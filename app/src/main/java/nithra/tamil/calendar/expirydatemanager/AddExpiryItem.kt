@@ -74,7 +74,6 @@ class AddItemActivity : AppCompatActivity() {
         db.execSQL("CREATE TABLE IF NOT EXISTS categorys (id INTEGER PRIMARY KEY AUTOINCREMENT, categoryname TEXT NOT NULL, itemtype TEXT NOT NULL)")
     }
 
-    // Fetch data from a specified table
     private fun fetchDataFromTable(tableName: String, columnName: String, filterType: String? = null): List<String> {
         val dataList = mutableListOf<String>()
         val query = if (filterType != null) {
@@ -96,7 +95,7 @@ class AddItemActivity : AppCompatActivity() {
         return dataList
     }
 
-    // Show dialog to select or add items/categories
+
     private fun showSelectionDialog(title: String, items: List<String>, onItemSelected: (String) -> Unit) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
@@ -111,7 +110,9 @@ class AddItemActivity : AppCompatActivity() {
         val tableName = if (title.contains("Category", true)) "categorys" else "itemnames"
         val columnName = if (tableName == "categorys") "categoryname" else "itemname"
 
-        adapter = ItemAdapter_editdelete(this, items.toMutableList(),
+        val itemList = fetchDataFromTable(tableName, columnName).toMutableList()  // Fetch initial data
+
+        adapter = ItemAdapter_editdelete(this, itemList,
             onEdit = { item ->
                 showCreateDialog(tableName, item) { updatedItems ->
                     adapter.updateItems(updatedItems)
@@ -136,14 +137,14 @@ class AddItemActivity : AppCompatActivity() {
         }
 
         btnCustomAction.setOnClickListener {
-            dialog.dismiss()
             showCreateDialog(tableName) { updatedItems ->
-                adapter.updateItems(updatedItems)
+                adapter.updateItems(updatedItems)  // Refresh RecyclerView with new data
             }
         }
 
         dialog.show()
     }
+
 
     // Delete item from database
     private fun deleteItem(tableName: String, item: String) {
@@ -156,7 +157,6 @@ class AddItemActivity : AppCompatActivity() {
         }
     }
 
-    // Show dialog to create or update items/categories
     private fun showCreateDialog(tableName: String, existingItem: String? = null, onItemsUpdated: ((List<String>) -> Unit)? = null) {
         val dialog = Dialog(this, android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar_MinWidth)
         dialog.setContentView(R.layout.dialog_create_item)
@@ -186,15 +186,17 @@ class AddItemActivity : AppCompatActivity() {
                 } else {
                     db.insert(tableName, null, contentValues)
                 }
+
                 if (result != -1L) {
                     val updatedItems = fetchDataFromTable(tableName, if (tableName == "itemnames") "itemname" else "categoryname")
-                    onItemsUpdated?.invoke(updatedItems)
+                    onItemsUpdated?.invoke(updatedItems)  // Send updated data back to showSelectionDialog
                     dialog.dismiss()
                 } else Toast.makeText(this, "Failed to save!", Toast.LENGTH_SHORT).show()
             } else Toast.makeText(this, "Please enter a name!", Toast.LENGTH_SHORT).show()
         }
         dialog.show()
     }
+
 
     // Save item with item name and category
     private fun saveItem() {
