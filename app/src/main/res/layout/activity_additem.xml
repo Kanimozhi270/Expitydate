@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:elevation="4dp"
+        android:theme="@style/ToolbarColoredBackArrow2"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:titleTextColor="@color/black" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="Item Name"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="15dp"/>
+
+            <TextView
+                android:id="@+id/etItemName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select Item Name"
+                android:padding="15dp"
+                android:background="@drawable/bg_cal_spinner"
+                android:layout_margin="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="Item Type"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="15dp"/>
+
+            <!-- Item Type Button Selection -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/btnExpiryItem"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    android:layout_height="wrap_content"
+                    android:text="Expiry item"/>
+                <Button
+                    android:id="@+id/btnRenewItem"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Renew Item"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="Categorys"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="15dp"/>
+            <TextView
+                android:id="@+id/spCategories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                android:text="Select Category"
+                android:background="@drawable/bg_cal_spinner"
+                android:layout_margin="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="Add Expiry Date"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="15dp"/>
+            <EditText
+                android:id="@+id/etExpiryDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Add Expiry date"
+                android:background="@drawable/edittext_background"
+                android:layout_margin="10dp"
+                android:padding="12dp"
+                android:focusable="false"
+                android:drawableEnd="@drawable/expirydate_calendar"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="Reminder before"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="15dp"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/btnSameDay"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    android:layout_height="wrap_content"
+                    android:text="Same Day"/>
+                <Button
+                    android:id="@+id/btn2DaysBefore"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    android:layout_height="wrap_content"
+                    android:text="2 days Before"/>
+
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center">
+                <Button
+                    android:id="@+id/btn1WeekBefore"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    android:layout_height="wrap_content"
+                    android:text="1 Week Before"/>
+                <Button
+                    android:id="@+id/customReminder"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    android:layout_height="wrap_content"
+                    android:text="Custom"/>
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/etNotifyTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Notify Time"
+                android:background="@drawable/edittext_background"
+                android:padding="15dp"
+                android:layout_margin="10dp"
+                android:focusable="false"
+                android:drawableEnd="@drawable/expirydate_calendar"/>
+
+            <EditText
+                android:id="@+id/etNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Add Note"
+                android:inputType="text"
+                android:layout_margin="10dp"
+                android:background="@drawable/edittext_background"
+                android:padding="15dp"/>
+
+            <Button
+                android:id="@+id/btnAddItem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="+ Add Item"
+                android:backgroundTint="#9B73F2"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="10dp"
+                android:padding="12dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+
+</LinearLayout>
