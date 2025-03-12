@@ -1,11 +1,13 @@
-package nithra.tamil.calendar.expirydatemanager
+package nithra.tamil.calendar.expirydatemanager.Activity
 
+import android.app.AlarmManager
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.Dialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
-import android.content.ContentValues  // Required for .put() method
-import android.database.Cursor
+import android.content.ContentValues
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -17,16 +19,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
+import nithra.tamil.calendar.Others.ItemAdapter_editdelete
+import nithra.tamil.calendar.expirydatemanager.Notification.NotificationReceiver
+import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityAdditemBinding
 import java.util.*
 
 class AddItemActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityAdditemBinding
     private lateinit var db: SQLiteDatabase
     private lateinit var adapter: ItemAdapter_editdelete
 
-    private var selectedItemType = "Expiry Item"
+    private var selectedItemType = ""
     private var selectedReminder = "same day"
     private var categories = listOf<String>()
 
@@ -56,6 +60,61 @@ class AddItemActivity : AppCompatActivity() {
                 binding.etItemName.text = selectedName
             }
         }
+        println("selectttttrewmn  ====$selectedItemType")
+        binding.btnExpiryItem.setOnClickListener {
+            selectedItemType = "Expiry Item"
+            println("selecttttt====$selectedItemType")
+        }
+
+        binding.btnRenewItem.setOnClickListener {
+            selectedItemType = "Renew Item"
+            println("selectttttrew====$selectedItemType")
+        }
+
+        binding.etExpiryDate.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val datePickerDialog = DatePickerDialog(
+                this,
+                { _, year, month, dayOfMonth ->
+                    val selectedDate = String.format("%02d-%02d-%04d", dayOfMonth, month + 1, year)
+                    binding.etExpiryDate.setText(selectedDate)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePickerDialog.show()
+        }
+
+        binding.etNotifyTime.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val timePickerDialog = TimePickerDialog(
+                this,
+                { _, hourOfDay, minute ->
+                    val selectedTime = String.format("%02d:%02d", hourOfDay, minute)
+                    binding.etNotifyTime.setText(selectedTime)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                false
+            )
+            timePickerDialog.show()
+        }
+
+        binding.btnSameDay.setOnClickListener {
+            selectedReminder = "same day"
+        }
+        binding.btn2DaysBefore.setOnClickListener {
+            selectedReminder = "2 days before"
+        }
+        binding.btn1WeekBefore.setOnClickListener {
+            selectedReminder = "1 week before"
+        }
+        binding.customReminder.setOnClickListener {
+            // Open dialog to pick custom reminder if needed
+        }
+
+
 
         binding.spCategories.setOnClickListener {
             showSelectionDialog("Select Category", categories) { selectedCategory ->
@@ -68,11 +127,25 @@ class AddItemActivity : AppCompatActivity() {
         }
     }
 
+
+
     // Create tables if they do not exist
     private fun createTablesIfNotExist() {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS items (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "itemname TEXT NOT NULL, " +
+                    "itemtype TEXT NOT NULL, " +
+                    "category TEXT NOT NULL, " +
+                    "expiry_date TEXT NOT NULL, " +
+                    "reminderbefore TEXT NOT NULL, " +
+                    "notify_time TEXT, " +
+                    "note TEXT)"
+        )
         db.execSQL("CREATE TABLE IF NOT EXISTS itemnames (id INTEGER PRIMARY KEY AUTOINCREMENT, itemname TEXT NOT NULL)")
         db.execSQL("CREATE TABLE IF NOT EXISTS categorys (id INTEGER PRIMARY KEY AUTOINCREMENT, categoryname TEXT NOT NULL, itemtype TEXT NOT NULL)")
     }
+
 
     private fun fetchDataFromTable(tableName: String, columnName: String, filterType: String? = null): List<String> {
         val dataList = mutableListOf<String>()
@@ -132,11 +205,13 @@ class AddItemActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
+
         etSearch.addTextChangedListener {
             adapter.filter(it.toString())
         }
 
         btnCustomAction.setOnClickListener {
+            dialog.dismiss()
             showCreateDialog(tableName) { updatedItems ->
                 adapter.updateItems(updatedItems)  // Refresh RecyclerView with new data
             }
@@ -197,19 +272,66 @@ class AddItemActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    // Save item with all details
 
-    // Save item with item name and category
     private fun saveItem() {
-        val itemName = binding.etItemName.text.toString()
-        val category = binding.spCategories.text.toString()
-        if (itemName.isNotEmpty()) {
+        val itemName = binding.etItemName.text.toString().trim()
+        val category = binding.spCategories.text.toString().trim()
+        val expiryDate = binding.etExpiryDate.text.toString().trim()
+        val notifyTime = binding.etNotifyTime.text.toString().trim()
+        val reminderBefore = selectedReminder.trim()
+        val note = binding.etNote.text.toString().trim()
+
+        if (itemName.isNotEmpty() && category.isNotEmpty() && expiryDate.isNotEmpty() && notifyTime.isNotEmpty()) {
             val contentValues = ContentValues().apply {
                 put("itemname", itemName)
+                put("itemtype", selectedItemType)
                 put("category", category)
+                put("expiry_date", expiryDate)
+                put("reminderbefore", reminderBefore)
+                put("notify_time", notifyTime)
+                put("note", note)
             }
             val result = db.insert("items", null, contentValues)
-            if (result != -1L) Toast.makeText(this, "Item added successfully!", Toast.LENGTH_SHORT).show()
-            else Toast.makeText(this, "Failed to add item!", Toast.LENGTH_SHORT).show()
-        } else Toast.makeText(this, "Please fill all required fields!", Toast.LENGTH_SHORT).show()
+            if (result != -1L) {
+                Toast.makeText(this, "Item added successfully!", Toast.LENGTH_SHORT).show()
+                scheduleNotification(itemName, expiryDate, notifyTime) // Schedule notification
+                finish()
+            } else {
+                Toast.makeText(this, "Failed to add item!", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Please fill all required fields!", Toast.LENGTH_SHORT).show()
+        }
     }
+
+    private fun scheduleNotification(itemName: String, expiryDate: String, notifyTime: String) {
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, NotificationReceiver::class.java).apply {
+            putExtra("itemName", itemName)
+            putExtra("notificationId", itemName.hashCode()) // Unique ID
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, itemName.hashCode(), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Convert expiryDate and notifyTime to Calendar format
+        val dateParts = expiryDate.split("-") // Expected format: dd-MM-yyyy
+        val timeParts = notifyTime.split(":") // Expected format: HH:mm
+
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
+            set(Calendar.MONTH, dateParts[1].toInt() - 1) // Month is 0-based
+            set(Calendar.YEAR, dateParts[2].toInt())
+            set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
+            set(Calendar.MINUTE, timeParts[1].toInt())
+            set(Calendar.SECOND, 0)
+        }
+
+        // Set Alarm
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+    }
+
 }

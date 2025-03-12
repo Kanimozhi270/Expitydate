@@ -41,7 +41,7 @@
                 android:autoLink="all"
                 android:linksClickable="true"
                 android:padding="2dp"
-                android:text="Expiration date management software helps track and manage expiry dates for products and goods. It can include features like automated reminders, inventory management, and alerts. "
+                android:text="காலாவதி தேதி மேலாண்மை மென்பொருள், தயாரிப்புகள் மற்றும் பொருட்களுக்கான காலாவதி தேதிகளைக் கண்காணிக்கவும் நிர்வகிக்கவும் உதவுகிறது. இதில் தானியங்கி நினைவூட்டல்கள் மற்றும் எச்சரிக்கைகள் போன்ற அம்சங்கள் அடங்கும். "
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="#000" />
             <LinearLayout

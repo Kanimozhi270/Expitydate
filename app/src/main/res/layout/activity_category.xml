@@ -1,48 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_height="match_parent">
+    android:background="@color/white"
+    android:fitsSystemWindows="true">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/app_bar"
+    <!-- Main Content -->
+    <RelativeLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/white"
-        android:elevation="4dp"
-        android:theme="@style/ToolbarColoredBackArrow2"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:titleTextAppearance="?android:attr/textAppearanceSmall"
-        app:titleTextColor="@color/black" />
+        android:layout_height="match_parent"
+        android:background="@color/white">
 
-    <!-- TabLayout -->
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            android:elevation="4dp"
+            android:theme="@style/ToolbarColoredBackArrow2"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:titleTextColor="@color/black" />
 
+        <!-- TabLayout and ViewPager2 for tabs -->
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fillViewport="false"
-            app:tabIndicatorHeight="50dp"
             android:visibility="visible"
-            android:textStyle="bold"
-            app:tabTextColor="@color/black"
-            app:tabSelectedTextColor="@color/white"
-            app:tabIndicatorColor="#ED1B62"
-            app:tabMode="fixed" />
+            android:layout_below="@+id/app_bar"/>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_below="@+id/tabLayout"
+            android:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/contentLayout"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:visibility="gone"
+                android:layout_centerInParent="true"
+                android:src="@drawable/expity_nodata"
+                android:contentDescription="Calendar Illustration"
+                android:scaleType="fitCenter"/>
 
 
 
-    <!-- ViewPager for Fragments -->
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/tabLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+    </RelativeLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:itemTextColor="@android:color/black"
+        app:itemIconTint="@android:color/black"
+        app:headerLayout="@layout/drawer_header"
+        app:menu="@menu/drawer_menu" />
 
 </LinearLayout>

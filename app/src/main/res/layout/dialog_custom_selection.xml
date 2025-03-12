@@ -10,9 +10,12 @@
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search..."
+        android:hint="Search name"
         android:padding="8dp"
-        android:background="@android:drawable/edit_text"/>
+        android:background="@android:drawable/edit_text"
+        android:textSize="16sp"
+        android:drawableEnd="@drawable/ic_search_24"
+        android:drawablePadding="8dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

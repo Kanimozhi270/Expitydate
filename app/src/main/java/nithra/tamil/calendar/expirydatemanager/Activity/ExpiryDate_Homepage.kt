@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.expirydatemanager
+package nithra.tamil.calendar.expirydatemanager.Activity
 
 import android.app.Dialog
 import android.content.ContentValues
@@ -6,9 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -16,8 +18,14 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.GravityCompat
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayoutMediator
+import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryDateHomepageBinding
+import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryFragment_home
+import nithra.tamil.calendar.expirydatemanager.fragment.RenewFragment_home
 
 class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -43,6 +51,11 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
         toggle.syncState()
 
         binding.navView.setNavigationItemSelectedListener(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
+        }
+
 
         // Create database and table directly in Homepage
         db = openOrCreateDatabase("expirydatemanager.db", Context.MODE_PRIVATE, null)
@@ -70,22 +83,22 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
                     "itemtype TEXT)"
         )
 
-
-
         binding.btnAddItem.setOnClickListener {
             startActivity(Intent(this, AddItemActivity::class.java))
         }
 
+       // showTabs()
+
         // Check if the items table has data
         if (hasItemsData()) {
+            print("chexkk data enter")
             showTabs()
         } else {
+            print("chexkk data enter else")
             showContentLayout()
         }
     }
 
-
-    // Method to check if items table has data
     private fun hasItemsData(): Boolean {
         val cursor = db.rawQuery("SELECT COUNT(*) FROM items", null)
         var hasData = false
@@ -96,36 +109,37 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
         return hasData
     }
 
-    // Method to show tabs and hide content layout
     private fun showTabs() {
-        binding.contentLayout.visibility = android.view.View.GONE
-        binding.tabLayout.visibility = android.view.View.VISIBLE
-        binding.viewPager.visibility = android.view.View.VISIBLE
+        binding.contentLayout.visibility = View.GONE
+        binding.tabLayout.visibility = View.VISIBLE
+        binding.viewPager.visibility = View.VISIBLE
 
-        // Setup ViewPager and Tabs
-        binding.viewPager.adapter = object : androidx.viewpager2.adapter.FragmentStateAdapter(this) {
-            override fun getItemCount() = 2
-            override fun createFragment(position: Int): androidx.fragment.app.Fragment {
-                return if (position == 0) {
-                    ExpiryCategoryFragment()
-                } else {
-                    RenewCategoryFragment()
+            binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+                override fun createFragment(position: Int): Fragment {
+                    return if (position == 0) ExpiryFragment_home() else RenewFragment_home()
                 }
+                override fun getItemCount() = 2
             }
-        }
 
-        com.google.android.material.tabs.TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = if (position == 0) "Expiry Item" else "Renew Item"
         }.attach()
     }
 
-    // Method to show content layout and hide tabs
     private fun showContentLayout() {
-        binding.contentLayout.visibility = android.view.View.VISIBLE
-        binding.tabLayout.visibility = android.view.View.GONE
-        binding.viewPager.visibility = android.view.View.GONE
+        binding.contentLayout.visibility = View.VISIBLE
+        binding.tabLayout.visibility = View.GONE
+        binding.viewPager.visibility = View.GONE
     }
 
+    override fun onResume() {
+        super.onResume()
+      /*  if (hasItemsData()) {
+            showTabs()
+        } else {
+            showContentLayout()
+        }*/
+    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -203,8 +217,6 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
 
         dialog.show()
     }
-
-
 
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
