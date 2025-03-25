@@ -1,7 +1,6 @@
 package nithra.tamil.calendar.expirydatemanager.Activity
 
 import android.app.Dialog
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
@@ -14,24 +13,31 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import nithra.tamil.calendar.expirydatemanager.R
+import nithra.tamil.calendar.expirydatemanager.SharedPreference
+import nithra.tamil.calendar.expirydatemanager.retrofit.RetrofitClient
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryDateHomepageBinding
 import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryFragment_home
 import nithra.tamil.calendar.expirydatemanager.fragment.RenewFragment_home
+import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
+import retrofit2.Call
 
 class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var binding: ActivityExpiryDateHomepageBinding
     private lateinit var toggle: ActionBarDrawerToggle
-    private lateinit var db: SQLiteDatabase
+    val sharedPreference = SharedPreference()
+    private val expiryDateViewModel: ExpiryDateViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +46,7 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
 
         setSupportActionBar(binding.appBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeAsUpIndicator(R.drawable.expirydate_calendar)
+        //supportActionBar?.setHomeAsUpIndicator(R.drawable.expirydate_calendar)
 
         // Navigation Drawer
         toggle = ActionBarDrawerToggle(
@@ -56,32 +62,14 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
         }
 
+        // Observe LiveData from the ViewModel
+        expiryDateViewModel.itemNameResponse.observe(this, Observer { message ->
+           // Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        })
 
-        // Create database and table directly in Homepage
-        db = openOrCreateDatabase("expirydatemanager.db", Context.MODE_PRIVATE, null)
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS items (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "itemname TEXT, " +
-                    "itemtype TEXT, " +
-                    "category TEXT, " +
-                    "expiry_date TEXT, " +
-                    "reminderbefore TEXT, " +
-                    "notify_time TEXT, " +
-                    "note TEXT)"
-        )
-
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS itemnames (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "itemname TEXT)"
-        )
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS categorys (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "categoryname TEXT, " +
-                    "itemtype TEXT)"
-        )
+        expiryDateViewModel.categoryResponse.observe(this, Observer { message ->
+            Toast.makeText(this, message["status"].toString(), Toast.LENGTH_SHORT).show()
+        })
 
         binding.btnAddItem.setOnClickListener {
             startActivity(Intent(this, AddItemActivity::class.java))
@@ -90,16 +78,16 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
        // showTabs()
 
         // Check if the items table has data
-        if (hasItemsData()) {
+       /* if (hasItemsData()) {
             print("chexkk data enter")
             showTabs()
         } else {
             print("chexkk data enter else")
             showContentLayout()
-        }
+        }*/
     }
 
-    private fun hasItemsData(): Boolean {
+   /* private fun hasItemsData(): Boolean {
         val cursor = db.rawQuery("SELECT COUNT(*) FROM items", null)
         var hasData = false
         if (cursor.moveToFirst()) {
@@ -107,7 +95,7 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
         }
         cursor.close()
         return hasData
-    }
+    }*/
 
     private fun showTabs() {
         binding.contentLayout.visibility = View.GONE
@@ -160,34 +148,27 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
 
 
     private fun showCreateDialog(tableName: String) {
-        val dialog = Dialog(
-            this@ExpiryDate_Homepage,
-            android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar_MinWidth
-        )
+        val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_create_item)
         dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
 
         val etItemName = dialog.findViewById<EditText>(R.id.etItemName)
         val spinnerItemType = dialog.findViewById<android.widget.Spinner>(R.id.spinnerItemType)
+        //val spinnercard = dialog.findViewById<androidx.cardview.widget.CardView>(R.id.spinnerItemType)
         val btnCreate = dialog.findViewById<Button>(R.id.btnCreate)
 
-        // Show or hide spinner based on table name
         if (tableName == "categorys") {
             etItemName.hint = "Enter Category Name"
-            spinnerItemType.visibility = android.view.View.VISIBLE
+            spinnerItemType.visibility = View.VISIBLE
 
-            // Populate spinner with options
             val itemTypes = arrayOf("expiry item", "renew item")
-            val adapter = android.widget.ArrayAdapter(
-                this,
-                android.R.layout.simple_spinner_item,
-                itemTypes
-            )
+            val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, itemTypes)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerItemType.adapter = adapter
         } else {
             etItemName.hint = "Enter Item Name"
-            spinnerItemType.visibility = android.view.View.GONE
+            spinnerItemType.visibility = View.GONE
+            //spinnercard.visibility = View.GONE
         }
 
         btnCreate.setOnClickListener {
@@ -195,21 +176,14 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
             val selectedType = if (tableName == "categorys") spinnerItemType.selectedItem.toString() else ""
 
             if (name.isNotEmpty()) {
-                val contentValues = ContentValues()
                 if (tableName == "itemnames") {
-                    contentValues.put("itemname", name)
+                    println("item nameeee===== $name")
+                    expiryDateViewModel.addItemToServer(name)
                 } else if (tableName == "categorys") {
-                    contentValues.put("categoryname", name)
-                    contentValues.put("itemtype", selectedType)  // Save item type for category
+                    println("cat nameeee===== $name")
+                    expiryDateViewModel.addCategoryToServer(name, selectedType)
                 }
-
-                val result = db.insert(tableName, null, contentValues)
-                if (result != -1L) {
-                    Toast.makeText(this, "Added successfully!", Toast.LENGTH_SHORT).show()
-                    dialog.dismiss()
-                } else {
-                    Toast.makeText(this, "Failed to add!", Toast.LENGTH_SHORT).show()
-                }
+                dialog.dismiss()
             } else {
                 Toast.makeText(this, "Please enter a name!", Toast.LENGTH_SHORT).show()
             }

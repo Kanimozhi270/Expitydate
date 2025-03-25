@@ -60,7 +60,7 @@
                     android:layout_marginRight="10dp"
                     android:layout_marginBottom="5dp"
                     android:layout_weight="0.33"
-                    app:cardBackgroundColor="#221b44"
+                    app:cardBackgroundColor="#9B73F2"
                     app:cardCornerRadius="10dp">
 
                     <androidx.appcompat.widget.AppCompatButton

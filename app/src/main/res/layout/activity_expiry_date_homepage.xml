@@ -31,7 +31,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="visible"
+            android:background="@color/white"
             android:layout_below="@+id/app_bar"/>
+
+        <!--<androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tabLayout"
+            android:layout_margin="10dp"
+            app:cardCornerRadius="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Item to be Renew and Expity in 7days*"/>
+
+        </androidx.cardview.widget.CardView>-->
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
@@ -58,7 +74,7 @@
                 android:id="@+id/imageView"
                 android:layout_width="250dp"
                 android:layout_height="250dp"
-                android:src="@drawable/expirydate_calendar"
+                android:src="@drawable/expiryicon"
                 android:contentDescription="Calendar Illustration"
                 android:scaleType="fitCenter"/>
 
@@ -66,6 +82,7 @@
                 android:id="@+id/tvDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="-50dp"
                 android:text="Add Items date to be Remember when its time for expiry or renewal"
                 android:textSize="16sp"
                 android:textColor="@android:color/black"
@@ -74,16 +91,23 @@
                 android:padding="16dp"/>
         </LinearLayout>
 
-        <!-- Add Item Button -->
-        <Button
+
+        <LinearLayout
             android:id="@+id/btnAddItem"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
-            android:layout_margin="16dp"
-            android:text="+ Add Item"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"/>
+            android:background="#9B73F2"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ Add Item"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
     </RelativeLayout>
 
     <!-- Navigation Drawer -->
@@ -93,6 +117,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:background="@color/white"
         app:itemTextColor="@android:color/black"
         app:itemIconTint="@android:color/black"
         app:headerLayout="@layout/drawer_header"

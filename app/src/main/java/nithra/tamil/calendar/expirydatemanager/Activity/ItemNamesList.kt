@@ -3,26 +3,28 @@ package nithra.tamil.calendar.expirydatemanager.Activity
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import nithra.tamil.calendar.expirydatemanager.Adapter.ItemNamesAdapter
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityItemNamesListBinding
+import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
 
-data class ItemData(
-    val id: Int,
-    val itemName: String,
-    val expiryDate: String,
-    val reminderBefore: String
-)
+
 
 class ItemNamesList : AppCompatActivity() {
 
     private lateinit var binding: ActivityItemNamesListBinding
-    private lateinit var db: SQLiteDatabase
     private lateinit var itemNamesAdapter: ItemNamesAdapter
-    private lateinit var itemNames: MutableList<ItemData>
+    private val addItemViewModel: ExpiryDateViewModel by viewModels()
+    var categoriesList: Map<String, Any> = hashMapOf()
+
+    var itemNames: List<HashMap<String, Any>> = listOf()
+    private var dialog_type = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,49 +40,48 @@ class ItemNamesList : AppCompatActivity() {
         )
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        // Create or open database
-        db = openOrCreateDatabase("expirydatemanager.db", MODE_PRIVATE, null)
+        //get data from server
+        addItemViewModel.fetchList(989015)
+        // Observe item names from ViewModel
+        addItemViewModel.itemList.observe(this, androidx.lifecycle.Observer { item ->
 
-        // Fetch item data from the database
-        itemNames = fetchItemNames().toMutableList()
 
+            itemNames  = item["list"] as List<HashMap<String, Any>>
+            println("itemNames == $itemNames")
+
+
+        })
         // Set up RecyclerView
-        itemNamesAdapter = ItemNamesAdapter(itemNames, db)
+        itemNamesAdapter = ItemNamesAdapter(itemNames)
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@ItemNamesList)
             adapter = itemNamesAdapter
         }
 
-        // Check if list is empty
-        checkEmptyState()
+
+        // Observe categories from ViewModel
+        addItemViewModel.categories.observe(this, androidx.lifecycle.Observer { categories ->
+            categoriesList = categories
+            println("catItem == $categoriesList")
+            dialog_type = "Category name"
+            // If empty, don't show the dialog
+            if (categoriesList.isEmpty()) return@Observer
+
+        })
+
+
+
     }
 
-    // Method to fetch item names from the database
-    private fun fetchItemNames(): List<ItemData> {
-        val itemList = mutableListOf<ItemData>()
-        val cursor: Cursor = db.rawQuery("SELECT id, itemname, expiry_date, reminderbefore FROM items", null)
-        if (cursor.moveToFirst()) {
-            do {
-                val id = cursor.getInt(0)
-                val itemName = cursor.getString(1)
-                val expiryDate = cursor.getString(2)
-                val reminderBefore = cursor.getString(3)
-                itemList.add(ItemData(id, itemName, expiryDate, reminderBefore))
-            } while (cursor.moveToNext())
+    override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+        if (menuItem.itemId == android.R.id.home) {
+            finish()
         }
-        cursor.close()
-        return itemList
+
+
+        return super.onOptionsItemSelected(menuItem)
     }
 
-    // Show/hide tvEmptyMessage based on data availability
-    fun checkEmptyState() {
-        if (itemNames.isEmpty()) {
-            binding.tvEmptyMessage.visibility = View.VISIBLE
-            binding.recyclerView.visibility = View.GONE
-        } else {
-            binding.tvEmptyMessage.visibility = View.GONE
-            binding.recyclerView.visibility = View.VISIBLE
-        }
-    }
+
 }
 

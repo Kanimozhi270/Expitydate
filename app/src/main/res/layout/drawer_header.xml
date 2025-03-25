@@ -1,16 +1,24 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@android:color/white"
-    android:padding="16dp">
+    android:background="@android:color/white">
 
-    <ImageView
-        android:id="@+id/header_image"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:src="@drawable/expirydate_calendar"
-        android:scaleType="centerCrop"
-        android:contentDescription="Header Image" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        app:cardCornerRadius="10dp"
+        android:layout_margin="10dp">
+
+        <ImageView
+            android:id="@+id/header_image"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:src="@drawable/expiryicon"
+            android:scaleType="centerCrop"
+            android:contentDescription="Header Image" />
+    </androidx.cardview.widget.CardView>
+
 </LinearLayout>

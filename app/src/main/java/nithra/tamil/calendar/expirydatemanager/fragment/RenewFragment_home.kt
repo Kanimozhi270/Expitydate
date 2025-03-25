@@ -32,15 +32,7 @@ class RenewFragment_home : Fragment() {
     }
 
     private fun loadRenewItems() {
-        val cursor: Cursor = db.rawQuery("SELECT * FROM items WHERE itemtype = 'renew item'", null)
         itemList.clear()
-        while (cursor.moveToNext()) {
-            val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-            val name = cursor.getString(cursor.getColumnIndexOrThrow("itemname"))
-            val expiryDate = cursor.getString(cursor.getColumnIndexOrThrow("expiry_date"))
-            itemList.add(Item(id, name, expiryDate))
-        }
-        cursor.close()
         val obj_adapter = ItemAdapter_home(itemList)
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         recyclerView.adapter = obj_adapter
