@@ -7,8 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import nithra.tamil.calendar.expirydatemanager.R
 
-class ItemAdapter_home(private val itemList: List<Map<String, Any>>) :
-    RecyclerView.Adapter<ItemAdapter_home.ItemViewHolder>() {
+class ExpiryItemAdapter_home(private val itemList: List<Map<String, Any>>) :
+    RecyclerView.Adapter<ExpiryItemAdapter_home.ItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view =

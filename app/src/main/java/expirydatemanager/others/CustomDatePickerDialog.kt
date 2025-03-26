@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import nithra.tamil.calendar.expirydatemanager.Adapter.CustomDayAdapter
+import nithra.tamil.calendar.expirydatemanager.Adapter.ExpiryCustomDayAdapter
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityAanmeegaDatePickerDialogBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -208,7 +208,7 @@ class CustomDatePickerDialog(
     private fun updateCalendar() {
         val daysList = getDaysInMonth(calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR))
 
-        val adapter = CustomDayAdapter(daysList, requireContext(), selectedDay) { day ->
+        val adapter = ExpiryCustomDayAdapter(daysList, requireContext(), selectedDay) { day ->
             selectedDay = day
             calendar.set(Calendar.DAY_OF_MONTH, day.toInt())
             selectedMonth = calendar.get(Calendar.MONTH)

@@ -12,12 +12,12 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import nithra.tamil.calendar.expirydatemanager.R
 
-class CustomDayAdapter(
+class ExpiryCustomDayAdapter(
     private val days: List<String>,
     var context: Context,
     var defaultSelectedDay: String?,
     private val onDaySelected: (String) -> Unit
-) : RecyclerView.Adapter<CustomDayAdapter.DayViewHolder>() {
+) : RecyclerView.Adapter<ExpiryCustomDayAdapter.DayViewHolder>() {
 
     private var selectedPosition = -1
 

@@ -14,8 +14,8 @@ import nithra.tamil.calendar.expirydatemanager.activity.AddItemActivity
 import nithra.tamil.calendar.expirydatemanager.activity.Expiry_FullView
 import nithra.tamil.calendar.expirydatemanager.R
 
-class ListAdapter(private val itemList: List<HashMap<String, Any>>) :
-    RecyclerView.Adapter<ListAdapter.ItemViewHolder>() {
+class ExpiryListAdapter(private val itemList: List<HashMap<String, Any>>) :
+    RecyclerView.Adapter<ExpiryListAdapter.ItemViewHolder>() {
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val itemNameTextView: TextView = itemView.findViewById(R.id.itemName)

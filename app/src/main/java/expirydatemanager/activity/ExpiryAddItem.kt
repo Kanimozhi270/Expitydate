@@ -24,7 +24,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import nithra.tamil.calendar.expirydatemanager.others.CustomDatePickerDialog
-import nithra.tamil.calendar.expirydatemanager.Adapter.ItemAdapter_editdelete
+import nithra.tamil.calendar.expirydatemanager.Adapter.ExpiryItemAdapter_editdelete
 import nithra.tamil.calendar.expirydatemanager.Notification.NotificationReceiver
 import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityAdditemBinding
@@ -38,7 +38,7 @@ class AddItemActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAdditemBinding
     private val addItemViewModel: ExpiryDateViewModel by viewModels()
     private lateinit var db: SQLiteDatabase
-    private lateinit var adapter: ItemAdapter_editdelete
+    private lateinit var adapter: ExpiryItemAdapter_editdelete
     private var selectedItemType = ""
     private var displayDate = ""
     private var selectedDate = ""
@@ -505,7 +505,7 @@ class AddItemActivity : AppCompatActivity() {
         val dialog = builder.create()
 
         // Initialize adapter
-        val adapter = ItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
+        val adapter = ExpiryItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
             onItemSelected(selectedItem)
             dialog.dismiss()
         }, onEdit = { itemName, itemId ->

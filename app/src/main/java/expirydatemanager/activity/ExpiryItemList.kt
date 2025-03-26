@@ -6,7 +6,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import nithra.tamil.calendar.expirydatemanager.Adapter.ListAdapter
+import nithra.tamil.calendar.expirydatemanager.Adapter.ExpiryListAdapter
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityItemNamesListBinding
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
 
@@ -15,7 +15,7 @@ import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
 class ExpiryItemList : AppCompatActivity() {
 
     private lateinit var binding: ActivityItemNamesListBinding
-    private lateinit var itemNamesAdapter: ListAdapter
+    private lateinit var itemNamesAdapter: ExpiryListAdapter
     private val addItemViewModel: ExpiryDateViewModel by viewModels()
     var categoriesList: Map<String, Any> = hashMapOf()
 
@@ -49,7 +49,7 @@ class ExpiryItemList : AppCompatActivity() {
 
         })
         // Set up RecyclerView
-        itemNamesAdapter = ListAdapter(itemNames)
+        itemNamesAdapter = ExpiryListAdapter(itemNames)
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@ExpiryItemList)
             adapter = itemNamesAdapter

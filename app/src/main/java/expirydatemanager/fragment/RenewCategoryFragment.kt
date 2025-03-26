@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import nithra.tamil.calendar.expirydatemanager.others.Item
 import nithra.tamil.calendar.expirydatemanager.others.Utils
-import nithra.tamil.calendar.expirydatemanager.Adapter.ItemAdapter_cat
+import nithra.tamil.calendar.expirydatemanager.Adapter.ExpiryItemAdapter_cat
 import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
 
@@ -34,7 +34,7 @@ class RenewCategoryFragment : Fragment() {
         val contentLayout = view.findViewById<LinearLayout>(R.id.contentLayout)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = ItemAdapter_cat(itemList)
+        val adapter = ExpiryItemAdapter_cat(itemList)
         recyclerView.adapter = adapter
 
         if (!Utils.isNetworkAvailable(requireContext())){

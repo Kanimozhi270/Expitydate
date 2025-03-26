@@ -11,13 +11,13 @@ import androidx.recyclerview.widget.RecyclerView
 import nithra.tamil.calendar.expirydatemanager.R
 
 
-class ItemAdapter_editdelete(
+class ExpiryItemAdapter_editdelete(
     private val context: Context,
     var items: MutableList<Map<String, Any>>,
     private val onItemClick: (Map<String, Any>) -> Unit,
     private val onEdit: (String, Int) -> Unit,  // Edit listener with item name and ID
     private val onDelete: (Int) -> Unit         // Delete listener with item ID
-) : RecyclerView.Adapter<ItemAdapter_editdelete.ItemViewHolder>() {
+) : RecyclerView.Adapter<ExpiryItemAdapter_editdelete.ItemViewHolder>() {
 
     private var filteredItems: MutableList<Map<String, Any>> = items
 
