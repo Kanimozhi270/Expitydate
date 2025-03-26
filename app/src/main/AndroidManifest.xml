@@ -17,7 +17,7 @@
         android:theme="@style/Theme.ExpiryDateManager"
         tools:targetApi="31">
         <activity
-            android:name=".Activity.Expiry_FullView"
+            android:name=".activity.Expiry_FullView"
             android:exported="false" />
 
         <receiver
@@ -25,16 +25,16 @@
             android:exported="false" />
 
         <activity
-            android:name=".Activity.ItemNamesList"
+            android:name=".activity.ExpiryItemList"
             android:exported="false" />
         <activity
-            android:name=".Activity.Category"
+            android:name=".activity.ExpiryCategory"
             android:exported="false" />
         <activity
-            android:name=".Activity.AddItemActivity"
+            android:name=".activity.AddItemActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.ExpiryDate_Homepage"
+            android:name=".activity.ExpiryHomepage"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

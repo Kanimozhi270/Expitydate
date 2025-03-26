@@ -1,24 +1,21 @@
-package nithra.tamil.calendar.expirydatemanager.Activity
+package nithra.tamil.calendar.expirydatemanager.activity
 
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import nithra.tamil.calendar.expirydatemanager.Adapter.ItemNamesAdapter
+import nithra.tamil.calendar.expirydatemanager.Adapter.ListAdapter
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityItemNamesListBinding
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
 
 
 
-class ItemNamesList : AppCompatActivity() {
+class ExpiryItemList : AppCompatActivity() {
 
     private lateinit var binding: ActivityItemNamesListBinding
-    private lateinit var itemNamesAdapter: ItemNamesAdapter
+    private lateinit var itemNamesAdapter: ListAdapter
     private val addItemViewModel: ExpiryDateViewModel by viewModels()
     var categoriesList: Map<String, Any> = hashMapOf()
 
@@ -41,7 +38,7 @@ class ItemNamesList : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //get data from server
-        addItemViewModel.fetchList(989015)
+        addItemViewModel.fetchList(userId = 989015,1,4)
         // Observe item names from ViewModel
         addItemViewModel.itemList.observe(this, androidx.lifecycle.Observer { item ->
 
@@ -52,9 +49,9 @@ class ItemNamesList : AppCompatActivity() {
 
         })
         // Set up RecyclerView
-        itemNamesAdapter = ItemNamesAdapter(itemNames)
+        itemNamesAdapter = ListAdapter(itemNames)
         binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(this@ItemNamesList)
+            layoutManager = LinearLayoutManager(this@ExpiryItemList)
             adapter = itemNamesAdapter
         }
 

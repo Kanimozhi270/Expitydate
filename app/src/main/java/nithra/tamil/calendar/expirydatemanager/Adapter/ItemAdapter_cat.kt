@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import nithra.tamil.calendar.Others.Item
+import nithra.tamil.calendar.expirydatemanager.others.Item
 import nithra.tamil.calendar.expirydatemanager.R
 
 class ItemAdapter_cat(private val itemList: List<Item>) : RecyclerView.Adapter<ItemAdapter_cat.ItemViewHolder>() {

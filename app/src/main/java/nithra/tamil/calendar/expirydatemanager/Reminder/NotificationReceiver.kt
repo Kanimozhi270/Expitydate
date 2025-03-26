@@ -9,7 +9,7 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import nithra.tamil.calendar.expirydatemanager.Activity.AddItemActivity
+import nithra.tamil.calendar.expirydatemanager.activity.AddItemActivity
 import nithra.tamil.calendar.expirydatemanager.R
 
 class NotificationReceiver : BroadcastReceiver() {

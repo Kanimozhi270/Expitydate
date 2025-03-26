@@ -1,15 +1,10 @@
-package nithra.tamil.calendar.expirydatemanager.Activity
+package nithra.tamil.calendar.expirydatemanager.activity
 
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import nithra.tamil.calendar.expirydatemanager.R
-import nithra.tamil.calendar.expirydatemanager.databinding.ActivityAdditemBinding
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryFullViewBinding
 
 class Expiry_FullView : AppCompatActivity() {

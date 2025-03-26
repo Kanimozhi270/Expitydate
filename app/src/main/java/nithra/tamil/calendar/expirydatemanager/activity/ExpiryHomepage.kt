@@ -1,9 +1,7 @@
-package nithra.tamil.calendar.expirydatemanager.Activity
+package nithra.tamil.calendar.expirydatemanager.activity
 
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
@@ -25,14 +23,12 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.SharedPreference
-import nithra.tamil.calendar.expirydatemanager.retrofit.RetrofitClient
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryDateHomepageBinding
 import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryFragment_home
 import nithra.tamil.calendar.expirydatemanager.fragment.RenewFragment_home
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
-import retrofit2.Call
 
-class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var binding: ActivityExpiryDateHomepageBinding
     private lateinit var toggle: ActionBarDrawerToggle
@@ -46,7 +42,6 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
 
         setSupportActionBar(binding.appBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        //supportActionBar?.setHomeAsUpIndicator(R.drawable.expirydate_calendar)
 
         // Navigation Drawer
         toggle = ActionBarDrawerToggle(
@@ -58,13 +53,16 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
 
         binding.navView.setNavigationItemSelectedListener(this)
 
+        // Set up ViewPager with TabLayout
+        setupViewPager()
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
         }
 
         // Observe LiveData from the ViewModel
         expiryDateViewModel.itemNameResponse.observe(this, Observer { message ->
-           // Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
         })
 
         expiryDateViewModel.categoryResponse.observe(this, Observer { message ->
@@ -75,58 +73,25 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
             startActivity(Intent(this, AddItemActivity::class.java))
         }
 
-       // showTabs()
-
-        // Check if the items table has data
-       /* if (hasItemsData()) {
-            print("chexkk data enter")
-            showTabs()
-        } else {
-            print("chexkk data enter else")
-            showContentLayout()
-        }*/
     }
 
-   /* private fun hasItemsData(): Boolean {
-        val cursor = db.rawQuery("SELECT COUNT(*) FROM items", null)
-        var hasData = false
-        if (cursor.moveToFirst()) {
-            hasData = cursor.getInt(0) > 0
-        }
-        cursor.close()
-        return hasData
-    }*/
-
-    private fun showTabs() {
-        binding.contentLayout.visibility = View.GONE
-        binding.tabLayout.visibility = View.VISIBLE
-        binding.viewPager.visibility = View.VISIBLE
-
-            binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-                override fun createFragment(position: Int): Fragment {
-                    return if (position == 0) ExpiryFragment_home() else RenewFragment_home()
-                }
-                override fun getItemCount() = 2
+    private fun setupViewPager() {
+        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun createFragment(position: Int): Fragment {
+                return if (position == 0) ExpiryFragment_home() else RenewFragment_home()
             }
+            override fun getItemCount() = 2
+        }
 
+        // Attach TabLayout to ViewPager2
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = if (position == 0) "Expiry Item" else "Renew Item"
         }.attach()
     }
 
-    private fun showContentLayout() {
-        binding.contentLayout.visibility = View.VISIBLE
-        binding.tabLayout.visibility = View.GONE
-        binding.viewPager.visibility = View.GONE
-    }
-
     override fun onResume() {
         super.onResume()
-      /*  if (hasItemsData()) {
-            showTabs()
-        } else {
-            showContentLayout()
-        }*/
+
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -138,7 +103,7 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
                 showCreateDialog("categorys")
             }
             R.id.itemlist -> {
-                val i = Intent(this@ExpiryDate_Homepage, ItemNamesList::class.java)
+                val i = Intent(this@ExpiryHomepage, ExpiryItemList::class.java)
                 startActivity(i)
             }
         }
@@ -178,7 +143,7 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
             if (name.isNotEmpty()) {
                 if (tableName == "itemnames") {
                     println("item nameeee===== $name")
-                    expiryDateViewModel.addItemToServer(name)
+                    expiryDateViewModel.addItemToServer(name, 0)
                 } else if (tableName == "categorys") {
                     println("cat nameeee===== $name")
                     expiryDateViewModel.addCategoryToServer(name, selectedType)
@@ -210,7 +175,7 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
             android.R.id.home -> finish()
             R.id.action_info -> {
                 val infoDialog = Dialog(
-                    this@ExpiryDate_Homepage,
+                    this@ExpiryHomepage,
                     android.R.style.Theme_Material_Light_Dialog_NoActionBar_MinWidth
                 )
                 infoDialog.setContentView(R.layout.expiry_info)
@@ -221,7 +186,7 @@ class ExpiryDate_Homepage : AppCompatActivity(), NavigationView.OnNavigationItem
                 return true
             }
             R.id.action_category -> {
-                val i = Intent(this@ExpiryDate_Homepage, Category::class.java)
+                val i = Intent(this@ExpiryHomepage, ExpiryCategory::class.java)
                 i.putExtra("title", "Homepage")
                 startActivity(i)
                 return true

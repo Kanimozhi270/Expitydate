@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.Others
+package nithra.tamil.calendar.expirydatemanager.others
 
 data class Item(
     val id: Int,

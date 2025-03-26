@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.expirydatemanager.Activity
+package nithra.tamil.calendar.expirydatemanager.activity
 
 import android.os.Bundle
 import android.view.MenuItem
@@ -12,7 +12,7 @@ import nithra.tamil.calendar.expirydatemanager.databinding.ActivityCategoryBindi
 import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryCategoryFragment
 import nithra.tamil.calendar.expirydatemanager.fragment.RenewCategoryFragment
 
-class Category : AppCompatActivity() {
+class ExpiryCategory : AppCompatActivity() {
 
     private lateinit var binding: ActivityCategoryBinding
 

@@ -1,35 +1,78 @@
 package nithra.tamil.calendar.expirydatemanager.fragment
 
 import android.content.Context
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.viewModels
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import nithra.tamil.calendar.Others.Item
+import nithra.tamil.calendar.expirydatemanager.others.Utils
 import nithra.tamil.calendar.expirydatemanager.Adapter.ItemAdapter_home
 import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
+import org.json.JSONArray
 
 class ExpiryFragment_home : Fragment() {
 
-
+    private val addItemViewModel: ExpiryDateViewModel by viewModels()
     private lateinit var recyclerView: RecyclerView
-    private val itemList = mutableListOf<Item>()
+    private val itemList = mutableListOf<Map<String, Any>>()  // Store raw data as List of Maps
+    lateinit var fragmentActivity: AppCompatActivity
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_expiry_home, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewExpiry)
+        val contentLayout = view.findViewById<LinearLayout>(R.id.contentLayout)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        val adapter = ItemAdapter_home(itemList)
+        recyclerView.adapter = adapter
+
+        if (Utils.isNetworkAvailable(requireContext())) {
+            Utils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
+            addItemViewModel.fetchList(userId = 989015, 1, 4)
+        } else {
+            contentLayout.visibility = View.VISIBLE
+        }
+
+        // Observe itemList LiveData and update itemList with the raw data
+        addItemViewModel.itemList.observe(viewLifecycleOwner) { response ->
+
+            println("addItemViewModel.itemList == $response")
+
+            val jsonArray =
+                response["list"] as? JSONArray ?: JSONArray()
+
+            val list = List(jsonArray.length()) { index ->
+                jsonArray.getJSONObject(index).let { jsonObject ->
+                    jsonObject.keys().asSequence().associateWith { jsonObject[it] }
+                }
+            }
+
+            Utils.mProgress.dismiss()
+            itemList.clear()
+            itemList.addAll(list)
+
+
+            adapter.notifyDataSetChanged()
+        }
 
         return view
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        // Now it's safe to call fragmentActivity
+        if (context is AppCompatActivity) {
+            fragmentActivity = context
+        }
+    }
 }
+

@@ -48,18 +48,25 @@ class ItemAdapter_editdelete(
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = filteredItems[position]
-        holder.tvItemName.text = item["item_name"]?.toString() ?: ""
 
+        println("filteredItems ==$item")
+        if (item.containsKey("item_name")) {
+            holder.tvItemName.text = filteredItems[position]["item_name"] as String? ?: ""
+
+        } else if (item.containsKey("category")) {
+            holder.tvItemName.text = filteredItems[position]["category"] as String? ?: ""
+
+        }
         // Handle edit button click
         holder.btnEdit.setOnClickListener {
             val itemName = item["item_name"]?.toString() ?: ""
-            val itemId = item["item_id"] as? Int ?: 0
+            val itemId = item["id"] as? Int ?: 0
             onEdit(itemName, itemId) // Call edit listener with item name and item ID
         }
 
         // Handle delete button click
         holder.btnDelete.setOnClickListener {
-            val itemId = item["item_id"] as? Int ?: 0
+            val itemId = item["id"] as? Int ?: 0
             showDeleteConfirmationDialog(itemId)  // Show delete confirmation dialog
         }
 

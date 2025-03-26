@@ -3,26 +3,26 @@ package nithra.tamil.calendar.expirydatemanager.Adapter
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import nithra.tamil.calendar.expirydatemanager.Activity.AddItemActivity
-import nithra.tamil.calendar.expirydatemanager.Activity.Expiry_FullView
+import nithra.tamil.calendar.expirydatemanager.activity.AddItemActivity
+import nithra.tamil.calendar.expirydatemanager.activity.Expiry_FullView
 import nithra.tamil.calendar.expirydatemanager.R
 
-class ItemNamesAdapter(private val itemList: List<HashMap<String, Any>>) :
-    RecyclerView.Adapter<ItemNamesAdapter.ItemViewHolder>() {
+class ListAdapter(private val itemList: List<HashMap<String, Any>>) :
+    RecyclerView.Adapter<ListAdapter.ItemViewHolder>() {
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val itemNameTextView: TextView = itemView.findViewById(R.id.itemName)
         val expiryOn: TextView = itemView.findViewById(R.id.expityOn)
         val reminderBefore: TextView = itemView.findViewById(R.id.reminderBefore)
-        val expiryDelete: View = itemView.findViewById(R.id.expiry_delete)
-        val expiryEdit: View = itemView.findViewById(R.id.expity_edit)
+        val expiryDelete: LinearLayout = itemView.findViewById(R.id.expiry_delete)
+        val expiryEdit: LinearLayout = itemView.findViewById(R.id.expiry_edit)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {

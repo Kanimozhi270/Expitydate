@@ -14,13 +14,14 @@
 
     <ImageView
         android:id="@+id/btnEdit"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:src="@drawable/expiry_edit"/>
 
     <ImageView
         android:id="@+id/btnDelete"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="5dp"
         android:src="@drawable/expity_delete"/>
 </LinearLayout>
