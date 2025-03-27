@@ -49,36 +49,50 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
 
     private val apiService = ExpiryRetrofitInstance.instance
 
+    /* fun addItemToServer(itemName: String, itemId: Int) {
+         val params = HashMap<String, String>().apply {
+             this["action"] = "addItemName"
+             this["user_id"] = "989015"
+             this["itemname"] = itemName
+             this["item_id"] = "$itemId" // if edit only
+         }
+         println("item name send to server==$params")
 
-    fun addItemToServer(itemName: String, itemId: Int) {
-        val params = HashMap<String, String>().apply {
-            this["action"] = "addItemName"
-            this["user_id"] = "989015"
-            this["itemname"] = itemName
-            this["item_id"] = "$itemId" // if edit only
-        }
-        println("item name send to server==$params")
+         apiService.addItem(params).enqueue(object : Callback<HashMap<String, Any>> {
+             override fun onResponse(
+                 call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
+             ) {
+                 if (response.isSuccessful) {
+                     println("response body=====vv ${response.body()}")
 
-        apiService.addItem(params).enqueue(object : Callback<HashMap<String, Any>> {
-            override fun onResponse(
-                call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-            ) {
-                if (response.isSuccessful) {
-                    println("response body=====vv ${response.body()}")
+                     _itemNameResponse.value = response.body()
+                 } else {
+                     println("response body=====${response.body()}")
+                 }
+             }
 
-                    _itemNameResponse.value = response.body()
-                } else {
-                    println("response body=====${response.body()}")
-                }
-            }
+             override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
+                 _error.value = t.message
+             }
+         })
+     }*/
 
-            override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
+    fun addItemToServer(params: HashMap<String, String>) {
+        viewModelScope.launch {
+            try {
+                val response = repository.addItem(params)
+                _itemNameResponse.value = response
+                println("ExpiryResponse - == ${_itemNameResponse.value}")
+            } catch (t: SocketTimeoutException) {
+                println("exception == ${t.toString()}")
                 _error.value = t.message
+
             }
-        })
+        }
     }
 
-    fun addCategoryToServer(categoryName: String, itemType: String) {
+
+    /*fun addCategoryToServer(categoryName: String, itemType: String) {
         val params = HashMap<String, Any>().apply {
             this["action"] = "addCategory"
             this["user_id"] = "989015"
@@ -105,6 +119,20 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
                 println("_categoryResponse  ===== ${_categoryResponse.value}")
             }
         })
+    }*/
+
+    fun addCategoryToServer(params: HashMap<String, Any>) {
+        viewModelScope.launch {
+            try {
+                val response = repository.addCategory(params)
+                _categoryResponse.value = response
+                println("ExpiryResponse - == ${_categoryResponse.value}")
+            } catch (t: SocketTimeoutException) {
+                println("exception == ${t.toString()}")
+                _error.value = t.message
+
+            }
+        }
     }
 
     fun fetchItemNames(userId: Int) {
@@ -160,8 +188,10 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
         remark: String,
         actionDate: String,
         listId: Int,//if edit only
-        customDate: String? = null
+        customDate: String? = null,
+        id: String
     ) {
+
         val params = HashMap<String, Any>().apply {
             this["action"] = "addList"
             this["user_id"] = "989015"
@@ -172,7 +202,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             this["notify_time"] = notifyTime
             this["remark"] = remark
             this["action_date"] = actionDate
-            listId.let { this["list_id"] = it.toString() }
+            this["list_id"] = id ?: ""
             customDate?.let { this["custom_date"] = it }
         }
 
@@ -230,15 +260,15 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
                 val response = repository.getItemlist(InputMap)
                 _itemlist1.value = response
                 println("ExpiryResponse - == ${_itemlist1.value}")
-            }  catch (e: SocketTimeoutException) {
+            } catch (e: SocketTimeoutException) {
                 // Handle errors
                 println("exception == ${e.toString()}")
                 _error.value = e.message
-            }catch (e: IOException) {
+            } catch (e: IOException) {
                 // Handle errors
                 println("exception == ${e.toString()}")
                 _error.value = e.message
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 // Handle errors
                 println("exception == ${e.toString()}")
                 _error.value = e.message
@@ -246,34 +276,34 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
         }
     }
 
-/*    fun deletelist(userId: Int, list_id: Int) {
-        val params = HashMap<String, String>().apply {
-            this["action"] = "deleteList"
-            this["user_id"] = userId.toString()
-            this["list_id"] = list_id.toString()
-        }
-        println("item name send to server==$params")
+    /*    fun deletelist(userId: Int, list_id: Int) {
+            val params = HashMap<String, String>().apply {
+                this["action"] = "deleteList"
+                this["user_id"] = userId.toString()
+                this["list_id"] = list_id.toString()
+            }
+            println("item name send to server==$params")
 
-        apiService.deletelist(params).enqueue(object : Callback<HashMap<String, Any>> {
-            override fun onResponse(
-                call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-            ) {
-                if (response.isSuccessful) {
-                    println("response body=====vv ${response.body()}")
+            apiService.deletelist(params).enqueue(object : Callback<HashMap<String, Any>> {
+                override fun onResponse(
+                    call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
+                ) {
+                    if (response.isSuccessful) {
+                        println("response body=====vv ${response.body()}")
 
-                    //_itemNameResponse.value = response.body()?.get("message") ?: "Item added successfully!"
-                    _deletelistResponse.value = response.body()
-                } else {
-                    println("response body=====${response.body()}")
-                    //_itemNameResponse.value = "Failed to add item!"
+                        //_itemNameResponse.value = response.body()?.get("message") ?: "Item added successfully!"
+                        _deletelistResponse.value = response.body()
+                    } else {
+                        println("response body=====${response.body()}")
+                        //_itemNameResponse.value = "Failed to add item!"
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                _error.value = listOf("Error: ${t.message}")
-            }
-        })
-    }*/
+                override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
+                    _error.value = listOf("Error: ${t.message}")
+                }
+            })
+        }*/
     fun safeGetString(jsonObject: JsonObject, key: String): String? {
         val element = jsonObject.get(key)
         return if (element != null && !element.isJsonNull) {

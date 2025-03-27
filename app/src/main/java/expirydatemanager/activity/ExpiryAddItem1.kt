@@ -1,4 +1,5 @@
-package expirydatemanager.activity
+/*
+package nithra.tamil.calendar.expirydatemanager.activity
 
 import android.app.AlarmManager
 import android.app.AlertDialog
@@ -23,34 +24,23 @@ import androidx.core.text.HtmlCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import expirydatemanager.Adapter.ExpiryItemAdapter_editdelete
-import expirydatemanager.fragment.ExpiryViewModelFactory
-import expirydatemanager.others.ExpiryCustomDatePickerDialog
-import expirydatemanager.others.ExpiryUtils
-import expirydatemanager.retrofit.ExpiryRepository
-import nithra.tamil.calendar.expirydatemanager.Notification.ExpiryNotificationReceiver
+import nithra.tamil.calendar.expirydatemanager.Adapter.ItemAdapter_editdelete
+import nithra.tamil.calendar.expirydatemanager.Notification.NotificationReceiver
 import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityAdditemBinding
-import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
-import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
+import nithra.tamil.calendar.expirydatemanager.others.CustomDatePickerDialog
+import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-
 class AddItemActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAdditemBinding
-
-    // private val addItemViewModel: ExpiryViewModel by viewModels()
-    private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
-    private val addItemViewModel: ExpiryViewModel by viewModels {
-        ExpiryViewModelFactory(repository)
-    }
-
+    private val addItemViewModel: ExpiryDateViewModel by viewModels()
     private lateinit var db: SQLiteDatabase
-    private lateinit var adapter: ExpiryItemAdapter_editdelete
+    private lateinit var adapter: ItemAdapter_editdelete
     private var selectedItemType = ""
     private var displayDate = ""
     private var selectedDate = ""
@@ -59,10 +49,7 @@ class AddItemActivity : AppCompatActivity() {
     private var categories = HashMap<String, Any>()
     var itemNamesList: Map<String, Any> = hashMapOf()
     var categoriesList: Map<String, Any> = hashMapOf()
-
-    //private val expiryDateViewModel: ExpiryViewModel by viewModels()
-    var editId = ""
-    var isEditMode = ""
+    private val expiryDateViewModel: ExpiryDateViewModel by viewModels()
 
     // Variables to store selected time values
     private var selectedHour: String = "HH"
@@ -90,7 +77,6 @@ class AddItemActivity : AppCompatActivity() {
         loadCategoriesForSelectedType()
         addItemViewModel.fetchItemNames(989015)
         itemData = intent.getSerializableExtra("item_data") as? HashMap<String, String>
-        isEditMode = (intent.getStringExtra("isEditMode") as? String).toString()
 
         // Observe item names from ViewModel
         addItemViewModel.itemNames.observe(this, androidx.lifecycle.Observer { itemNames ->
@@ -99,8 +85,7 @@ class AddItemActivity : AppCompatActivity() {
 
             itemNamesList = itemNames
 
-            dialog_type = "Item name"
-//            adapter.notifyDataSetChanged()
+            //dialog_type = "Item name"
 
         })
 
@@ -109,44 +94,52 @@ class AddItemActivity : AppCompatActivity() {
         addItemViewModel.categories.observe(this, androidx.lifecycle.Observer { categories ->
             categoriesList = categories
             println("catItem == $categoriesList")
-            dialog_type = "Category name"
+            //  dialog_type = "Category name"
             // If empty, don't show the dialog
             if (categoriesList.isEmpty()) return@Observer
             if (categoriesList.isNotEmpty() && itemData != null) {
-
+                populateItemData()
             }
         })
-        if (isEditMode == "edit") {
-            populateItemData()
-        } else {
-            setupReminderButtons(binding.btnSameDay)
-            setupTimeSpinners()
-        }
 
 
-        //  setupReminderButtons(binding.btnSameDay)
-        //  setupTimeSpinners()
+
+
+
+        setupReminderButtons(binding.btnSameDay)
 
         db = openOrCreateDatabase("expirydatemanager.db", MODE_PRIVATE, null)
         db.execSQL("PRAGMA foreign_keys=ON;")
 
 
+        val hourList = listOf("HH") + (1..12).map { it.toString().padStart(2, '0') }
+        val minuteList = listOf("MM") + (0..59).map { it.toString().padStart(2, '0') }
+        val amPmList = listOf("AM", "PM") // AM/PM options
 
+// Hour spinner
+        val hourAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, hourList)
+        hourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.JathagamSpinnerHour.adapter = hourAdapter
+
+// Minute spinner
+        val minuteAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, minuteList)
+        minuteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.JathagamSpinnerMinute.adapter = minuteAdapter
+
+        // Create an ArrayAdapter
+        val amPmAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, amPmList)
+        amPmAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.JathagamSpinnerAmPM.adapter = amPmAdapter
 
         binding.etItemName.setOnClickListener {
-            if (ExpiryUtils.isNetworkAvailable(this)) {
-                val GetItems =
-                    itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
-                println("GetItems == $GetItems")
-
-                println("GetItems == $GetItems")
-                showSelectionDialog("Select Item Name", GetItems) { selectedName ->
-                    binding.etItemName.setText(selectedName["item_name"] as String)
-                }
-            } else {
-                Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
+            val GetItems =
+                itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+            println("GetItems == $GetItems")
+            dialog_type = "Item name"
+            println("GetItems == $GetItems")
+            showSelectionDialog("Select Item Name", GetItems) { selectedName ->
+                binding.etItemName.setText(selectedName["item_name"] as String)
             }
-
         }
         println("selectttttrewmn  ====$selectedItemType")
         binding.btnExpiryItem.setOnClickListener {
@@ -161,12 +154,42 @@ class AddItemActivity : AppCompatActivity() {
         }
 
         binding.etExpiryDate.setOnClickListener {
+            */
+/*  val calendar = Calendar.getInstance()
+              val datePickerDialog = DatePickerDialog(
+                  this,
+                  { _, year, month, dayOfMonth ->
+                      val selectedDate = String.format("%02d-%02d-%04d", dayOfMonth, month + 1, year)
+                      binding.etExpiryDate.setText(selectedDate)
+                  },
+                  calendar.get(Calendar.YEAR),
+                  calendar.get(Calendar.MONTH),
+                  calendar.get(Calendar.DAY_OF_MONTH)
+              )
+              datePickerDialog.show()*//*
 
-            val datePicker = ExpiryCustomDatePickerDialog({ selectedManamagalDatePicker ->
+
+            val datePicker = CustomDatePickerDialog({ selectedManamagalDatePicker ->
                 showDatePicker1(selectedManamagalDatePicker)
             }, binding.etExpiryDate.text.toString().trim())
             datePicker.show(supportFragmentManager, "datePicker")
         }
+
+        */
+/*     binding.etNotifyTime.setOnClickListener {
+                 val calendar = Calendar.getInstance()
+                 val timePickerDialog = TimePickerDialog(
+                     this,
+                     { _, hourOfDay, minute ->
+                         val selectedTime = String.format("%02d:%02d", hourOfDay, minute)
+                         binding.etNotifyTime.setText(selectedTime)
+                     },
+                     calendar.get(Calendar.HOUR_OF_DAY),
+                     calendar.get(Calendar.MINUTE),
+                     false
+                 )
+                 timePickerDialog.show()
+             }*//*
 
 
         binding.btnSameDay.setOnClickListener {
@@ -183,7 +206,7 @@ class AddItemActivity : AppCompatActivity() {
         }
 
         binding.customReminder.setOnClickListener {
-            val datePicker = ExpiryCustomDatePickerDialog({ selectedManamagalDatePicker ->
+            val datePicker = CustomDatePickerDialog({ selectedManamagalDatePicker ->
                 showCustomReminderDate(selectedManamagalDatePicker)
             }, binding.customdatetext.text.toString().trim())
 
@@ -194,29 +217,31 @@ class AddItemActivity : AppCompatActivity() {
 
 
         binding.spCategories.setOnClickListener {
-            if (ExpiryUtils.isNetworkAvailable(this)) {
-                // loadCategoriesForSelectedType()
-                val GetcategoryList = categoriesList["Category"] as MutableList<Map<String, Any>>
-                showSelectionDialog("Select Category", GetcategoryList) { selectedCategory ->
-                    binding.spCategories.text = selectedCategory["category"] as String
-                }
-            } else {
-                Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
+            // loadCategoriesForSelectedType()
+            dialog_type = "Category name"
+            val GetcategoryList = categoriesList["Category"] as MutableList<Map<String, Any>>
+            showSelectionDialog("Select Category", GetcategoryList) { selectedCategory ->
+                binding.spCategories.text = selectedCategory["category"] as String
             }
-
         }
 
 
         binding.btnAddItem.setOnClickListener {
-            if (ExpiryUtils.isNetworkAvailable(this)) {
-                saveItemToServer()
-            } else {
-                Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
-            }
+            saveItemToServer()
         }
 
-        //setupTimeSpinners()
+       setupTimeSpinners()
         // loadCategoriesForSelectedType()
+    }
+
+    private fun getCategoryNameFromId(categoryId: String): String {
+        println("getCategoryNameFromId ==$categoriesList")
+        val categories =
+            categoriesList["Category"] as? List<Map<String, Any>> ?: return "Unknown Category"
+
+        return categories.find {
+            it["id"]?.toString()?.toDouble()?.toInt() == categoryId.toDoubleOrNull()?.toInt()
+        }?.get("category")?.toString() ?: "Unknown Category"
     }
 
 
@@ -245,11 +270,9 @@ class AddItemActivity : AppCompatActivity() {
 
         println("saveItemToServer == formattedExpiryDate $formattedExpiryDate")
         println("saveItemToServer == customDate $customDate")
-        println("saveItemToServer == id $editId")
 
         // Save the item to the server
         addItemViewModel.addListToServer(
-            id = editId,
             categoryId = categoryId,
             itemType = if (selectedItemType == "expiry item") 1 else 2,
             itemId = itemId,
@@ -324,16 +347,14 @@ class AddItemActivity : AppCompatActivity() {
         val items = itemNamesList["Items"] as? List<Map<String, Any>> ?: return 0
         println("saveItemToServer == $itemNamesList")
 
-        return items.find { it["item_name"] == name }
-            ?.get("id")
-            ?.let {
-                when (it) {
-                    is Double -> it.toInt()  // Convert Double to Int
-                    is Int -> it             // Already an Int
-                    is String -> it.toDoubleOrNull()?.toInt() ?: 0  // Handle string numbers
-                    else -> 0
-                }
-            } ?: 0
+        return items.find { it["item_name"] == name }?.get("id")?.let {
+            when (it) {
+                is Double -> it.toInt()  // Convert Double to Int
+                is Int -> it             // Already an Int
+                is String -> it.toDoubleOrNull()?.toInt() ?: 0  // Handle string numbers
+                else -> 0
+            }
+        } ?: 0
     }
 
 
@@ -342,8 +363,7 @@ class AddItemActivity : AppCompatActivity() {
         println("saveItemToServer  category == $categoriesList")
 
         return categories.find { it["category"] == name } // Change "item_name" to "category"
-            ?.get("id")
-            ?.let {
+            ?.get("id")?.let {
                 when (it) {
                     is Double -> it.toInt()  // Convert Double to Int
                     is Int -> it             // Already an Int
@@ -425,12 +445,9 @@ class AddItemActivity : AppCompatActivity() {
 
     private fun populateItemData() {
         itemData?.let { data ->
-
-            println("check data === $data")
             binding.etItemName.setText(data["item_name"] ?: "Select Item Name")
-            binding.etExpiryDate.setText(formatDate(data["action_date"].toString()) ?: "")
+            binding.etExpiryDate.setText(data["action_date"] ?: "")
             binding.etNote.setText(data["remark"] ?: "")
-            editId = data["id"] ?: ""
 
             selectedItemType =
                 if (data["item_type"] == "expiry item") "expiry item" else "renew item"
@@ -442,13 +459,9 @@ class AddItemActivity : AppCompatActivity() {
 
             setupReminderButtons1(data["reminder_type"].toString() ?: "0")
 
-            // **Ensure Time Spinners Are Initialized Before Setting Selection**
-            setupTimeSpinners()
-
-            // **Extract Notify Time & Handle Potential Nulls**
-            val notifyTime = data["notify_time"] ?: "12:00 AM"
+            val notifyTime = data["notify_time"] ?: "00:00 AM"
             val timeParts = notifyTime.split(" ")
-            val time = timeParts.getOrNull(0)?.split(":") ?: listOf("12", "00") // Default 12:00
+            val time = timeParts.getOrNull(0)?.split(":") ?: listOf("00", "00")
             val amPm = timeParts.getOrNull(1) ?: "AM"
 
             val hourStr = time.getOrNull(0)?.padStart(2, '0') ?: "HH"
@@ -457,28 +470,17 @@ class AddItemActivity : AppCompatActivity() {
             val hourList = listOf("HH") + (1..12).map { it.toString().padStart(2, '0') }
             val minuteList = listOf("MM") + (0..59).map { it.toString().padStart(2, '0') }
 
-            val hourIndex = hourList.indexOf(hourStr).takeIf { it >= 0 } ?: 0
-            val minuteIndex = minuteList.indexOf(minuteStr).takeIf { it >= 0 } ?: 0
-            val amPmIndex = if (amPm.uppercase() == "PM") 1 else 0
+            val hourIndex = hourList.indexOf(hourStr)
+            val minuteIndex = minuteList.indexOf(minuteStr)
 
-            // **Set Spinner Selections**
-            binding.JathagamSpinnerHour.setSelection(hourIndex)
-            binding.JathagamSpinnerMinute.setSelection(minuteIndex)
-            binding.JathagamSpinnerAmPM.setSelection(amPmIndex)
-
-            binding.spCategories.text = data["category_name"].toString() ?: ""
-        }
-    }
+            binding.JathagamSpinnerHour.setSelection(if (hourIndex != -1) hourIndex else 0)
+            binding.JathagamSpinnerMinute.setSelection(if (minuteIndex != -1) minuteIndex else 0)
+            binding.JathagamSpinnerAmPM.setSelection(if (amPm.uppercase() == "PM") 1 else 0)
 
 
-    fun formatDate(inputDate: String): String {
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-            val date = inputFormat.parse(inputDate)  // Parse input string to Date
-            outputFormat.format(date!!)  // Convert Date to desired format
-        } catch (e: Exception) {
-            inputDate // Return the original date if there's an error
+            val category = data["category_id"].toString() ?: "0"
+            println(" Intent  data $data")
+            binding.spCategories.text = getCategoryNameFromId(category)
         }
     }
 
@@ -655,39 +657,65 @@ class AddItemActivity : AppCompatActivity() {
 
         val dialog = builder.create()
 
-        // Initialize adapter
-        val adapter = ExpiryItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
+        // ✅ Declare adapter here so it's accessible in refreshList()
+        lateinit var adapter: ItemAdapter_editdelete
+
+        // ✅ Define refreshList *before* initializing adapter
+        fun refreshList() {
+            if (dialog_type == "Item name") {
+                expiryDateViewModel.fetchItemNames(989015)
+                expiryDateViewModel.itemNames.observe(this@AddItemActivity) { updated ->
+                    val updatedItems =
+                        updated["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+                    items.clear()
+                    items.addAll(updatedItems)
+                    adapter.notifyDataSetChanged()
+                }
+            } else if (dialog_type == "categorys") {
+                expiryDateViewModel.fetchCategories(989015, selectedItemType)
+                expiryDateViewModel.categories.observe(this@AddItemActivity) { updated ->
+                    val updatedCats =
+                        updated["Category"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+                    items.clear()
+                    items.addAll(updatedCats)
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        }
+
+        // ✅ Now initialize adapter after refreshList is defined
+        adapter = ItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
             onItemSelected(selectedItem)
             dialog.dismiss()
         }, onEdit = { itemName, itemId ->
-            showEditDialog(itemName, itemId) // Show the edit dialog
+            showEditDialog(itemName, itemId) {
+                refreshList() // refresh after edit
+            }
         }, onDelete = { itemId ->
-            deleteItem(itemId) // Delete the item
+            deleteItem(itemId) {
+                refreshList() // refresh after delete
+            }
         })
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        // Search functionality
         etSearch.addTextChangedListener {
-            adapter.filter(it.toString()) // Filter list based on search input
+            adapter.filter(it.toString())
         }
 
-        // Button for adding new item
         btnCustomAction.setOnClickListener {
-            // Open the create dialog when the button is clicked
-            showCreateDialog(dialog_type) { newItem ->
-                // Add the new item to the list and update the adapter
-                items.add(newItem)
-                adapter.notifyDataSetChanged()
-            }
             dialog.dismiss()
+            showCreateDialog(dialog_type) {
+                refreshList() // refresh after create
+            }
         }
 
         dialog.show()
     }
 
-    private fun showEditDialog(itemName: String, itemId: Int) {
+
+    private fun showEditDialog(itemName: String, itemId: Int, onEditDone: () -> Unit) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.dialog_edit_item, null)
@@ -696,28 +724,20 @@ class AddItemActivity : AppCompatActivity() {
         val etItemName = dialogView.findViewById<EditText>(R.id.etItemName)
         etItemName.setText(itemName)
 
-        builder.setPositiveButton("Save") { dialog, which ->
+        builder.setPositiveButton("Save") { dialog, _ ->
             val newItemName = etItemName.text.toString()
             if (newItemName.isNotEmpty()) {
-                // Call the ViewModel's addItemToServer method with the item ID to update
-                println("itemId for item ==$itemId")
-
-                val params = HashMap<String, String>().apply {
-                    this["action"] = "addItemName"
-                    this["user_id"] = "989015"
-                    this["itemname"] = itemName
-                    this["item_id"] = "$itemId" // if edit only
-                }
-
-                addItemViewModel.addItemToServer(params)
+                expiryDateViewModel.addItemToServer(newItemName, itemId)
+                onEditDone()
             }
         }
-        builder.setNegativeButton("Cancel", null)
 
+        builder.setNegativeButton("Cancel", null)
         builder.create().show()
     }
 
-    private fun showCreateDialog(tableName: String, onNewItemCreated: (Map<String, Any>) -> Unit) {
+
+    private fun showCreateDialog(tableName: String, onNewItemCreated: () -> Unit) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_create_item)
         dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
@@ -731,55 +751,28 @@ class AddItemActivity : AppCompatActivity() {
             spinnerItemType.visibility = View.VISIBLE
 
             val itemTypes = arrayOf("expiry item", "renew item")
-            val adapter =
-                android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, itemTypes)
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, itemTypes)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerItemType.adapter = adapter
         } else {
             etItemName.hint = "Enter Item Name"
             spinnerItemType.visibility = View.GONE
         }
-        println("check doalogg")
 
         btnCreate.setOnClickListener {
-            println("check doalogg New")
             val name = etItemName.text.toString().trim()
             val selectedType =
                 if (tableName == "categorys") spinnerItemType.selectedItem.toString() else ""
-            println("item nameeee===== $name")
-            println("item nameeeett ===== $tableName")
 
             if (name.isNotEmpty()) {
                 if (tableName == "Item name") {
-                    println("item nameeee===== $name")
-
-                    val params = HashMap<String, String>().apply {
-                        this["action"] = "addItemName"
-                        this["user_id"] = "989015"
-                        this["itemname"] = etItemName.text.toString()
-                        this["item_id"] = "" // if edit only
-                    }
-
-                    addItemViewModel.addItemToServer(params)
-
-                    //addItemViewModel.addItemToServer(name, 0)
+                    expiryDateViewModel.addItemToServer(name, 0)
                 } else if (tableName == "categorys") {
-                    println("cat nameeee===== $name")
-
-                    val params = HashMap<String, Any>().apply {
-                        this["action"] = "addCategory"
-                        this["user_id"] = "989015"
-                        this["category"] = etItemName
-                        this["item_type"] =
-                            if (spinnerItemType.selectedItem.toString() == "expiry item") "1" else "2"
-                        this["cat_id"] = "" // if edit only
-                    }
-
-                    addItemViewModel.addCategoryToServer(params)
-
-
+                    expiryDateViewModel.addCategoryToServer(name, selectedType)
                 }
+
                 dialog.dismiss()
+                onNewItemCreated() // 👈 This triggers the refresh
             } else {
                 Toast.makeText(this, "Please enter a name!", Toast.LENGTH_SHORT).show()
             }
@@ -788,9 +781,12 @@ class AddItemActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun deleteItem(itemId: Int) {
-        //   addItemViewModel.deleteitem(itemId.toString())
+
+    private fun deleteItem(itemId: Int, onDeleteDone: () -> Unit) {
+        expiryDateViewModel.deleteitem(itemId.toString())
+        onDeleteDone()
     }
+
 
     private fun scheduleNotification(
         itemName: String,
@@ -800,7 +796,7 @@ class AddItemActivity : AppCompatActivity() {
         customDate: String? = null
     ) {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, ExpiryNotificationReceiver::class.java).apply {
+        val intent = Intent(this, NotificationReceiver::class.java).apply {
             putExtra("itemName", itemName)
             putExtra("notificationId", itemName.hashCode()) // Unique ID for the notification
         }
@@ -840,7 +836,9 @@ class AddItemActivity : AppCompatActivity() {
 
         // Adjust the notification date based on reminder type
         when (reminderType) {
-            "same day" -> { /* No change */
+            "same day" -> { */
+/* No change *//*
+
             }
 
             "2 days before" -> calendar.add(Calendar.DAY_OF_MONTH, -2)
@@ -860,4 +858,4 @@ class AddItemActivity : AppCompatActivity() {
     }
 
 
-}
+}*/

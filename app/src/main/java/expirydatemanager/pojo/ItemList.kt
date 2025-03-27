@@ -22,6 +22,10 @@ class ItemList{
         @Expose
          val categoryId: Int? = null
 
+        @SerializedName("category_name")
+        @Expose
+        val categoryName: String? = null
+
         @SerializedName("custom_date")
         @Expose
          val customDate: Any? = null

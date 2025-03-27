@@ -41,21 +41,26 @@ class ExpiryItemAdapter_home(
         holder.expiry_on.text = expiry_on
 
         holder.expiryEdit.setOnClickListener {
-          /*  val itemMap = hashMapOf(
+            var item = itemList[position]
+            val itemMap = hashMapOf(
                 "id" to item.id.toString(),
-                "category_id" to item.category_id.toString(),
-                "custom_date" to (item.custom_date ?: ""), // Handle null values
-                "item_id" to item.item_id.toString(),
-                "action_date" to item.action_date,
-                "reminder_type" to item.reminder_type,
-                "notify_time" to item.notify_time,
-                "item_name" to item.item_name,
+                "category_id" to item.categoryId.toString(),
+                "category_name" to item.categoryName.toString(),
+                "custom_date" to (item.customDate ?: ""),
+                "item_id" to item.itemId.toString(),
+                "action_date" to item.actionDate,
+                "reminder_type" to item.reminderType,
+                "notify_time" to item.notifyTime,
+                "item_name" to item.itemName,
                 "item_type" to item_type,
-                "remark" to item.remark
-            )*/
+                "remark" to item.remark,
+
+            )
 
             val intent = Intent(contextFromFrag, AddItemActivity::class.java).apply {
-                putExtra("item_data", itemList[position].itemId)
+              //  putExtra("item_data", itemList[position].itemId)
+                putExtra("item_data", itemMap)
+                putExtra("isEditMode", "edit")
             }
             contextFromFrag.startActivity(intent)
         }

@@ -149,10 +149,29 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             if (name.isNotEmpty()) {
                 if (tableName == "itemnames") {
                     println("item nameeee===== $name")
-                    expiryDateViewModel.addItemToServer(name, 0)
+
+                    val params = HashMap<String, String>().apply {
+                        this["action"] = "addItemName"
+                        this["user_id"] = "989015"
+                        this["itemname"] = etItemName.text.toString()
+                        this["item_id"] = "" // if edit only
+                    }
+
+                    expiryDateViewModel.addItemToServer(params)
+
+                   // expiryDateViewModel.addItemToServer(name, 0)
                 } else if (tableName == "categorys") {
                     println("cat nameeee===== $name")
-                    expiryDateViewModel.addCategoryToServer(name, selectedType)
+
+                    val params = HashMap<String, Any>().apply {
+                        this["action"] = "addCategory"
+                        this["user_id"] = "989015"
+                        this["category"] = etItemName
+                        this["item_type"] = if (spinnerItemType.selectedItem.toString() == "expiry item") "1" else "2"
+                        this["cat_id"] = "" // if edit only
+                    }
+
+                    expiryDateViewModel.addCategoryToServer(params)
                 }
                 dialog.dismiss()
             } else {

@@ -17,16 +17,23 @@ interface ExpiryRetrofitInterface {
     // Add Item
     @FormUrlEncoded
     @POST("expiryData")
-    fun addItem(
+    suspend fun addItem(
         @FieldMap params: HashMap<String, String>
-    ): Call<HashMap<String, Any>>
+    ): HashMap<String, Any>
+
+    /*@FormUrlEncoded
+    @POST("expiryData")
+    suspend fun addItem(
+        @FieldMap params: HashMap<String, Any>
+    ): ItemList*/
+
 
     // Add Category
     @FormUrlEncoded
     @POST("expiryData")
-    fun addCategory(
+    suspend fun addCategory(
         @FieldMap params: HashMap<String, Any>
-    ): Call<HashMap<String, Any>>
+    ): HashMap<String, Any>
 
     // Fetch Item Names
     @FormUrlEncoded
