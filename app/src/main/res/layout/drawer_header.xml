@@ -16,7 +16,7 @@
             android:id="@+id/header_image"
             android:layout_width="match_parent"
             android:layout_height="170dp"
-            android:src="@drawable/expiryicon"
+            android:src="@drawable/expiry_icon"
             android:scaleType="centerCrop"
             android:contentDescription="Header Image" />
     </androidx.cardview.widget.CardView>

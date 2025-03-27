@@ -1,11 +1,11 @@
-package nithra.tamil.calendar.expirydatemanager
+package expirydatemanager.others
 
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class SharedPreference {
+class ExpirySharedPreference {
     private lateinit var sharedPreference: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
 

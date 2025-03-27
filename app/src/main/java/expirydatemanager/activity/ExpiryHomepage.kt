@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.expirydatemanager.activity
+package expirydatemanager.activity
 
 import android.app.Dialog
 import android.content.Intent
@@ -21,19 +21,25 @@ import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
+import expirydatemanager.fragment.ExpiryViewModelFactory
+import expirydatemanager.fragment.RenewFragment_home
 import nithra.tamil.calendar.expirydatemanager.R
-import nithra.tamil.calendar.expirydatemanager.SharedPreference
+import expirydatemanager.others.ExpirySharedPreference
+import expirydatemanager.retrofit.ExpiryRepository
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryDateHomepageBinding
 import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryFragment_home
-import nithra.tamil.calendar.expirydatemanager.fragment.RenewFragment_home
-import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryDateViewModel
+import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
+import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
 
 class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var binding: ActivityExpiryDateHomepageBinding
     private lateinit var toggle: ActionBarDrawerToggle
-    val sharedPreference = SharedPreference()
-    private val expiryDateViewModel: ExpiryDateViewModel by viewModels()
+    val sharedPreference = ExpirySharedPreference()
+    private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
+    private val expiryDateViewModel: ExpiryViewModel by viewModels{
+        ExpiryViewModelFactory(repository)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

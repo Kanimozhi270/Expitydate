@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.expirydatemanager.others
+package expirydatemanager.others
 
 import android.R
 import android.app.AlertDialog
@@ -13,13 +13,13 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import nithra.tamil.calendar.expirydatemanager.Adapter.ExpiryCustomDayAdapter
+import expirydatemanager.Adapter.ExpiryCustomDayAdapter
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityAanmeegaDatePickerDialogBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class CustomDatePickerDialog(
+class ExpiryCustomDatePickerDialog(
     private val onDateSelected: (String) -> Unit,
     private var initialDate: String? = null // <-- Added this parameter
 ) : DialogFragment() {

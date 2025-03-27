@@ -3,51 +3,54 @@ package expirydatemanager.pojo
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class ExpiryGetLIst {
+
+class ItemList{
     @SerializedName("status")
     @Expose
-    private val status: String? = null
+     val status: String? = null
 
     @SerializedName("list")
     @Expose
-    private val list: List<Expiry_getlist>? = null
+     val list: List<GetList>? = null
 
-    class Expiry_getlist {
+    class GetList {
         @SerializedName("id")
         @Expose
-        private val id: Int? = null
+         val id: Int? = null
 
         @SerializedName("category_id")
         @Expose
-        private val categoryId: Int? = null
+         val categoryId: Int? = null
 
         @SerializedName("custom_date")
         @Expose
-        private val customDate: String? = null
+         val customDate: Any? = null
 
         @SerializedName("item_id")
         @Expose
-        private val itemId: Int? = null
+         val itemId: Int? = null
 
         @SerializedName("action_date")
         @Expose
-        private val actionDate: String? = null
+         val actionDate: String? = null
 
         @SerializedName("reminder_type")
         @Expose
-        private val reminderType: String? = null
+         val reminderType: String? = null
 
         @SerializedName("notify_time")
         @Expose
-        private val notifyTime: String? = null
+         val notifyTime: String? = null
 
         @SerializedName("item_name")
         @Expose
-        private val itemName: String? = null
+         val itemName: String? = null
 
         @SerializedName("remark")
         @Expose
-        private val remark: String? = null
+         val remark: String? = null
     }
 
+
 }
+

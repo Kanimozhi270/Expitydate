@@ -52,7 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/CustomSpinner"
-                android:background="@drawable/edittext_background"
+                android:background="@drawable/expiry_edittext_background"
                 android:padding="5dp"
                 android:spinnerMode="dropdown" />
 
@@ -77,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:background="@drawable/edittext_background"
+                android:background="@drawable/expiry_edittext_background"
                 style="@style/CustomSpinner"
                 android:padding="5dp"
                 android:spinnerMode="dropdown" />

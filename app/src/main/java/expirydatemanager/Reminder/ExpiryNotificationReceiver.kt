@@ -9,10 +9,10 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import nithra.tamil.calendar.expirydatemanager.activity.AddItemActivity
+import expirydatemanager.activity.AddItemActivity
 import nithra.tamil.calendar.expirydatemanager.R
 
-class NotificationReceiver : BroadcastReceiver() {
+class ExpiryNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         val itemName = intent?.getStringExtra("itemName") ?: "Item"
         val notificationId = intent?.getIntExtra("notificationId", 0) ?: 0

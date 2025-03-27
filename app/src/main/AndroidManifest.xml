@@ -17,24 +17,24 @@
         android:theme="@style/Theme.ExpiryDateManager"
         tools:targetApi="31">
         <activity
-            android:name=".activity.Expiry_FullView"
+            android:name="expirydatemanager.activity.Expiry_FullView"
             android:exported="false" />
 
         <receiver
-            android:name=".Notification.NotificationReceiver"
+            android:name=".Notification.ExpiryNotificationReceiver"
             android:exported="false" />
 
         <activity
-            android:name=".activity.ExpiryItemList"
+            android:name="expirydatemanager.activity.ExpiryItemList"
             android:exported="false" />
         <activity
-            android:name=".activity.ExpiryCategory"
+            android:name="expirydatemanager.activity.ExpiryCategory"
             android:exported="false" />
         <activity
-            android:name=".activity.AddItemActivity"
+            android:name="expirydatemanager.activity.AddItemActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.ExpiryHomepage"
+            android:name="expirydatemanager.activity.ExpiryHomepage"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

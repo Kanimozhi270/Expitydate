@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.expirydatemanager.others
+package expirydatemanager.others
 
 
 import android.app.Dialog
@@ -13,7 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import nithra.tamil.calendar.expirydatemanager.R
 
-object Utils {
+object ExpiryUtils {
 
     private lateinit var dialogMsg: Dialog
     const val ram_s =

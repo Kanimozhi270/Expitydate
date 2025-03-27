@@ -1,10 +1,11 @@
-package nithra.tamil.calendar.expirydatemanager.retrofit
+package expirydatemanager.retrofit
 
 import com.google.gson.JsonObject
+import expirydatemanager.pojo.ItemList
 import retrofit2.Call
 import retrofit2.http.*
 
-interface ApiService {
+interface ExpiryRetrofitInterface {
 
     // Add List
     @FormUrlEncoded
@@ -36,7 +37,7 @@ interface ApiService {
     ): Call<HashMap<String, Any>>
 
     //fetch list
-    @FormUrlEncoded
+    /*@FormUrlEncoded
     @POST("expiryData")
     fun getItemlist(
         @Field("action") action: String,
@@ -44,7 +45,12 @@ interface ApiService {
        // @Field("catgeory_id") cat_id: Int,
         @Field("item_type") item_id: Int,
         @Field("is_days") is_days: Int
-    ): Call<JsonObject>
+    ): Call<ItemList>*/
+    @FormUrlEncoded
+    @POST("expiryData")
+    suspend fun getItemlist(
+        @FieldMap params: HashMap<String, Any>
+    ): ItemList
 
 
     // Fetch Categories

@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.expirydatemanager.activity
+package expirydatemanager.activity
 
 import android.os.Bundle
 import android.view.MenuItem
@@ -8,9 +8,9 @@ import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
+import expirydatemanager.fragment.ExpiryCategoryFragment
+import expirydatemanager.fragment.RenewCategoryFragment
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityCategoryBinding
-import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryCategoryFragment
-import nithra.tamil.calendar.expirydatemanager.fragment.RenewCategoryFragment
 
 class ExpiryCategory : AppCompatActivity() {
 

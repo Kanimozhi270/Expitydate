@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.expirydatemanager.Adapter
+package expirydatemanager.Adapter
 
 import android.app.AlertDialog
 import android.content.Context

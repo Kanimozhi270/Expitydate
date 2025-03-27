@@ -7,7 +7,7 @@
     <item
         android:id="@+id/action_info"
         android:title="Info"
-        android:icon="@drawable/ic_infoo"
+        android:icon="@drawable/expiry_ic_infoo"
         app:iconTint="@color/black"
         app:showAsAction="ifRoom" />
 

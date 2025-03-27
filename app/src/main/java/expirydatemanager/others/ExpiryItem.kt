@@ -1,6 +1,6 @@
-package nithra.tamil.calendar.expirydatemanager.others
+package expirydatemanager.others
 
-data class Item(
+data class ExpiryItem(
     val id: Int,
     val itemName: String,
     val expiryDate: String

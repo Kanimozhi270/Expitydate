@@ -27,7 +27,7 @@
             android:id="@+id/imageView"
             android:layout_width="250dp"
             android:layout_height="250dp"
-            android:src="@drawable/expiryicon"
+            android:src="@drawable/expiry_icon"
             android:contentDescription="Calendar Illustration"
             android:scaleType="fitCenter"/>
 

@@ -1,4 +1,4 @@
-package nithra.tamil.calendar.expirydatemanager.activity
+package expirydatemanager.activity
 
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle

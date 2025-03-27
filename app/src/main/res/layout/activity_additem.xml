@@ -139,8 +139,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:background="@drawable/edittext_background"
-                android:drawableEnd="@drawable/expirydate_calendar"
+                android:background="@drawable/expiry_edittext_background"
+                android:drawableEnd="@drawable/expiry_calendar"
                 android:focusable="false"
                 android:hint="Add Expiry date"
                 android:padding="12dp" />
@@ -242,7 +242,7 @@
                         android:id="@+id/JathagamSpinnerHour"
                         android:layout_width="100dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/edittext_background"
+                        android:background="@drawable/expiry_edittext_background"
                         style="@style/CustomSpinner"
                         android:padding="3dp"
                         android:textAlignment="center"
@@ -269,7 +269,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="5dp"
                         android:scrollbars="none"
-                        android:background="@drawable/edittext_background"
+                        android:background="@drawable/expiry_edittext_background"
                         android:padding="3dp"
                         android:textAlignment="center"
                         style="@style/CustomSpinner"
@@ -296,7 +296,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="5dp"
                         android:scrollbars="none"
-                        android:background="@drawable/edittext_background"
+                        android:background="@drawable/expiry_edittext_background"
                         android:padding="3dp"
                         android:textAlignment="center"
                         style="@style/CustomSpinner"
@@ -330,7 +330,7 @@
                 android:hint="Add Note"
                 android:inputType="text"
                 android:layout_margin="10dp"
-                android:background="@drawable/edittext_background"
+                android:background="@drawable/expiry_edittext_background"
                 android:padding="15dp"/>
 
 
