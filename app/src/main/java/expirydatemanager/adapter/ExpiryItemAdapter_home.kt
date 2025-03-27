@@ -55,6 +55,7 @@ class ExpiryItemAdapter_home(
                 "item_type" to item_type,
                 "remark" to item.remark,
 
+
             )
 
             val intent = Intent(contextFromFrag, AddItemActivity::class.java).apply {
