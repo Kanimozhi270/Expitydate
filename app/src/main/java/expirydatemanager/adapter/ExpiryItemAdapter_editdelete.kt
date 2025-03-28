@@ -15,8 +15,8 @@ class ExpiryItemAdapter_editdelete(
     private val context: Context,
     var items: MutableList<Map<String, Any>>,
     private val onItemClick: (Map<String, Any>) -> Unit,
-    private val onEdit: (String, Int) -> Unit,  // Edit listener with item name and ID
-    private val onDelete: (Int) -> Unit         // Delete listener with item ID
+    private val onEdit: (String, Int, String) -> Unit,  // Edit listener with item name and ID
+    private val onDelete: (Int, String) -> Unit         // Delete listener with item ID
 ) : RecyclerView.Adapter<ExpiryItemAdapter_editdelete.ItemViewHolder>() {
 
     private var filteredItems: MutableList<Map<String, Any>> = items
@@ -26,12 +26,21 @@ class ExpiryItemAdapter_editdelete(
             items
         } else {
             items.filter {
-                (it["category"]?.toString()?.contains(query, true) == true ||
-                        it["item_name"]?.toString()?.contains(query, true) == true)
+                (it["category"]?.toString()
+                    ?.contains(query, true) == true || it["item_name"]?.toString()
+                    ?.contains(query, true) == true)
             }.toMutableList()
         }
         notifyDataSetChanged()
     }
+
+    fun updateList(newItems: MutableList<Map<String, Any>>) {
+        this.items.clear()
+        this.items.addAll(newItems)
+        this.filteredItems = newItems.toMutableList() // 🔥 update this too!
+        notifyDataSetChanged()
+    }
+
 
     inner class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvItemName: TextView = view.findViewById(R.id.tvItemName)
@@ -55,19 +64,35 @@ class ExpiryItemAdapter_editdelete(
 
         } else if (item.containsKey("category")) {
             holder.tvItemName.text = filteredItems[position]["category"] as String? ?: ""
-
         }
         // Handle edit button click
         holder.btnEdit.setOnClickListener {
-            val itemName = item["item_name"]?.toString() ?: ""
-            val itemId = item["id"] as? Int ?: 0
-            onEdit(itemName, itemId) // Call edit listener with item name and item ID
+            var itemName = ""
+            var itemType = ""
+            var itemId = 0
+            if (item.containsKey("item_name")) {
+                itemName = item["item_name"]?.toString() ?: ""
+                itemType = "item_type" // ✅ this is correct
+            } else if (item.containsKey("category")) {
+                itemName = item["category"]?.toString() ?: ""
+                itemType = "categorys" // ✅ should match how you check in refresh
+            }
+
+            itemId = (item["id"] as? Double)?.toInt() ?: 0
+            onEdit(itemName, itemId, itemType) // Call edit listener with item name and item ID
         }
 
         // Handle delete button click
         holder.btnDelete.setOnClickListener {
-            val itemId = item["id"] as? Int ?: 0
-            showDeleteConfirmationDialog(itemId)  // Show delete confirmation dialog
+            var itemType = ""
+            if (item.containsKey("item_name")) {
+                itemType = "item_type"
+
+            } else if (item.containsKey("category")) {
+                itemType = "cateogry_type"
+            }
+            val itemId = (item["id"] as? Double)?.toInt() ?: 0
+            showDeleteConfirmationDialog(itemId, itemType)  // Show delete confirmation dialog
         }
 
         // Handle item click
@@ -76,16 +101,14 @@ class ExpiryItemAdapter_editdelete(
         }
     }
 
-    private fun showDeleteConfirmationDialog(itemId: Int) {
+    private fun showDeleteConfirmationDialog(itemId: Int, itemType: String) {
         val builder = AlertDialog.Builder(context)
         builder.setMessage("Are you sure you want to delete this item?")
             .setPositiveButton("Yes") { dialog, id ->
-                onDelete(itemId)  // Call delete listener with item ID
-            }
-            .setNegativeButton("No", null)
+                onDelete(itemId, itemType)
+            }.setNegativeButton("No", null)
         builder.create().show()
     }
 }
-
 
 
