@@ -108,10 +108,10 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             R.id.nav_category -> {
                 showCreateDialog("categorys")
             }
-            R.id.itemlist -> {
+           /* R.id.itemlist -> {
                 val i = Intent(this@ExpiryHomepage, ExpiryItemList::class.java)
                 startActivity(i)
-            }
+            }*/
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true

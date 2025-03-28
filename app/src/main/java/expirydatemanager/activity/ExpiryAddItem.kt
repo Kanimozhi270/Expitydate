@@ -270,6 +270,12 @@ class AddItemActivity : AppCompatActivity() {
             customDate = customDate
         )
 
+        println("itemname == ${binding.etItemName.text.toString()}")
+        println("expiryDate == $formattedExpiryDate")
+        println("notifyTime == $notifyTime")
+        println("selectedReminder == $selectedReminder")
+        println("customDate == $customDate")
+
         // Reset fields after saving the item
         clearFields()
     }
@@ -794,16 +800,33 @@ class AddItemActivity : AppCompatActivity() {
 
     private fun scheduleNotification(
         itemName: String,
-        expiryDate: String,
-        notifyTime: String,
-        reminderType: String,
+        expiryDate: String,      // yyyy-MM-dd from server
+        notifyTime: String,      // HH:mm AM/PM
+        reminderType: String,    // same day / 2 days before / 1 week before / custom
         customDate: String? = null
     ) {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+
+        // Convert expiryDate to dd_MM_yyyy for notification
+        val displayDate = try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+            val outputFormat = SimpleDateFormat("dd_MM_yyyy", Locale.ENGLISH)
+            val date = inputFormat.parse(expiryDate)
+            outputFormat.format(date!!)
+        } catch (e: Exception) {
+            expiryDate // fallback
+        }
+
         val intent = Intent(this, ExpiryNotificationReceiver::class.java).apply {
             putExtra("itemName", itemName)
-            putExtra("notificationId", itemName.hashCode()) // Unique ID for the notification
+            putExtra("notificationId", itemName.hashCode())
+            putExtra("reminderType", reminderType)
+            putExtra("customDate", customDate)
+            putExtra("expiryDate", displayDate) // sending as dd_MM_yyyy
+            putExtra("notifyTime", notifyTime)
         }
+
+
 
         val pendingIntent = PendingIntent.getBroadcast(
             this,
@@ -812,51 +835,48 @@ class AddItemActivity : AppCompatActivity() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Split the expiryDate into day, month, and year
-        val dateParts = expiryDate.split("-") // Expected format: dd-MM-yyyy
-        val timeParts = notifyTime.split(" ") // Expected format: HH:mm AM/PM
+        // Convert time to 24-hour
+        val timeParts = notifyTime.split(" ")
+        val hourMinute = timeParts[0].split(":")
+        var hour = hourMinute[0].toInt()
+        val minute = hourMinute[1].toInt()
+        val amPm = timeParts[1]
 
-        val hourMinuteParts = timeParts[0].split(":") // Splitting HH:mm
-        var hour = hourMinuteParts[0].toInt()
-        val minute = hourMinuteParts[1].toInt()
-        val amPm = timeParts[1] // AM or PM
+        if (amPm == "PM" && hour != 12) hour += 12
+        if (amPm == "AM" && hour == 12) hour = 0
 
-        // Convert 12-hour format to 24-hour format
-        if (amPm == "PM" && hour != 12) {
-            hour += 12
-        } else if (amPm == "AM" && hour == 12) {
-            hour = 0
-        }
-
-        // Set up the calendar with expiry date and notify time
+        // Parse expiryDate for calendar
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        val baseDate = sdf.parse(expiryDate)
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
-            set(Calendar.MONTH, dateParts[1].toInt() - 1) // Month is 0-based
-            set(Calendar.YEAR, dateParts[2].toInt())
-            set(Calendar.HOUR_OF_DAY, hour) // Corrected hour format
+            time = baseDate!!
+            set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
         }
 
-        // Adjust the notification date based on reminder type
+        // Adjust for reminder type
         when (reminderType) {
-            "same day" -> { /* No change */
-            }
-
             "2 days before" -> calendar.add(Calendar.DAY_OF_MONTH, -2)
             "1 week before" -> calendar.add(Calendar.DAY_OF_MONTH, -7)
             "custom" -> {
                 customDate?.let {
-                    val customParts = it.split("-")
-                    calendar.set(Calendar.DAY_OF_MONTH, customParts[0].toInt())
-                    calendar.set(Calendar.MONTH, customParts[1].toInt() - 1)
-                    calendar.set(Calendar.YEAR, customParts[2].toInt())
+                    val customFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+                    val customParsed = customFormat.parse(it)
+                    calendar.time = customParsed!!
+                    calendar.set(Calendar.HOUR_OF_DAY, hour)
+                    calendar.set(Calendar.MINUTE, minute)
+                    calendar.set(Calendar.SECOND, 0)
                 }
             }
         }
 
-        // Schedule the Alarm
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+        // Set alarm
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            pendingIntent
+        )
     }
 
 

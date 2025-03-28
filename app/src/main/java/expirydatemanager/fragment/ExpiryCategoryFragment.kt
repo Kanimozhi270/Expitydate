@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +32,7 @@ class ExpiryCategoryFragment : Fragment() {
     private val itemList = mutableListOf<ExpiryItem>()
 
     lateinit var fragmentActivity: AppCompatActivity
+    private lateinit var itemType: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,8 +49,18 @@ class ExpiryCategoryFragment : Fragment() {
         val adapter = ExpiryItemAdapter_cat(itemList) { clickedItem ->
             val intent = Intent(requireContext(), ExpiryItemList::class.java)
             intent.putExtra("category_id", clickedItem.id)
+            intent.putExtra("category_name", clickedItem.itemName)
+            intent.putExtra("item_type", clickedItem.itemType)
+
             startActivity(intent)
+
+            println("catid===${clickedItem.id}")
+            println("catname===${clickedItem.itemName}")
+            println("itemType===${clickedItem.itemType}")
+
         }
+
+
         recyclerView.adapter = adapter
 
 
@@ -63,21 +73,17 @@ class ExpiryCategoryFragment : Fragment() {
 
      }
 
-
-        // Observe categories LiveData and update itemList with the categories
         addItemViewModel.categories.observe(viewLifecycleOwner) { response ->
-            // Map response data to Item objects
             println("addItemViewModel.categories == $response")
             val categories = (response["Category"] as? List<Map<String, Any>>)?.map {
-                // Safely get the 'id' and convert to Int (handle float or decimal cases)
-                val id = (it["id"] as? Double)?.toInt() ?: 0  // Convert Double to Int safely, default to 0 if not present
+                val id = (it["id"] as? Double)?.toInt() ?: 0
 
-                // Safely get 'category' and 'item_type' and convert to String
                 val category = it["category"]?.toString() ?: ""
-                val itemType = it["item_type"]?.toString() ?: ""
+                 itemType = it["item_type"]?.toString() ?: ""
+
 
                 // Now map to your Item class
-                ExpiryItem(id, category, itemType)
+                ExpiryItem(id, category,"", itemType)
             } ?: emptyList()
 
             ExpiryUtils.mProgress.dismiss()

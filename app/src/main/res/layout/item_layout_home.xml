@@ -104,14 +104,15 @@
                                         android:padding="5dp">
 
                                         <ImageView
-                                            android:layout_width="20dp"
-                                            android:layout_height="20dp"
+                                            android:layout_width="15dp"
+                                            android:layout_height="15dp"
                                             android:src="@drawable/expity_delete"/>
 
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Delete"
+                                            android:textSize="12dp"
                                             android:textColor="@android:color/black"
                                             android:textStyle="bold" />
                                     </LinearLayout>
@@ -127,14 +128,15 @@
                                         android:padding="5dp">
 
                                         <ImageView
-                                            android:layout_width="20dp"
-                                            android:layout_height="20dp"
+                                            android:layout_width="15dp"
+                                            android:layout_height="15dp"
                                             android:src="@drawable/expiry_edit"/>
 
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Edit"
+                                            android:textSize="12dp"
                                             android:textColor="@android:color/black"
                                             android:textStyle="bold" />
                                     </LinearLayout>
@@ -163,16 +165,17 @@
                                         android:textSize="20dp"
                                         android:layout_marginStart="25dp"
                                         android:hint="1"
+                                        android:textStyle="bold"
                                         android:maxLines="1"
-                                        android:textColor="@color/black" />
+                                        android:textColor="@color/exp_green" />
 
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:ellipsize="end"
-                                        android:hint="Reminding"
+                                        android:hint="Remaining"
                                         android:maxLines="1"
-                                        android:textColor="@color/exp_brown" />
+                                        android:textColor="@color/exp_green" />
 
                                 </LinearLayout>
                             </LinearLayout>

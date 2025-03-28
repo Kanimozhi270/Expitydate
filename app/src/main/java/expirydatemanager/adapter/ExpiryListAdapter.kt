@@ -36,8 +36,9 @@ class ExpiryListAdapter(private val itemList: MutableList<ItemList.GetList>) :
         val item = itemList[position]
 
         holder.itemNameTextView.text = item.itemName ?: "No Name"
-        holder.expiryOn.text = "Expiry On: ${item.actionDate ?: "N/A"}"
+        holder.expiryOn.text = "${item.actionDate ?: "N/A"}"
         holder.reminderBefore.text = "Reminder: ${item.reminderType ?: "N/A"}"
+
 
         holder.expiryEdit.setOnClickListener {
             showEditDialog(item, holder.itemView.context)

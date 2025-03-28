@@ -71,7 +71,7 @@ class RenewCategoryFragment : Fragment() {
                 val itemType = it["item_type"]?.toString() ?: ""
 
                 // Now map to your Item class
-                ExpiryItem(id, category, itemType)
+                ExpiryItem(id, category,"", itemType)
             } ?: emptyList()
 
             ExpiryUtils.mProgress.dismiss()

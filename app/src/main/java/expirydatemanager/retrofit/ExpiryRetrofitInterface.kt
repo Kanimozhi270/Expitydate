@@ -21,13 +21,6 @@ interface ExpiryRetrofitInterface {
         @FieldMap params: HashMap<String, String>
     ): HashMap<String, Any>
 
-    /*@FormUrlEncoded
-    @POST("expiryData")
-    suspend fun addItem(
-        @FieldMap params: HashMap<String, Any>
-    ): ItemList*/
-
-
     // Add Category
     @FormUrlEncoded
     @POST("expiryData")
@@ -43,16 +36,6 @@ interface ExpiryRetrofitInterface {
         @Field("user_id") userId: Int
     ): Call<HashMap<String, Any>>
 
-    //fetch list
-    /*@FormUrlEncoded
-    @POST("expiryData")
-    fun getItemlist(
-        @Field("action") action: String,
-        @Field("user_id") userId: Int,
-       // @Field("catgeory_id") cat_id: Int,
-        @Field("item_type") item_id: Int,
-        @Field("is_days") is_days: Int
-    ): Call<ItemList>*/
     @FormUrlEncoded
     @POST("expiryData")
     suspend fun getItemlist(

@@ -13,11 +13,15 @@ import expirydatemanager.activity.AddItemActivity
 import nithra.tamil.calendar.expirydatemanager.R
 
 class ExpiryNotificationReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent?) {
         val itemName = intent?.getStringExtra("itemName") ?: "Item"
         val notificationId = intent?.getIntExtra("notificationId", 0) ?: 0
+        val expiryDate = intent?.getStringExtra("expiryDate") ?: "N/A"  // now in dd_MM_yyyy
+        val notifyTime = intent?.getStringExtra("notifyTime") ?: ""
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "expiry_notification_channel"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -29,13 +33,27 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
+        // Intent to open AddItemActivity
         val openIntent = Intent(context, AddItemActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(context, notificationId, openIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notificationId,
+            openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Highlight expiry date using bold styling
+        val message = "🕒 Your item <b>$itemName</b> is expiring on <b><font color='#FF0000'>$expiryDate</font></b>"
 
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.expity_nodata)
-            .setContentTitle("Reminder for $itemName")
-            .setContentText("Your item is expiring soon. Check your list!")
+            .setContentTitle("📦 Expiry Reminder")
+            .setContentText("Your item is expiring soon")
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(
+                    android.text.Html.fromHtml(message, android.text.Html.FROM_HTML_MODE_LEGACY)
+                )
+            )
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
             .setAutoCancel(true)
@@ -44,4 +62,5 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
 
         notificationManager.notify(notificationId, notification)
     }
+
 }

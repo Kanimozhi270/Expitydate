@@ -35,8 +35,8 @@
                 android:id="@+id/ivArrow"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_more"
-                app:tint="@color/gray" />
+                android:src="@drawable/expiry_cat_arrow"
+                app:tint="@color/black" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

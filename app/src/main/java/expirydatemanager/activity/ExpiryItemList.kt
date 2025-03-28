@@ -34,15 +34,17 @@ class ExpiryItemList : AppCompatActivity() {
         binding = ActivityItemNamesListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Get category ID from intent
+        val categoryId = intent.getIntExtra("category_id", -1)
+        val categoryName = intent.getStringExtra("category_name") ?: "All Items"
+        val itemType = intent.getStringExtra("item_type") ?: "expiry item"
+
         // Set toolbar title
         binding.appBar.title = HtmlCompat.fromHtml(
-            "<b>All Items List", HtmlCompat.FROM_HTML_MODE_LEGACY
+            "<b>$categoryName", HtmlCompat.FROM_HTML_MODE_LEGACY
         )
         setSupportActionBar(binding.appBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        // Get category ID from intent
-        val categoryId = intent.getIntExtra("category_id", -1)
 
         // Fetch data from server
         if (ExpiryUtils.isNetworkAvailable(this)) {
@@ -51,11 +53,12 @@ class ExpiryItemList : AppCompatActivity() {
             val inputMap = HashMap<String, Any>().apply {
                 put("action", "getlist")
                 put("user_id", "989015")
-                put("item_id", "0")
+                put("category_id", categoryId)
+                put("item_type", itemType)
                 put("is_days", "0")
-                if (categoryId != -1) {
+                /*if (categoryId != -1) {
                     put("category_id", categoryId.toString())
-                }
+                }*/
             }
 
             addItemViewModel.fetchList1(inputMap)

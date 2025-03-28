@@ -49,34 +49,6 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
 
     private val apiService = ExpiryRetrofitInstance.instance
 
-    /* fun addItemToServer(itemName: String, itemId: Int) {
-         val params = HashMap<String, String>().apply {
-             this["action"] = "addItemName"
-             this["user_id"] = "989015"
-             this["itemname"] = itemName
-             this["item_id"] = "$itemId" // if edit only
-         }
-         println("item name send to server==$params")
-
-         apiService.addItem(params).enqueue(object : Callback<HashMap<String, Any>> {
-             override fun onResponse(
-                 call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-             ) {
-                 if (response.isSuccessful) {
-                     println("response body=====vv ${response.body()}")
-
-                     _itemNameResponse.value = response.body()
-                 } else {
-                     println("response body=====${response.body()}")
-                 }
-             }
-
-             override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                 _error.value = t.message
-             }
-         })
-     }*/
-
     fun addItemToServer(params: HashMap<String, String>) {
         viewModelScope.launch {
             try {
@@ -90,36 +62,6 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             }
         }
     }
-
-
-    /*fun addCategoryToServer(categoryName: String, itemType: String) {
-        val params = HashMap<String, Any>().apply {
-            this["action"] = "addCategory"
-            this["user_id"] = "989015"
-            this["category"] = categoryName
-            this["item_type"] = if (itemType == "expiry item") "1" else "2"
-            this["cat_id"] = "" // if edit only
-        }
-        println("item name send to server category==$params")
-        apiService.addCategory(params).enqueue(object : Callback<HashMap<String, Any>> {
-            override fun onResponse(
-                call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-            ) {
-                if (response.isSuccessful) {
-                    println("_categoryResponse  ===== ${response.body()}")
-                    _categoryResponse.value = response.body()
-                } else {
-                    _categoryResponse.value = hashMapOf("status" to "Failed to add category!")
-                    println("_categoryResponse  ===== ${_categoryResponse.value}")
-                }
-            }
-
-            override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                _categoryResponse.value = hashMapOf("status" to "Error: ${t.message}")
-                println("_categoryResponse  ===== ${_categoryResponse.value}")
-            }
-        })
-    }*/
 
     fun addCategoryToServer(params: HashMap<String, Any>) {
         viewModelScope.launch {
@@ -179,6 +121,14 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             })
     }
 
+   /* fun fetchCategories(){
+        viewModelScope.launch {
+            try {
+                val response = repository.getCategories()
+                _categories.value = response
+                println("ExpiryResponse - == ${_categories.value}")
+    }
+*/
     fun addListToServer(
         categoryId: Int,
         itemType: Int,
@@ -235,24 +185,6 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
         })
     }
 
-    /*fun fetchList1(userId: Int, item_id: Int, is_days: Int) {
-        val action = "getlist"
-
-        apiService.getItemlist(action, userId, item_id, is_days)
-            .enqueue(object : Callback<ItemList> {
-                override fun onResponse(call: Call<ItemList>, response: Response<ItemList>) {
-                    if (response.isSuccessful) {
-                        val responseBody = response.body()
-                        _itemlist1.postValue(responseBody!!)
-
-                    }
-                }
-
-                override fun onFailure(call: Call<ItemList>, t: Throwable) {
-                    println("_itemNames  ===== ${t.message}")
-                }
-            })
-    }*/
 
     fun fetchList1(InputMap: HashMap<String, Any>) {
         viewModelScope.launch {
