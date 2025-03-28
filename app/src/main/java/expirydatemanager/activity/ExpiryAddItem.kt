@@ -1,5 +1,6 @@
 package expirydatemanager.activity
 
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.AlertDialog
 import android.app.Dialog
@@ -21,6 +22,9 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import expirydatemanager.Adapter.ExpiryItemAdapter_editdelete
@@ -59,6 +63,7 @@ class AddItemActivity : AppCompatActivity() {
     private var categories = HashMap<String, Any>()
     var itemNamesList: Map<String, Any> = hashMapOf()
     var categoriesList: Map<String, Any> = hashMapOf()
+    var selectedType = ""
 
     //private val expiryDateViewModel: ExpiryViewModel by viewModels()
     var editId = ""
@@ -85,7 +90,7 @@ class AddItemActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         // Set default selection to "Expiry Item"
-        selectedItemType = "expiry item"
+        selectedItemType = (intent.getStringExtra("itemType") as? String).toString()
         changeColor(binding.btnExpiryItem, binding.expiryText, true)
         loadCategoriesForSelectedType()
         addItemViewModel.fetchItemNames(989015)
@@ -139,7 +144,6 @@ class AddItemActivity : AppCompatActivity() {
                     itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
                 println("GetItems == $GetItems")
 
-                println("GetItems == $GetItems")
                 showSelectionDialog("Select Item Name", GetItems) { selectedName ->
                     binding.etItemName.setText(selectedName["item_name"] as String)
                 }
@@ -191,15 +195,37 @@ class AddItemActivity : AppCompatActivity() {
             setupReminderButtons(binding.customReminder)
 
         }
+        addItemViewModel.itemNameResponse.observe(this) { response ->
+            println("Add/Update Item Response == $response")
+
+            val status = response["status"]?.toString() ?: ""
+            if (status == "success") {
+                if (isEditMode == "edit") {
+                    Toast.makeText(this, "Updated Successfully!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Added Successfully!", Toast.LENGTH_SHORT).show()
+                }
+                val resultIntent = Intent()
+                resultIntent.putExtra("item_added", true)
+                setResult(Activity.RESULT_OK, resultIntent)
+                finish()
+            } else {
+                Toast.makeText(this, "Something went wrong!", Toast.LENGTH_SHORT).show()
+            }
+        }
 
 
         binding.spCategories.setOnClickListener {
             if (ExpiryUtils.isNetworkAvailable(this)) {
                 // loadCategoriesForSelectedType()
-                val GetcategoryList = categoriesList["Category"] as MutableList<Map<String, Any>>
-                showSelectionDialog("Select Category", GetcategoryList) { selectedCategory ->
-                    binding.spCategories.text = selectedCategory["category"] as String
+                if (categoriesList["Category"] != null) {
+                    val GetcategoryList =
+                        categoriesList["Category"] as MutableList<Map<String, Any>>
+                    showSelectionDialog("Select Category", GetcategoryList) { selectedCategory ->
+                        binding.spCategories.text = selectedCategory["category"] as String
+                    }
                 }
+
             } else {
                 Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
             }
@@ -270,12 +296,6 @@ class AddItemActivity : AppCompatActivity() {
             customDate = customDate
         )
 
-        println("itemname == ${binding.etItemName.text.toString()}")
-        println("expiryDate == $formattedExpiryDate")
-        println("notifyTime == $notifyTime")
-        println("selectedReminder == $selectedReminder")
-        println("customDate == $customDate")
-
         // Reset fields after saving the item
         clearFields()
     }
@@ -330,16 +350,14 @@ class AddItemActivity : AppCompatActivity() {
         val items = itemNamesList["Items"] as? List<Map<String, Any>> ?: return 0
         println("saveItemToServer == $itemNamesList")
 
-        return items.find { it["item_name"] == name }
-            ?.get("id")
-            ?.let {
-                when (it) {
-                    is Double -> it.toInt()  // Convert Double to Int
-                    is Int -> it             // Already an Int
-                    is String -> it.toDoubleOrNull()?.toInt() ?: 0  // Handle string numbers
-                    else -> 0
-                }
-            } ?: 0
+        return items.find { it["item_name"] == name }?.get("id")?.let {
+            when (it) {
+                is Double -> it.toInt()  // Convert Double to Int
+                is Int -> it             // Already an Int
+                is String -> it.toDoubleOrNull()?.toInt() ?: 0  // Handle string numbers
+                else -> 0
+            }
+        } ?: 0
     }
 
 
@@ -348,8 +366,7 @@ class AddItemActivity : AppCompatActivity() {
         println("saveItemToServer  category == $categoriesList")
 
         return categories.find { it["category"] == name } // Change "item_name" to "category"
-            ?.get("id")
-            ?.let {
+            ?.get("id")?.let {
                 when (it) {
                     is Double -> it.toInt()  // Convert Double to Int
                     is Int -> it             // Already an Int
@@ -502,6 +519,15 @@ class AddItemActivity : AppCompatActivity() {
             binding.customReminder
         )
         when (reminderType) {
+            "0" -> highlightSelectedButton(
+                binding.btnSameDay,
+                defaultColor,
+                selectedColor,
+                textDefaultColor,
+                textSelectedColor,
+                reminderButtons
+            )
+
             "1" -> highlightSelectedButton(
                 binding.btnSameDay,
                 defaultColor,
@@ -661,15 +687,57 @@ class AddItemActivity : AppCompatActivity() {
 
         val dialog = builder.create()
 
-        // Initialize adapter
-        val adapter = ExpiryItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
+
+        fun refreshItemList(itemType: String) {
+            println("refreshItemList == $itemType")
+            if (itemType == "item_type") {
+                addItemViewModel.fetchItemNames(989015)
+                // Don't rely on items.clear() directly here, use a fresh copy
+                addItemViewModel.itemNames.observeOnce(this@AddItemActivity) { updatedItemsMap ->
+                    itemNamesList = updatedItemsMap
+
+                    val updatedItems =
+                        updatedItemsMap["Items"] as? List<Map<String, Any>> ?: emptyList()
+
+                    // Update the adapter data properly
+                    adapter.updateList(updatedItems.toMutableList()) // <-- use this
+                    recyclerView.adapter =
+                        adapter // <- Force rebind in case observer skipped notify
+                    etSearch.setText("") // Reset search box to show full list
+
+                }
+            } else {
+                addItemViewModel.fetchCategories(989015, selectedType)
+                addItemViewModel.categories.observeOnce(this@AddItemActivity) { categories ->
+                    categoriesList = categories
+                    val updatedCategories =
+                        categories["Category"] as? List<Map<String, Any>> ?: emptyList()
+                    adapter.updateList(updatedCategories.toMutableList())
+                    recyclerView.adapter =
+                        adapter // <- Force rebind in case observer skipped notify
+                    etSearch.setText("") // Reset search box to show full list
+
+                }
+            }
+        }
+
+
+
+
+        adapter = ExpiryItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
             onItemSelected(selectedItem)
             dialog.dismiss()
-        }, onEdit = { itemName, itemId ->
-            showEditDialog(itemName, itemId) // Show the edit dialog
-        }, onDelete = { itemId ->
-            deleteItem(itemId) // Delete the item
+        }, onEdit = { itemName, itemId, itemType ->
+            showEditDialog(itemName, itemId, itemType) {
+                refreshItemList(itemType)
+            }
+
+        }, onDelete = { itemId, itemType ->
+            deleteItem(itemId, itemType) {
+                refreshItemList(itemType)
+            }
         })
+
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -681,19 +749,43 @@ class AddItemActivity : AppCompatActivity() {
 
         // Button for adding new item
         btnCustomAction.setOnClickListener {
-            // Open the create dialog when the button is clicked
+            if (title == "Select Category") {
+                dialog_type = "categorys"
+            } else {
+                dialog_type = "Item name"
+            }
+
             showCreateDialog(dialog_type) { newItem ->
-                // Add the new item to the list and update the adapter
-                items.add(newItem)
-                adapter.notifyDataSetChanged()
+                if (dialog_type == "Item name") {
+                    refreshItemList("item_type")
+                } else {
+                    refreshCategoryList(selectedItemType)
+                }
             }
             dialog.dismiss()
         }
 
+
         dialog.show()
     }
 
-    private fun showEditDialog(itemName: String, itemId: Int) {
+    fun refreshCategoryList(itemType: String) {
+        val type = if (itemType == "expiry item") "1" else "2"
+        addItemViewModel.fetchCategories(989015, itemType)
+
+        addItemViewModel.categories.observe(this) { categoryMap ->
+            categoriesList = categoryMap
+            println("🔥 Categories updated == $categoriesList")
+        }
+    }
+
+
+    private fun showEditDialog(
+        itemName: String,
+        itemId: Int,
+        itemType: String,
+        onSuccess: () -> Unit
+    ) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.dialog_edit_item, null)
@@ -702,26 +794,62 @@ class AddItemActivity : AppCompatActivity() {
         val etItemName = dialogView.findViewById<EditText>(R.id.etItemName)
         etItemName.setText(itemName)
 
-        builder.setPositiveButton("Save") { dialog, which ->
+        builder.setPositiveButton("Save") { _, _ ->
             val newItemName = etItemName.text.toString()
             if (newItemName.isNotEmpty()) {
-                // Call the ViewModel's addItemToServer method with the item ID to update
-                println("itemId for item ==$itemId")
+                if (itemType == "item_type") {
+                    val params = HashMap<String, String>().apply {
+                        this["action"] = "addItemName"
+                        this["user_id"] = "989015"
+                        this["itemname"] = newItemName
+                        this["item_id"] = "$itemId"
+                    }
 
-                val params = HashMap<String, String>().apply {
-                    this["action"] = "addItemName"
-                    this["user_id"] = "989015"
-                    this["itemname"] = itemName
-                    this["item_id"] = "$itemId" // if edit only
+                    addItemViewModel.addItemToServer(params)
+
+                    addItemViewModel.itemNameResponse1.removeObservers(this)
+                    addItemViewModel.itemNameResponse1.observe(this) { response ->
+                        val status = response["status"]?.toString() ?: ""
+                        if (status == "success") {
+                            Toast.makeText(this, "Updated Successfully!", Toast.LENGTH_SHORT).show()
+                            onSuccess.invoke()
+                        } else {
+                            Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show()
+                        }
+                        addItemViewModel.itemNameResponse1.removeObservers(this)
+                    }
+
+                } else {
+                    val params = HashMap<String, Any>().apply {
+                        this["action"] = "addCategory"
+                        this["user_id"] = "989015"
+                        this["category"] = newItemName
+                        this["item_type"] =
+                            if (selectedType == "expiry item") "1" else "2"
+                        this["cat_id"] = "$itemId"
+                    }
+                    println(" Sending data ==$params")
+                    addItemViewModel.addCategoryToServer(params)
+
+                    addItemViewModel.categoryResponse.observe(this) { response ->
+                        val status = response["status"]?.toString() ?: ""
+                        if (status == "success") {
+                            Toast.makeText(this, "Updated Successfully!", Toast.LENGTH_SHORT).show()
+                            onSuccess.invoke() // 🔁 Trigger refresh callback
+                        } else {
+                            Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show()
+                        }
+                        addItemViewModel.categoryResponse.removeObservers(this)
+                    }
                 }
 
-                addItemViewModel.addItemToServer(params)
             }
         }
-        builder.setNegativeButton("Cancel", null)
 
+        builder.setNegativeButton("Cancel", null)
         builder.create().show()
     }
+
 
     private fun showCreateDialog(tableName: String, onNewItemCreated: (Map<String, Any>) -> Unit) {
         val dialog = Dialog(this)
@@ -731,7 +859,7 @@ class AddItemActivity : AppCompatActivity() {
         val etItemName = dialog.findViewById<EditText>(R.id.etItemName)
         val spinnerItemType = dialog.findViewById<android.widget.Spinner>(R.id.spinnerItemType)
         val btnCreate = dialog.findViewById<Button>(R.id.btnCreate)
-
+        println("Show create dialog tableName ==$tableName")
         if (tableName == "categorys") {
             etItemName.hint = "Enter Category Name"
             spinnerItemType.visibility = View.VISIBLE
@@ -745,42 +873,66 @@ class AddItemActivity : AppCompatActivity() {
             etItemName.hint = "Enter Item Name"
             spinnerItemType.visibility = View.GONE
         }
-        println("check doalogg")
+        addItemViewModel.categoryResponse.observe(this@AddItemActivity) { response ->
+            val status = response["status"]?.toString() ?: ""
+            if (status == "success") {
+                Toast.makeText(this@AddItemActivity, "Category added!", Toast.LENGTH_SHORT).show()
+                refreshCategoryList(selectedType)  // ⬅️ Call refresh here
+                addItemViewModel.categoryResponse.removeObservers(this@AddItemActivity)
+            } else {
+                Toast.makeText(this@AddItemActivity, "Failed to add category!", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+
 
         btnCreate.setOnClickListener {
-            println("check doalogg New")
             val name = etItemName.text.toString().trim()
-            val selectedType =
+            selectedType =
                 if (tableName == "categorys") spinnerItemType.selectedItem.toString() else ""
             println("item nameeee===== $name")
             println("item nameeeett ===== $tableName")
 
             if (name.isNotEmpty()) {
                 if (tableName == "Item name") {
-                    println("item nameeee===== $name")
-
                     val params = HashMap<String, String>().apply {
                         this["action"] = "addItemName"
                         this["user_id"] = "989015"
                         this["itemname"] = etItemName.text.toString()
-                        this["item_id"] = "" // if edit only
+                        this["item_id"] = ""
                     }
 
                     addItemViewModel.addItemToServer(params)
 
-                    //addItemViewModel.addItemToServer(name, 0)
+                    addItemViewModel.itemNameResponse1.observe(this@AddItemActivity) { response ->
+                        val status = response["status"]?.toString() ?: ""
+                        if (status == "success") {
+                            Toast.makeText(this@AddItemActivity, "Item added!", Toast.LENGTH_SHORT)
+                                .show()
+
+                            // ✅ Notify dialog and refresh item list
+                            onNewItemCreated(mapOf("item_name" to etItemName.text.toString()))
+                            addItemViewModel.itemNameResponse1.removeObservers(this@AddItemActivity)
+                        } else {
+                            Toast.makeText(
+                                this@AddItemActivity,
+                                "Failed to add item!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
                 } else if (tableName == "categorys") {
                     println("cat nameeee===== $name")
 
                     val params = HashMap<String, Any>().apply {
                         this["action"] = "addCategory"
                         this["user_id"] = "989015"
-                        this["category"] = etItemName
+                        this["category"] = etItemName.text.toString().trim()
                         this["item_type"] =
                             if (spinnerItemType.selectedItem.toString() == "expiry item") "1" else "2"
-                        this["cat_id"] = "" // if edit only
+                        this["cat_id"] = ""
                     }
-
+                    println("cat nameeee===== $params")
                     addItemViewModel.addCategoryToServer(params)
 
 
@@ -794,8 +946,25 @@ class AddItemActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun deleteItem(itemId: Int) {
-        //   addItemViewModel.deleteitem(itemId.toString())
+    private fun deleteItem(itemId: Int, itemType: String, onSuccess: () -> Unit) {
+        val params = hashMapOf<String, Any>(
+            "action" to "deleteItem", "user_id" to 989015, "item_id" to itemId
+        )
+        addItemViewModel.deleteitem(989015, itemId, params)
+
+        // Observe deletion result
+        addItemViewModel.deleteitemResponse.observe(this) { response ->
+            val status = response["status"]?.toString()
+            if (status == "success") {
+                Toast.makeText(this, "Deleted Successfully!", Toast.LENGTH_SHORT).show()
+                onSuccess.invoke()
+            } else {
+                Toast.makeText(this, "Failed to delete!", Toast.LENGTH_SHORT).show()
+            }
+
+            // Prevent multiple triggers
+            addItemViewModel.deleteitemResponse.removeObservers(this)
+        }
     }
 
     private fun scheduleNotification(
@@ -825,8 +994,6 @@ class AddItemActivity : AppCompatActivity() {
             putExtra("expiryDate", displayDate) // sending as dd_MM_yyyy
             putExtra("notifyTime", notifyTime)
         }
-
-
 
         val pendingIntent = PendingIntent.getBroadcast(
             this,
@@ -880,4 +1047,13 @@ class AddItemActivity : AppCompatActivity() {
     }
 
 
+}
+
+fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
+    observe(lifecycleOwner, object : Observer<T> {
+        override fun onChanged(t: T) {
+            observer.onChanged(t)
+            removeObserver(this)
+        }
+    })
 }
