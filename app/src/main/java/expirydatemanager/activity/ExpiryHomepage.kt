@@ -1,6 +1,7 @@
 package expirydatemanager.activity
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
@@ -18,19 +19,24 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.GravityCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
+import expirydatemanager.Adapter.ExpiryItemAdapter_editdelete
 import expirydatemanager.fragment.ExpiryViewModelFactory
 import expirydatemanager.fragment.RenewFragment_home
 import nithra.tamil.calendar.expirydatemanager.R
 import expirydatemanager.others.ExpirySharedPreference
+import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.pojo.ItemList
 import expirydatemanager.retrofit.ExpiryRepository
 import kotlinx.coroutines.launch
@@ -49,6 +55,14 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
     private lateinit var binding: ActivityExpiryDateHomepageBinding
     private lateinit var toggle: ActionBarDrawerToggle
     val sharedPreference = ExpirySharedPreference()
+
+    var itemNamesList: Map<String, Any> = hashMapOf()
+    var categoriesList: Map<String, Any> = hashMapOf()
+    private lateinit var adapter: ExpiryItemAdapter_editdelete
+    private var dialog_type = ""
+    var selectedType = ""
+
+
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
     private val expiryDateViewModel: ExpiryViewModel by viewModels {
         ExpiryViewModelFactory(repository)
@@ -147,14 +161,137 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                 showCreateDialog("categorys")
             }
 
-           /* R.id.itemlist -> {
-                val i = Intent(this@ExpiryHomepage, ExpiryItemList::class.java)
+            R.id.last3days -> {
+               /* val i = Intent(this@ExpiryHomepage, ExpiryHomepage::class.java)
+                startActivity(i)*/
+            }
+            R.id.category -> {
+                val i = Intent(this@ExpiryHomepage, ExpiryCategory::class.java)
+                i.putExtra("title", "Category")
                 startActivity(i)
+            }
+            R.id.categorylist -> {
+                dialog_type = "categorys"
+              /*  val i = Intent(this@ExpiryHomepage, ExpiryCategoryList::class.java)
+                startActivity(i)*/
+            }
+            R.id.itemlist -> {
+                dialog_type = "Item name"
+                if (ExpiryUtils.isNetworkAvailable(this)) {
+                    val GetItems =
+                        itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+                    println("GetItems == $GetItems")
+
+                    showSelectionDialog("Select Item Name", GetItems) { selectedName ->
+                    }
+                } else {
+                    Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
+                }
+            }
+           /* R.id.alllist -> {
+               *//* val i = Intent(this@ExpiryHomepage, ExpiryAllList::class.java)
+                startActivity(i)*//*
             }*/
+
+            R.id.appshare -> {
+                val shareText = """நித்ரா காலண்டர் வழியாக பகிரப்பட்டது. ஆண்ட்ராய்டு மொபைலில் தரவிறக்கம் செய்ய https://goo.gl/XOqGPp
+ஆப்பிள் மொபைலில் தரவிறக்கம் செய்ய : http://bit.ly/iostamilcal
+
+தமிழில் மிகச்சிறந்த காலண்டரான நித்ரா காலண்டரை  இலவசமாக  உங்கள் ஆண்ட்ராய்டு மொபைலில் தரவிறக்கம் செய்ய : https://goo.gl/XOqGPp 
+ஆப்பிள் மொபைலில் தரவிறக்கம் செய்ய : http://bit.ly/iostamilcal"""
+                val shareIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, shareText)
+                    type = "text/plain"
+                }
+                startActivity(Intent.createChooser(shareIntent, "Share via"))
+            }
+
+
+
+            /* R.id.itemlist -> {
+                 val i = Intent(this@ExpiryHomepage, ExpiryItemList::class.java)
+                 startActivity(i)
+             }*/
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
+
+    private fun showSelectionDialog(
+        title: String,
+        items: MutableList<Map<String, Any>>,
+        onItemSelected: (Map<String, Any>) -> Unit
+    ) {
+        val builder = AlertDialog.Builder(this)
+        val inflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.dialog_custom_selection, null)
+        builder.setView(dialogView)
+
+        val recyclerView = dialogView.findViewById<RecyclerView>(R.id.recyclerView)
+        val etSearch = dialogView.findViewById<EditText>(R.id.etSearch)
+        val btnCustomAction = dialogView.findViewById<Button>(R.id.btnCustomAction)
+
+        val dialog = builder.create()
+
+
+        fun refreshItemList(itemType: String) {
+            println("refreshItemList == $itemType")
+            if (itemType == "item_type") {
+                expiryDateViewModel.fetchItemNames(989015)
+                // Don't rely on items.clear() directly here, use a fresh copy
+                expiryDateViewModel.itemNames.observeOnce(this@ExpiryHomepage) { updatedItemsMap ->
+                    itemNamesList = updatedItemsMap
+
+                    val updatedItems =
+                        updatedItemsMap["Items"] as? List<Map<String, Any>> ?: emptyList()
+
+                    // Update the adapter data properly
+                    adapter.updateList(updatedItems.toMutableList()) // <-- use this
+                    recyclerView.adapter =
+                        adapter // <- Force rebind in case observer skipped notify
+                    etSearch.setText("") // Reset search box to show full list
+
+                }
+            } else {
+                expiryDateViewModel.fetchCategories(989015, selectedType)
+                expiryDateViewModel.categories.observeOnce(this@ExpiryHomepage) { categories ->
+                    categoriesList = categories
+                    val updatedCategories =
+                        categories["Category"] as? List<Map<String, Any>> ?: emptyList()
+                    adapter.updateList(updatedCategories.toMutableList())
+                    recyclerView.adapter =
+                        adapter // <- Force rebind in case observer skipped notify
+                    etSearch.setText("") // Reset search box to show full list
+
+                }
+            }
+        }
+
+        adapter = ExpiryItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
+            onItemSelected(selectedItem)
+            dialog.dismiss()
+        }, onEdit = { itemName, itemId, itemType ->
+
+
+
+        }, onDelete = { itemId, itemType ->
+
+
+        })
+
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+        // Search functionality
+        etSearch.addTextChangedListener {
+            adapter.filter(it.toString()) // Filter list based on search input
+        }
+
+        dialog.show()
+    }
+
 
 
     private fun showCreateDialog(tableName: String) {
@@ -171,7 +308,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             etItemName.hint = "Enter Category Name"
             spinnerItemType.visibility = View.VISIBLE
 
-            val itemTypes = arrayOf("expiry item", "renew item")
+            val itemTypes = arrayOf("Expiry Item", "Renew Item")
             val adapter =
                 android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, itemTypes)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -194,7 +331,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
                     val params = HashMap<String, String>().apply {
                         this["action"] = "addItemName"
-                        this["user_id"] = "989015"
+                        this["user_id"] = ExpiryUtils.userId
                         this["itemname"] = etItemName.text.toString()
                         this["item_id"] = "" // if edit only
                     }
@@ -207,7 +344,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
                     val params = HashMap<String, Any>().apply {
                         this["action"] = "addCategory"
-                        this["user_id"] = "989015"
+                        this["user_id"] = ExpiryUtils.userId
                         this["category"] = etItemName.text.toString().trim()
                         this["item_type"] = selectedItemType  // ✅ Use from selected tab
                         this["cat_id"] = ""
@@ -422,7 +559,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
 
         val params = HashMap<String, Any>().apply {
             this["action"] = "addList"
-            this["user_id"] = "989015"
+            this["user_id"] = ExpiryUtils.userId
             this["category_id"] = categoryId.toString()
             this["item_type"] = itemType
             this["item_id"] = itemId.toString()
@@ -535,11 +672,23 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
     fun deleteCategory(userId: Int, cat_id: Int) {
         val params = HashMap<String, Any>().apply {
             this["action"] = "deleteCategory"
-            this["user_id"] = "989015"
+            this["user_id"] = ExpiryUtils.userId
             this["cat_id"] = "1"
 
         }
         println("item name send to server==$params")
+
+        viewModelScope.launch {
+            try {
+                val response = repository.deleteCategory(params)
+                _deletecatResponse.value = response
+                println("ExpiryResponse - == ${_deleteitemResponse.value}")
+            } catch (t: SocketTimeoutException) {
+                println("exception == ${t.toString()}")
+                _error.value = t.message
+            }
+        }
+     /*
         apiService.deletecat(params).enqueue(object : Callback<HashMap<String, Any>> {
             override fun onResponse(
                 call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
@@ -558,7 +707,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
                 _error.value = t.message
             }
-        })
+        })*/
     }
 
     fun deleteitem(userId: Int, item_id: Int, params: HashMap<String, Any>) {

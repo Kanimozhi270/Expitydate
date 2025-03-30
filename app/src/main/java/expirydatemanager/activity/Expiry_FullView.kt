@@ -1,15 +1,36 @@
 package expirydatemanager.activity
 
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import expirydatemanager.adapter.ExpiryFullViewAdapter
+import expirydatemanager.fragment.ExpiryViewModelFactory
+import expirydatemanager.others.ExpiryUtils
+import expirydatemanager.pojo.ItemList
+import expirydatemanager.retrofit.ExpiryRepository
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryFullViewBinding
+import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
+import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
 
 class Expiry_FullView : AppCompatActivity() {
-    private lateinit var db: SQLiteDatabase
+
     private lateinit var binding: ActivityExpiryFullViewBinding
+    private lateinit var launcher: ActivityResultLauncher<Intent>
+    private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
+
+    private val addItemViewModel: ExpiryViewModel by viewModels {
+        ExpiryViewModelFactory(repository)
+    }
+    private var itemListNew: MutableList<ItemList.GetList> = mutableListOf()
+    private lateinit var itemNamesAdapter: ExpiryFullViewAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,15 +46,66 @@ class Expiry_FullView : AppCompatActivity() {
         )
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        // Initialize database
-        db = openOrCreateDatabase("expirydatemanager.db", MODE_PRIVATE, null)
 
-        // Get item ID from intent
-        val itemId = intent.getIntExtra("item_id", -1)
+        val itemName = intent.getStringExtra("item_name") ?: "N/A"
+        val expiryDate = intent.getStringExtra("action_date") ?: "N/A"
+        val reminderBefore = intent.getStringExtra("reminder_type") ?: "N/A"
+        val notifyTime = intent.getStringExtra("notify_time") ?: "N/A"
+        val note = intent.getStringExtra("remark") ?: "N/A"
+        val category = intent.getStringExtra("category_name") ?: "N/A"
+        val itemType = intent.getStringExtra("item_type") ?: "N/A"
+        val itemId = intent.getStringExtra("item_id") ?: "N/A"
 
-        if (itemId != -1) {
-            loadItemDetails(itemId)
+        binding.itemName.text = itemName
+        binding.expiryDate.text = "$expiryDate"
+        binding.reminderBefore.text = "$reminderBefore"+"Days"
+        binding.notifyTime.text = "$notifyTime"
+        binding.notes.text = "$note"
+        binding.category.text = "$category"
+        binding.itemType.text = "$itemType"
+
+        println("🔍 Item ID received in FullView = $itemId")
+
+
+
+        // Fetch data from server
+        if (ExpiryUtils.isNetworkAvailable(this)) {
+            ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
+
+            val inputMap = HashMap<String, Any>().apply {
+                put("action", "getlist")
+                put("user_id", ExpiryUtils.userId)
+                put("category_id", "0")
+                put("item_type", itemType)
+                put("item_id", itemId)
+                put("is_days", "0")
+            }
+
+            addItemViewModel.fetchList1(inputMap)
+        } else {
+            Toast.makeText(this, "இணையதள இணைப்பு இல்லை", Toast.LENGTH_SHORT).show()
         }
+
+        //observe the list response
+        addItemViewModel.itemList1.observe(this) { response ->
+            ExpiryUtils.mProgress.dismiss()
+
+            itemListNew.clear()
+            if (!response.list.isNullOrEmpty()) {
+                itemListNew.addAll(response.list)
+            }
+/*
+            if (itemListNew.isEmpty()) {
+                binding.contentLayout.visibility = View.VISIBLE
+                binding.recyclerViewExpiry.visibility = View.GONE
+            } else {
+                binding.contentLayout.visibility = View.GONE
+                binding.recyclerViewExpiry.visibility = View.VISIBLE
+            }*/
+            itemNamesAdapter.notifyDataSetChanged()
+        }
+
+
     }
 
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
@@ -45,25 +117,4 @@ class Expiry_FullView : AppCompatActivity() {
 
     }
 
-    private fun loadItemDetails(itemId: Int) {
-        val cursor = db.rawQuery("SELECT * FROM items WHERE id = ?", arrayOf(itemId.toString()))
-        if (cursor.moveToFirst()) {
-            val itemName = cursor.getString(cursor.getColumnIndexOrThrow("itemname"))
-            val expiryDate = cursor.getString(cursor.getColumnIndexOrThrow("expiry_date"))
-            val reminderBefore = cursor.getString(cursor.getColumnIndexOrThrow("reminderbefore"))
-            val notifyTime = cursor.getString(cursor.getColumnIndexOrThrow("notify_time"))
-            val note = cursor.getString(cursor.getColumnIndexOrThrow("note"))
-            val category = cursor.getString(cursor.getColumnIndexOrThrow("category"))
-            val itemType = cursor.getString(cursor.getColumnIndexOrThrow("itemtype"))
-
-            binding.itemName.text = itemName
-            binding.expiryDate.text = "Expiry Date: $expiryDate"
-            binding.reminderBefore.text = "Reminder Before: $reminderBefore"
-            binding.notifyTime.text = "Notify Time: $notifyTime"
-            binding.notes.text = "Notes: $note"
-            binding.category.text = "Category: $category"
-            binding.itemType.text = "Item Type: $itemType"
-        }
-        cursor.close()
-    }
 }

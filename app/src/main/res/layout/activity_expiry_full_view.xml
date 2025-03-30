@@ -18,17 +18,19 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:titleTextColor="@color/black" />
 
+
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="40dp">
 
         <!-- Outer CardView (Big Blue Card) -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="20dp"
-            app:cardBackgroundColor="@color/black"
+            app:cardBackgroundColor="@color/btncolor"
             android:padding="20dp">
 
             <!-- Inner CardView (White Card) -->
@@ -52,7 +54,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Item Name"
-                        android:textColor="#fe7043"
+                        android:textColor="@color/black"
+                        android:layout_gravity="center"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:gravity="center" />
@@ -75,6 +78,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:textStyle="bold"
                             android:text="Expiry Date"
                             android:textColor="@color/black" />
 
@@ -105,7 +109,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:text="Reminder Before"
+                            android:textStyle="bold"
+                            android:text="Reminder"
                             android:textColor="@color/black" />
 
                         <TextView
@@ -135,6 +140,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:textStyle="bold"
                             android:text="Notify Time"
                             android:textColor="@color/black" />
 
@@ -165,6 +171,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:textStyle="bold"
                             android:text="Notes"
                             android:textColor="@color/black" />
 
@@ -196,6 +203,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:textStyle="bold"
                             android:text="Category"
                             android:textColor="@color/black" />
 
@@ -226,6 +234,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:textStyle="bold"
                             android:text="Item Type"
                             android:textColor="@color/black" />
 

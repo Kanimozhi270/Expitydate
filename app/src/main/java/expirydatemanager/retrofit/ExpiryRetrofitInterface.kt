@@ -84,7 +84,7 @@ interface ExpiryRetrofitInterface {
     @POST("expiryData")
     fun deletecat(
         @FieldMap params: HashMap<String, Any>
-    ): Call<HashMap<String, Any>>
+    ): HashMap<String, Any>
 
     //delete item
     @FormUrlEncoded

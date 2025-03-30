@@ -63,9 +63,9 @@ class RenewFragment_home : Fragment() {
                 if (result.resultCode == Activity.RESULT_OK) {
                     val inputMap = hashMapOf<String, Any>(
                         "action" to "getlist",
-                        "user_id" to "989015",
+                        "user_id" to ExpiryUtils.userId,
                         "item_type" to "2",
-                        "is_days" to "0"
+                        "is_days" to "3"
                     )
                     addItemViewModel.fetchList1(inputMap)
                 }
@@ -83,9 +83,9 @@ class RenewFragment_home : Fragment() {
             // OR: Re-fetch the full list if needed
             val inputMap = HashMap<String, Any>()
             inputMap["action"] = "getlist"
-            inputMap["user_id"] = "989015"
+            inputMap["user_id"] = ExpiryUtils.userId
             inputMap["item_type"] = "2"
-            inputMap["is_days"] = "0"
+            inputMap["is_days"] = "3"
             addItemViewModel.fetchList1(inputMap)
         }
 
@@ -95,9 +95,9 @@ class RenewFragment_home : Fragment() {
             ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
             val InputMap = HashMap<String, Any>()
             InputMap["action"] = "getlist"
-            InputMap["user_id"] = "989015"
+            InputMap["user_id"] = ExpiryUtils.userId
             InputMap["item_type"] = "2"
-            InputMap["is_days"] = "0"
+            InputMap["is_days"] = "3"
 
             addItemViewModel.fetchList1(InputMap)
             // addItemViewModel.deletelist(userId = 989015, 2, )
@@ -111,6 +111,15 @@ class RenewFragment_home : Fragment() {
 
             itemList.clear()
             itemList.addAll(response.list ?: emptyList())
+
+            if (itemList.isEmpty()) {
+                contentLayout.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+            } else {
+                contentLayout.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+            }
+
             adapter?.notifyDataSetChanged()
         }
 
@@ -119,9 +128,9 @@ class RenewFragment_home : Fragment() {
             println(" itemNameResponse is called =$response")
             val inputMap = HashMap<String, Any>().apply {
                 this["action"] = "getlist"
-                this["user_id"] = 989015
+                this["user_id"] = ExpiryUtils.userId
                 this["item_type"] = "2"
-                this["is_days"] = "0"
+                this["is_days"] = "3"
             }
             addItemViewModel.fetchList1(inputMap)
         }
@@ -139,9 +148,9 @@ class RenewFragment_home : Fragment() {
                 // 🔄 Refresh the list after successful delete
                 val inputMap = hashMapOf<String, Any>(
                     "action" to "getlist",
-                    "user_id" to "989015",
+                    "user_id" to ExpiryUtils.userId,
                     "item_type" to "2",
-                    "is_days" to "0"
+                    "is_days" to "3"
                 )
                 addItemViewModel.fetchList1(inputMap)
             } else {
@@ -156,9 +165,9 @@ class RenewFragment_home : Fragment() {
     fun refreshList() {
         val inputMap = hashMapOf<String, Any>(
             "action" to "getlist",
-            "user_id" to "989015",
+            "user_id" to ExpiryUtils.userId,
             "item_type" to "2",
-            "is_days" to "0"
+            "is_days" to "3"
         )
         addItemViewModel.fetchList1(inputMap)
     }
@@ -168,7 +177,7 @@ class RenewFragment_home : Fragment() {
 
         val InputMap = HashMap<String, Any>()
         InputMap["action"] = "getlist"
-        InputMap["user_id"] = "989015"
+        InputMap["user_id"] = ExpiryUtils.userId
         InputMap["item_type"] = "1"
 
         progressDialog = ExpiryUtils.mProgress(requireActivity(), "Deleting item...", true)
@@ -179,7 +188,7 @@ class RenewFragment_home : Fragment() {
 
                 val params = HashMap<String, Any>().apply {
                     this["action"] = "deleteList"
-                    this["user_id"] = 989015
+                    this["user_id"] = ExpiryUtils.userId
                     this["list_id"] = itemId
                 }
                 progressDialog!!.show()

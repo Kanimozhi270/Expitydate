@@ -6,51 +6,45 @@
     android:orientation="vertical"
     tools:context=".fragment.ExpiryFragment_home">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="10dp">
+        android:layout_height="match_parent">
 
+        <!-- RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewExpiry"
             android:layout_width="match_parent"
+            android:layout_marginTop="5dp"
             android:layout_height="match_parent"
-            android:scrollbars="vertical"/>
-    </LinearLayout>
+            android:scrollbars="vertical" />
 
-    <!-- Center Content -->
-    <LinearLayout
-        android:id="@+id/contentLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/app_bar"
-        android:layout_above="@id/btnAddItem"
-        android:gravity="center"
-        android:visibility="gone"
-        android:orientation="vertical"
-        android:layout_centerInParent="true">
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:src="@drawable/expiry_icon"
-            android:contentDescription="Calendar Illustration"
-            android:scaleType="fitCenter"/>
-
-        <TextView
-            android:id="@+id/tvDescription"
+        <!-- Empty View Layout (Content Layout) -->
+        <LinearLayout
+            android:id="@+id/contentLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-50dp"
-            android:text="Add Items date to be Remember when its time for expiry or renewal"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:textAlignment="center"
-            android:padding="16dp"/>
-    </LinearLayout>
+            android:orientation="vertical"
+            android:visibility="gone">
 
+            <ImageView
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:contentDescription="No items"
+                android:scaleType="fitCenter"
+                android:src="@drawable/expiry_icon" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-50dp"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="Add Items to remember expiry or renewal"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+    </FrameLayout>
 
 </LinearLayout>

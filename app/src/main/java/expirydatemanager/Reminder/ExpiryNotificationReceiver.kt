@@ -9,7 +9,7 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import expirydatemanager.activity.AddItemActivity
+import expirydatemanager.activity.Expiry_FullView
 import nithra.tamil.calendar.expirydatemanager.R
 
 class ExpiryNotificationReceiver : BroadcastReceiver() {
@@ -34,7 +34,12 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
         }
 
         // Intent to open AddItemActivity
-        val openIntent = Intent(context, AddItemActivity::class.java)
+        val itemId = intent?.getStringExtra("itemId") ?: ""
+
+        val openIntent = Intent(context, Expiry_FullView::class.java).apply {
+            putExtra("itemId", itemId)  // ✅ Pass the ID to FullView screen
+        }
+
         val pendingIntent = PendingIntent.getActivity(
             context,
             notificationId,

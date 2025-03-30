@@ -1,11 +1,10 @@
+/*
 package nithra.tamil.calendar.expirydatemanager.retrofit
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.JsonObject
-import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.pojo.ItemList
 import expirydatemanager.retrofit.ExpiryRepository
 import kotlinx.coroutines.launch
@@ -55,7 +54,8 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
 
     private val apiService = ExpiryRetrofitInstance.instance
 
-    /* fun addItemToServer(itemName: String, itemId: Int) {
+    */
+/* fun addItemToServer(itemName: String, itemId: Int) {
          val params = HashMap<String, String>().apply {
              this["action"] = "addItemName"
              this["user_id"] = "989015"
@@ -81,7 +81,8 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
                  _error.value = t.message
              }
          })
-     }*/
+     }*//*
+
 
     fun addItemToServer(params: HashMap<String, String>) {
         viewModelScope.launch {
@@ -171,7 +172,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
 
         val params = HashMap<String, Any>().apply {
             this["action"] = "addList"
-            this["user_id"] = ExpiryUtils.userId
+            this["user_id"] = "989015"
             this["category_id"] = categoryId.toString()
             this["item_type"] = itemType
             this["item_id"] = itemId.toString()
@@ -196,7 +197,8 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             }
         }
 
-        /*  apiService.addList(params).enqueue(object : Callback<HashMap<String, Any>> {
+        */
+/*  apiService.addList(params).enqueue(object : Callback<HashMap<String, Any>> {
               override fun onResponse(
                   call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
               ) {
@@ -220,8 +222,30 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
                   _listResponse.value = "Error: ${t.message}"
                   println("Error on add list  ==${t.message}")
               }
-          })*/
+          })*//*
+
     }
+
+    */
+/*fun fetchList1(userId: Int, item_id: Int, is_days: Int) {
+        val action = "getlist"
+
+        apiService.getItemlist(action, userId, item_id, is_days)
+            .enqueue(object : Callback<ItemList> {
+                override fun onResponse(call: Call<ItemList>, response: Response<ItemList>) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body()
+                        _itemlist1.postValue(responseBody!!)
+
+                    }
+                }
+
+                override fun onFailure(call: Call<ItemList>, t: Throwable) {
+                    println("_itemNames  ===== ${t.message}")
+                }
+            })
+    }*//*
+
 
     fun fetchList1(InputMap: HashMap<String, Any>) {
         viewModelScope.launch {
@@ -251,9 +275,9 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = repository.addList(params)
+                val response = repository.deleteList(params)
                 _deletelistResponse.value = response
-                println("ExpiryResponse - == ${_deleteitemResponse.value}")
+                println("ExpiryResponse - == ${_deletelistResponse.value}")
             } catch (t: SocketTimeoutException) {
                 println("exception == ${t.toString()}")
                 _error.value = t.message
@@ -265,40 +289,42 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
     fun deleteCategory(userId: Int, cat_id: Int, params: HashMap<String, Any>) {
         val params = HashMap<String, Any>().apply {
             this["action"] = "deleteCategory"
-            this["user_id"] = ExpiryUtils.userId
+            this["user_id"] = "989015"
             this["cat_id"] = cat_id
         }
         println("item name send to server==$params")
         viewModelScope.launch {
             try {
                 val response = repository.deleteCategory(params)
-                _deletecatResponse.value = response //  use correct LiveData
+                _deletecatResponse.value = response  // ✅ use correct LiveData
                 println("ExpiryResponse - == ${_deleteitemResponse.value}")
             } catch (t: SocketTimeoutException) {
                 println("exception == ${t.toString()}")
                 _error.value = t.message
             }
         }
-        /* println("item name send to server==$params")
-        apiService.deletecat(params).enqueue(object : Callback<HashMap<String, Any>> {
-        override fun onResponse(
-        call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-        ) {
-        if (response.isSuccessful) {
-        println("response body=====vv ${response.body()}")
+        */
+/*  println("item name send to server==$params")
+          apiService.deletecat(params).enqueue(object : Callback<HashMap<String, Any>> {
+              override fun onResponse(
+                  call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
+              ) {
+                  if (response.isSuccessful) {
+                      println("response body=====vv ${response.body()}")
 
-        //_itemNameResponse.value = response.body()?.get("message") ?: "Item added successfully!"
-        _deletecatResponse.value = response.body()
-        } else {
-        println("response body=====${response.body()}")
-        //_itemNameResponse.value = "Failed to add item!"
-        }
-        }
+                      //_itemNameResponse.value = response.body()?.get("message") ?: "Item added successfully!"
+                      _deletecatResponse.value = response.body()
+                  } else {
+                      println("response body=====${response.body()}")
+                      //_itemNameResponse.value = "Failed to add item!"
+                  }
+              }
 
-        override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-        _error.value = t.message
-        }
-        })*/
+              override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
+                  _error.value = t.message
+              }
+          })*//*
+
     }
 
     fun deleteitem(userId: Int, item_id: Int, params: HashMap<String, Any>) {
@@ -319,6 +345,4 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
     }
 
 
-}
-
-
+}*/

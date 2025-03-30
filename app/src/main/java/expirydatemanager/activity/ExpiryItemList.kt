@@ -1,8 +1,13 @@
 package expirydatemanager.activity
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
@@ -20,7 +25,7 @@ class ExpiryItemList : AppCompatActivity() {
 
     private lateinit var binding: ActivityItemNamesListBinding
     private lateinit var itemNamesAdapter: ExpiryListAdapter
-
+    private lateinit var launcher: ActivityResultLauncher<Intent>
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
 
     private val addItemViewModel: ExpiryViewModel by viewModels {
@@ -45,6 +50,21 @@ class ExpiryItemList : AppCompatActivity() {
         )
         setSupportActionBar(binding.appBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        launcher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val itemAdded = result.data?.getBooleanExtra("item_added", false) == true
+                    if (itemAdded) {
+                        refreshList(
+                            categoryId, categoryName, itemType
+                        ) // 🔄 When coming back from edit/add
+                    } else {
+                        // Optional: handle other result cases here if needed
+                        refreshList(categoryId, categoryName, itemType)
+                    }
+                }
+            }
+
 
         // Fetch data from server
         if (ExpiryUtils.isNetworkAvailable(this)) {
@@ -52,11 +72,10 @@ class ExpiryItemList : AppCompatActivity() {
 
             val inputMap = HashMap<String, Any>().apply {
                 put("action", "getlist")
-                put("user_id", "989015")
+                put("user_id", ExpiryUtils.userId)
                 put("category_id", categoryId)
                 put("item_type", itemType)
-                put("is_days", "0")
-                /*if (categoryId != -1) {
+                put("is_days", "0")/*if (categoryId != -1) {
                     put("category_id", categoryId.toString())
                 }*/
             }
@@ -67,8 +86,18 @@ class ExpiryItemList : AppCompatActivity() {
         }
 
         // Set up RecyclerView
-        itemNamesAdapter = ExpiryListAdapter(itemListNew)
-        binding.recyclerView.apply {
+        itemNamesAdapter = ExpiryListAdapter(
+            itemListNew, launcher, this, onDelete = { itemId, itemType ->
+                if (itemType == "item_type") {
+                    deleteItem(itemId, itemType) {
+                        itemListNew.removeAll { it.id == itemId }
+                        itemNamesAdapter.notifyDataSetChanged()
+                    }
+                }
+            }
+
+        )
+        binding.recyclerViewExpiry.apply {
             layoutManager = LinearLayoutManager(this@ExpiryItemList)
             adapter = itemNamesAdapter
         }
@@ -77,15 +106,66 @@ class ExpiryItemList : AppCompatActivity() {
         addItemViewModel.itemList1.observe(this) { response ->
             ExpiryUtils.mProgress.dismiss()
 
-            if (response.status == "success" && !response.list.isNullOrEmpty()) {
-                itemListNew.clear()
+            itemListNew.clear()
+            if (!response.list.isNullOrEmpty()) {
                 itemListNew.addAll(response.list)
-                itemNamesAdapter.notifyDataSetChanged()
+            }
+
+
+
+            if (itemListNew.isEmpty()) {
+                binding.contentLayout.visibility = View.VISIBLE
+                binding.recyclerViewExpiry.visibility = View.GONE
             } else {
-                Toast.makeText(this, "தகவல் இல்லை", Toast.LENGTH_SHORT).show()
+                binding.contentLayout.visibility = View.GONE
+                binding.recyclerViewExpiry.visibility = View.VISIBLE
+            }
+            itemNamesAdapter.notifyDataSetChanged()
+        }
+
+    }
+
+
+    private fun deleteItem(itemId: Int, itemType: String, onSuccess: () -> Unit) {
+        val params = hashMapOf<String, Any>(
+            "action" to "deleteList", "user_id" to ExpiryUtils.userId, "list_id" to itemId
+        )
+        addItemViewModel.deletelist(989015, itemId, params)
+
+        addItemViewModel.deletelistResponse.observeOnce(this) { response ->
+            val status = response["status"]?.toString()
+            if (status == "success") {
+                Toast.makeText(this, "Deleted Successfully!", Toast.LENGTH_SHORT).show()
+                onSuccess.invoke()
+
+                // 💡 Update UI visibility here
+                if (itemListNew.isEmpty()) {
+                    binding.contentLayout.visibility = View.VISIBLE
+                    binding.recyclerViewExpiry.visibility = View.GONE
+                } else {
+                    binding.contentLayout.visibility = View.GONE
+                    binding.recyclerViewExpiry.visibility = View.VISIBLE
+                }
+
+            } else {
+                Toast.makeText(this, "Failed to delete!", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
+
+    fun refreshList(categoryId: Int, categoryName: String, itemType: String) {
+        val inputMap = HashMap<String, Any>().apply {
+            put("action", "getlist")
+            put("user_id", ExpiryUtils.userId)
+            put("category_id", categoryId)
+            put("item_type", itemType)
+            put("is_days", "0")
+        }
+
+        addItemViewModel.fetchList1(inputMap)
+    }
+
 
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         if (menuItem.itemId == android.R.id.home) {

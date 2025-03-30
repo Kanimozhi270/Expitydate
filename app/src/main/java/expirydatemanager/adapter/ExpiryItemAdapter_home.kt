@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import expirydatemanager.activity.AddItemActivity
+import expirydatemanager.activity.Expiry_FullView
 import expirydatemanager.pojo.ItemList
 import nithra.tamil.calendar.expirydatemanager.R
 
@@ -32,13 +33,37 @@ class ExpiryItemAdapter_home(
         val itemName = item.itemName
         val reminderType = item.reminderType?.toString() ?: "No Reminder"
         val expiry_on = item.actionDate?.toString() ?: "No Expiry Date"
+
         val id = item.id
         println("ID after conversion: $id")
+
+        holder.serialNumber.text = (position + 1).toString()
 
         // Set values to the ViewHolder
         holder.itemName.text = itemName
         holder.expiryDate.text = reminderType
         holder.expiry_on.text = expiry_on
+
+        holder.itemView.setOnClickListener {
+            val intent = Intent(contextFromFrag, Expiry_FullView::class.java).apply {
+
+              //  putExtra("item_data", item)
+                putExtra("item_type", item_type)
+                putExtra("isEditMode", "edit")
+                putExtra("list_id", item.id)
+                putExtra("category_id", item.categoryId)
+                putExtra("category_name", item.categoryName)
+                putExtra("item_id", item.itemId)
+                putExtra("action_date", item.actionDate)
+                putExtra("reminder_type", item.reminderType)
+                putExtra("notify_time", item.notifyTime)
+                putExtra("item_name", item.itemName)
+                putExtra("remark", item.remark)
+
+            }
+            contextFromFrag.startActivity(intent)
+        }
+
 
         holder.expiryEdit.setOnClickListener {
             var item = itemList[position]
@@ -79,6 +104,7 @@ class ExpiryItemAdapter_home(
         val expiry_on: TextView = view.findViewById(R.id.expityOn)
         val expiryEdit: LinearLayout = view.findViewById(R.id.expiry_edit)
         val expiryDelete: LinearLayout = view.findViewById(R.id.expiry_delete)
+        val serialNumber: TextView = view.findViewById(R.id.serialNumber)
     }
 }
 
