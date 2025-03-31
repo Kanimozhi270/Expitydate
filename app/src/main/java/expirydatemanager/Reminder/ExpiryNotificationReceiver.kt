@@ -35,9 +35,11 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
 
         // Intent to open AddItemActivity
         val itemId = intent?.getStringExtra("itemId") ?: ""
+        println("itemIddd == $itemId")
 
         val openIntent = Intent(context, Expiry_FullView::class.java).apply {
             putExtra("itemId", itemId)  // ✅ Pass the ID to FullView screen
+
         }
 
         val pendingIntent = PendingIntent.getActivity(

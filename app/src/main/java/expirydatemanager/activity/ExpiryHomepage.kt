@@ -170,10 +170,10 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                 i.putExtra("title", "Category")
                 startActivity(i)
             }
-            R.id.categorylist -> {
+        /*    R.id.categorylist -> {
                 dialog_type = "categorys"
-              /*  val i = Intent(this@ExpiryHomepage, ExpiryCategoryList::class.java)
-                startActivity(i)*/
+              *//*  val i = Intent(this@ExpiryHomepage, ExpiryCategoryList::class.java)
+                startActivity(i)*//*
             }
             R.id.itemlist -> {
                 dialog_type = "Item name"
@@ -187,7 +187,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                 } else {
                     Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
                 }
-            }
+            }*/
            /* R.id.alllist -> {
                *//* val i = Intent(this@ExpiryHomepage, ExpiryAllList::class.java)
                 startActivity(i)*//*
@@ -238,7 +238,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         fun refreshItemList(itemType: String) {
             println("refreshItemList == $itemType")
             if (itemType == "item_type") {
-                expiryDateViewModel.fetchItemNames(989015)
+                expiryDateViewModel.fetchItemNames(ExpiryUtils.userId)
                 // Don't rely on items.clear() directly here, use a fresh copy
                 expiryDateViewModel.itemNames.observeOnce(this@ExpiryHomepage) { updatedItemsMap ->
                     itemNamesList = updatedItemsMap
@@ -254,7 +254,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
                 }
             } else {
-                expiryDateViewModel.fetchCategories(989015, selectedType)
+                expiryDateViewModel.fetchCategories(ExpiryUtils.userId, selectedType)
                 expiryDateViewModel.categories.observeOnce(this@ExpiryHomepage) { categories ->
                     categoriesList = categories
                     val updatedCategories =
@@ -279,7 +279,6 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
 
         })
-
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -331,7 +330,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
                     val params = HashMap<String, String>().apply {
                         this["action"] = "addItemName"
-                        this["user_id"] = ExpiryUtils.userId
+                        this["user_id"] = ""+ExpiryUtils.userId
                         this["itemname"] = etItemName.text.toString()
                         this["item_id"] = "" // if edit only
                     }

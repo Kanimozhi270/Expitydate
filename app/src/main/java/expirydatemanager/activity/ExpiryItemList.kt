@@ -130,7 +130,7 @@ class ExpiryItemList : AppCompatActivity() {
         val params = hashMapOf<String, Any>(
             "action" to "deleteList", "user_id" to ExpiryUtils.userId, "list_id" to itemId
         )
-        addItemViewModel.deletelist(989015, itemId, params)
+        addItemViewModel.deletelist(ExpiryUtils.userId, itemId, params)
 
         addItemViewModel.deletelistResponse.observeOnce(this) { response ->
             val status = response["status"]?.toString()

@@ -46,7 +46,6 @@ class Expiry_FullView : AppCompatActivity() {
         )
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-
         val itemName = intent.getStringExtra("item_name") ?: "N/A"
         val expiryDate = intent.getStringExtra("action_date") ?: "N/A"
         val reminderBefore = intent.getStringExtra("reminder_type") ?: "N/A"
@@ -65,8 +64,6 @@ class Expiry_FullView : AppCompatActivity() {
         binding.itemType.text = "$itemType"
 
         println("🔍 Item ID received in FullView = $itemId")
-
-
 
         // Fetch data from server
         if (ExpiryUtils.isNetworkAvailable(this)) {

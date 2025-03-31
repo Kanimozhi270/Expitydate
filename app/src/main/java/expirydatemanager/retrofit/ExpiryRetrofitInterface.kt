@@ -82,7 +82,7 @@ interface ExpiryRetrofitInterface {
     //delete category
     @FormUrlEncoded
     @POST("expiryData")
-    fun deletecat(
+    suspend fun deletecat(
         @FieldMap params: HashMap<String, Any>
     ): HashMap<String, Any>
 

@@ -192,7 +192,7 @@ class RenewFragment_home : Fragment() {
                     this["list_id"] = itemId
                 }
                 progressDialog!!.show()
-                addItemViewModel.deletelist(userId = 989015, list_id = itemId, params)
+                addItemViewModel.deletelist(userId = ExpiryUtils.userId, list_id = itemId, params)
             }
 
             .setNegativeButton("No", null).show()

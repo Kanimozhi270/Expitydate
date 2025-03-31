@@ -82,11 +82,11 @@ class AddItemActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.appBar.title = HtmlCompat.fromHtml(
-            "<b>Add Item", HtmlCompat.FROM_HTML_MODE_LEGACY
+            "Add Item", HtmlCompat.FROM_HTML_MODE_LEGACY
         )
         setSupportActionBar(binding.appBar)
         supportActionBar!!.title = HtmlCompat.fromHtml(
-            "<b>Add Item", HtmlCompat.FROM_HTML_MODE_LEGACY
+            "Add Item", HtmlCompat.FROM_HTML_MODE_LEGACY
         )
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -95,7 +95,7 @@ class AddItemActivity : AppCompatActivity() {
             (intent.getStringExtra("itemType") as? String).toString() ?: "expiry item"
         changeColor(binding.btnExpiryItem, binding.expiryText, true)
         loadCategoriesForSelectedType()
-        addItemViewModel.fetchItemNames(989015)
+        addItemViewModel.fetchItemNames(ExpiryUtils.userId)
         itemData = intent.getSerializableExtra("item_data") as? HashMap<String, String>
         isEditMode = (intent.getStringExtra("isEditMode") as? String).toString()
 
@@ -648,7 +648,7 @@ class AddItemActivity : AppCompatActivity() {
     }
 
     private fun loadCategoriesForSelectedType() {
-        addItemViewModel.fetchCategories(989015, selectedItemType)
+        addItemViewModel.fetchCategories(ExpiryUtils.userId, selectedItemType)
     }
 
 
@@ -704,7 +704,7 @@ class AddItemActivity : AppCompatActivity() {
         fun refreshItemList(itemType: String) {
             println("refreshItemList == $itemType")
             if (itemType == "item_type") {
-                addItemViewModel.fetchItemNames(989015)
+                addItemViewModel.fetchItemNames(ExpiryUtils.userId)
                 // Don't rely on items.clear() directly here, use a fresh copy
                 addItemViewModel.itemNames.observeOnce(this@AddItemActivity) { updatedItemsMap ->
                     itemNamesList = updatedItemsMap
@@ -720,7 +720,7 @@ class AddItemActivity : AppCompatActivity() {
 
                 }
             } else {
-                addItemViewModel.fetchCategories(989015, selectedType)
+                addItemViewModel.fetchCategories(ExpiryUtils.userId, selectedType)
                 addItemViewModel.categories.observeOnce(this@AddItemActivity) { categories ->
                     categoriesList = categories
                     val updatedCategories =
@@ -793,7 +793,7 @@ class AddItemActivity : AppCompatActivity() {
 
     fun refreshCategoryList(itemType: String) {
         val type = if (itemType == "expiry item") "1" else "2"
-        addItemViewModel.fetchCategories(989015, itemType)
+        addItemViewModel.fetchCategories(ExpiryUtils.userId, itemType)
 
         addItemViewModel.categories.observe(this) { categoryMap ->
             categoriesList = categoryMap
@@ -822,7 +822,7 @@ class AddItemActivity : AppCompatActivity() {
                 if (itemType == "item_type") {
                     val params = HashMap<String, String>().apply {
                         this["action"] = "addItemName"
-                        this["user_id"] = ExpiryUtils.userId
+                        this["user_id"] = ""+ ExpiryUtils.userId
                         this["itemname"] = newItemName
                         this["item_id"] = "$itemId"
                     }
@@ -872,7 +872,6 @@ class AddItemActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-
     private fun showCreateDialog(tableName: String, onNewItemCreated: (Map<String, Any>) -> Unit) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_create_item)
@@ -919,7 +918,7 @@ class AddItemActivity : AppCompatActivity() {
                 if (tableName == "Item name") {
                     val params = HashMap<String, String>().apply {
                         this["action"] = "addItemName"
-                        this["user_id"] = ExpiryUtils.userId
+                        this["user_id"] = ""+ExpiryUtils.userId
                         this["itemname"] = etItemName.text.toString()
                         this["item_id"] = ""
                     }
@@ -971,9 +970,9 @@ class AddItemActivity : AppCompatActivity() {
     private fun deleteItem(itemId: Int, itemType: String, onSuccess: () -> Unit) {
 
         val params = hashMapOf<String, Any>(
-            "action" to "deleteItem", "user_id" to 989015, "item_id" to itemId
+            "action" to "deleteItem", "user_id" to ExpiryUtils.userId, "item_id" to itemId
         )
-        addItemViewModel.deleteitem(989015, itemId, params)
+        addItemViewModel.deleteitem(ExpiryUtils.userId, itemId, params)
 
         // Observe deletion result
         addItemViewModel.deleteitemResponse.observe(this) { response ->
@@ -993,12 +992,12 @@ class AddItemActivity : AppCompatActivity() {
     private fun deleteCategory(itemId: Int, itemType: String, onSuccess: () -> Unit) {
 
         val params = hashMapOf<String, Any>(
-            "action" to "deleteCategory", "user_id" to 989015, "cat_id" to itemId
+            "action" to "deleteCategory", "user_id" to ExpiryUtils.userId, "cat_id" to itemId
         )
-        addItemViewModel.deleteCategory(989015, itemId, params)
+        addItemViewModel.deleteCategory(ExpiryUtils.userId, itemId, params)
 
         // Observe deletion result
-        addItemViewModel.deleteitemResponse.observe(this) { response ->
+        addItemViewModel.deletecatResponse.observe(this) { response ->
             val status = response["status"]?.toString()
             if (status == "success") {
                 Toast.makeText(this, "Deleted Successfully!", Toast.LENGTH_SHORT).show()
@@ -1008,7 +1007,7 @@ class AddItemActivity : AppCompatActivity() {
             }
 
             // Prevent multiple triggers
-            addItemViewModel.deleteitemResponse.removeObservers(this)
+            addItemViewModel.deletecatResponse.removeObservers(this)
         }
     }
 
@@ -1041,7 +1040,7 @@ class AddItemActivity : AppCompatActivity() {
             putExtra("customDate", customDate)
             putExtra("expiryDate", displayDate)
             putExtra("notifyTime", notifyTime)
-            putExtra("itemId", editId) //
+            putExtra("itemId", editId)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(

@@ -64,7 +64,7 @@ class RenewCategoryFragment : Fragment() {
 
         if (ExpiryUtils.isNetworkAvailable(requireContext())) {
             ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும் ", true)
-            addItemViewModel.fetchCategories(userId = 989015, itemType = "renew item")
+            addItemViewModel.fetchCategories(userId = ExpiryUtils.userId, itemType = "renew item")
 
         } else {
             contentLayout.visibility = View.VISIBLE
