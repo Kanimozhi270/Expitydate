@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:background="#F5F5F5">
 
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
@@ -14,7 +15,6 @@
         android:elevation="4dp"
         android:theme="@style/ToolbarColoredBackArrow2"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:titleTextAppearance="?android:attr/textAppearanceSmall"
         app:titleTextColor="@color/black" />
 
     <FrameLayout

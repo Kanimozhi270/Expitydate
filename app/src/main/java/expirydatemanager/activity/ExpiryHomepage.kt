@@ -34,12 +34,12 @@ import com.google.android.material.tabs.TabLayoutMediator
 import expirydatemanager.Adapter.ExpiryItemAdapter_editdelete
 import expirydatemanager.fragment.ExpiryViewModelFactory
 import expirydatemanager.fragment.RenewFragment_home
-import nithra.tamil.calendar.expirydatemanager.R
 import expirydatemanager.others.ExpirySharedPreference
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.pojo.ItemList
 import expirydatemanager.retrofit.ExpiryRepository
 import kotlinx.coroutines.launch
+import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryDateHomepageBinding
 import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryFragment_home
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
@@ -162,19 +162,30 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             }
 
             R.id.last3days -> {
-               /* val i = Intent(this@ExpiryHomepage, ExpiryHomepage::class.java)
-                startActivity(i)*/
+                /* val i = Intent(this@ExpiryHomepage, ExpiryHomepage::class.java)
+                 startActivity(i)*/
             }
+
             R.id.category -> {
                 val i = Intent(this@ExpiryHomepage, ExpiryCategory::class.java)
                 i.putExtra("title", "Category")
                 startActivity(i)
             }
-        /*    R.id.categorylist -> {
+
+            R.id.categorylist -> {
                 dialog_type = "categorys"
-              *//*  val i = Intent(this@ExpiryHomepage, ExpiryCategoryList::class.java)
-                startActivity(i)*//*
+                if (ExpiryUtils.isNetworkAvailable(this)) {
+                    val GetItems =
+                        itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+                    println("GetItems == $GetItems")
+
+                    showSelectionDialog("Select Category Name", GetItems) { selectedName ->
+                    }
+                } else {
+                    Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
+                }
             }
+
             R.id.itemlist -> {
                 dialog_type = "Item name"
                 if (ExpiryUtils.isNetworkAvailable(this)) {
@@ -187,14 +198,15 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                 } else {
                     Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
                 }
-            }*/
-           /* R.id.alllist -> {
-               *//* val i = Intent(this@ExpiryHomepage, ExpiryAllList::class.java)
-                startActivity(i)*//*
-            }*/
+            }
+            /* R.id.alllist -> {
+                 val i = Intent(this@ExpiryHomepage, ExpiryAllList::class.java)
+                 startActivity(i)
+             }*/
 
             R.id.appshare -> {
-                val shareText = """நித்ரா காலண்டர் வழியாக பகிரப்பட்டது. ஆண்ட்ராய்டு மொபைலில் தரவிறக்கம் செய்ய https://goo.gl/XOqGPp
+                val shareText =
+                    """நித்ரா காலண்டர் வழியாக பகிரப்பட்டது. ஆண்ட்ராய்டு மொபைலில் தரவிறக்கம் செய்ய https://goo.gl/XOqGPp
 ஆப்பிள் மொபைலில் தரவிறக்கம் செய்ய : http://bit.ly/iostamilcal
 
 தமிழில் மிகச்சிறந்த காலண்டரான நித்ரா காலண்டரை  இலவசமாக  உங்கள் ஆண்ட்ராய்டு மொபைலில் தரவிறக்கம் செய்ய : https://goo.gl/XOqGPp 
@@ -206,7 +218,6 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                 }
                 startActivity(Intent.createChooser(shareIntent, "Share via"))
             }
-
 
 
             /* R.id.itemlist -> {
@@ -274,7 +285,6 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         }, onEdit = { itemName, itemId, itemType ->
 
 
-
         }, onDelete = { itemId, itemType ->
 
 
@@ -290,7 +300,6 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
         dialog.show()
     }
-
 
 
     private fun showCreateDialog(tableName: String) {
@@ -330,7 +339,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
                     val params = HashMap<String, String>().apply {
                         this["action"] = "addItemName"
-                        this["user_id"] = ""+ExpiryUtils.userId
+                        this["user_id"] = "" + ExpiryUtils.userId
                         this["itemname"] = etItemName.text.toString()
                         this["item_id"] = "" // if edit only
                     }
@@ -687,26 +696,26 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
                 _error.value = t.message
             }
         }
-     /*
-        apiService.deletecat(params).enqueue(object : Callback<HashMap<String, Any>> {
-            override fun onResponse(
-                call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-            ) {
-                if (response.isSuccessful) {
-                    println("response body=====vv ${response.body()}")
+        /*
+           apiService.deletecat(params).enqueue(object : Callback<HashMap<String, Any>> {
+               override fun onResponse(
+                   call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
+               ) {
+                   if (response.isSuccessful) {
+                       println("response body=====vv ${response.body()}")
 
-                    //_itemNameResponse.value = response.body()?.get("message") ?: "Item added successfully!"
-                    _deletecatResponse.value = response.body()
-                } else {
-                    println("response body=====${response.body()}")
-                    //_itemNameResponse.value = "Failed to add item!"
-                }
-            }
+                       //_itemNameResponse.value = response.body()?.get("message") ?: "Item added successfully!"
+                       _deletecatResponse.value = response.body()
+                   } else {
+                       println("response body=====${response.body()}")
+                       //_itemNameResponse.value = "Failed to add item!"
+                   }
+               }
 
-            override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                _error.value = t.message
-            }
-        })*/
+               override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
+                   _error.value = t.message
+               }
+           })*/
     }
 
     fun deleteitem(userId: Int, item_id: Int, params: HashMap<String, Any>) {

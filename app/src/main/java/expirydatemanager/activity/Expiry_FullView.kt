@@ -55,13 +55,10 @@ class Expiry_FullView : AppCompatActivity() {
         val itemType = intent.getStringExtra("item_type") ?: "N/A"
         val itemId = intent.getStringExtra("item_id") ?: "N/A"
 
-        binding.itemName.text = itemName
-        binding.expiryDate.text = "$expiryDate"
-        binding.reminderBefore.text = "$reminderBefore"+"Days"
-        binding.notifyTime.text = "$notifyTime"
-        binding.notes.text = "$note"
-        binding.category.text = "$category"
-        binding.itemType.text = "$itemType"
+
+        binding.okButton.setOnClickListener {
+            finish()
+        }
 
         println("🔍 Item ID received in FullView = $itemId")
 
@@ -101,6 +98,14 @@ class Expiry_FullView : AppCompatActivity() {
             }*/
             itemNamesAdapter.notifyDataSetChanged()
         }
+
+        binding.itemName.text = itemName
+        binding.expiryDate.text = "$expiryDate"
+        binding.reminderBefore.text = "$reminderBefore"+"Days"
+        binding.notifyTime.text = "$notifyTime"
+        binding.notes.text = "$note"
+        binding.category.text = "$category"
+        binding.itemType.text = "$itemType"
 
 
     }

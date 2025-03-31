@@ -19,6 +19,7 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
         val notificationId = intent?.getIntExtra("notificationId", 0) ?: 0
         val expiryDate = intent?.getStringExtra("expiryDate") ?: "N/A"  // now in dd_MM_yyyy
         val notifyTime = intent?.getStringExtra("notifyTime") ?: ""
+        val itemId = intent?.getStringExtra("itemId") ?: ""
 
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -33,12 +34,9 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        // Intent to open AddItemActivity
-        val itemId = intent?.getStringExtra("itemId") ?: ""
-        println("itemIddd == $itemId")
-
         val openIntent = Intent(context, Expiry_FullView::class.java).apply {
-            putExtra("itemId", itemId)  // ✅ Pass the ID to FullView screen
+            putExtra("itemId", itemId)
+            println("itemIdddre == $itemId")
 
         }
 

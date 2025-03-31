@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.JsonObject
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.pojo.ItemList
 import expirydatemanager.retrofit.ExpiryRepository
@@ -179,7 +178,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             this["notify_time"] = notifyTime
             this["remark"] = remark
             this["action_date"] = actionDate
-            this["list_id"] = id ?: ""
+            this["list_id"] = ""
             customDate?.let { this["custom_date"] = it }
         }
 
@@ -189,7 +188,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             try {
                 val response = repository.addList(params)
                 _itemNameResponse.value = response
-                println("ExpiryResponse - == ${_deleteitemResponse.value}")
+                println("ExpiryResponse add list  - == ${_itemNameResponse.value}")
             } catch (t: SocketTimeoutException) {
                 println("exception == ${t.toString()}")
                 _error.value = t.message
@@ -228,7 +227,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             try {
                 val response = repository.getItemlist(InputMap)
                 _itemlist1.value = response
-                println("ExpiryResponse - == ${_itemlist1.value}")
+                println("ExpiryResponse get list - == ${_itemlist1.value}")
             } catch (e: SocketTimeoutException) {
                 // Handle errors
                 println("exception == ${e.toString()}")
@@ -278,8 +277,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
                 println("exception == ${t.toString()}")
                 _error.value = t.message
             }
-        }
-        /* println("item name send to server==$params")
+        }/* println("item name send to server==$params")
         apiService.deletecat(params).enqueue(object : Callback<HashMap<String, Any>> {
         override fun onResponse(
         call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>

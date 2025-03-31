@@ -46,7 +46,7 @@ class ExpiryItemList : AppCompatActivity() {
 
         // Set toolbar title
         binding.appBar.title = HtmlCompat.fromHtml(
-            "<b>$categoryName", HtmlCompat.FROM_HTML_MODE_LEGACY
+            "$categoryName", HtmlCompat.FROM_HTML_MODE_LEGACY
         )
         setSupportActionBar(binding.appBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -162,7 +162,6 @@ class ExpiryItemList : AppCompatActivity() {
             put("item_type", itemType)
             put("is_days", "0")
         }
-
         addItemViewModel.fetchList1(inputMap)
     }
 

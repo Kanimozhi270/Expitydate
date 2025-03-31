@@ -12,6 +12,8 @@ import expirydatemanager.activity.AddItemActivity
 import expirydatemanager.activity.Expiry_FullView
 import expirydatemanager.pojo.ItemList
 import nithra.tamil.calendar.expirydatemanager.R
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ExpiryItemAdapter_home(
     private val itemList: MutableList<ItemList.GetList>,
@@ -43,6 +45,24 @@ class ExpiryItemAdapter_home(
         holder.itemName.text = itemName
         holder.expiryDate.text = reminderType
         holder.expiry_on.text = expiry_on
+
+        // Get the current date
+        val currentDate = LocalDate.now()
+
+        // Parse the expiry date (assuming the expiry date is in a format like "dd-MM-yyyy")
+        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy") // Adjust the format based on your date string
+        val expiryDate = try {
+            LocalDate.parse(item.actionDate, formatter)
+        } catch (e: Exception) {
+            null
+        }
+
+        // Compare dates and show "Overdue" if the current date is greater than expiry date
+        if (expiryDate != null && currentDate.isAfter(expiryDate)) {
+            holder.overdueText.visibility = View.VISIBLE // Show overdue text
+        } else {
+            holder.overdueText.visibility = View.GONE // Hide overdue text
+        }
 
         holder.itemView.setOnClickListener {
             val intent = Intent(contextFromFrag, Expiry_FullView::class.java).apply {
@@ -105,6 +125,7 @@ class ExpiryItemAdapter_home(
         val expiryEdit: LinearLayout = view.findViewById(R.id.expiry_edit)
         val expiryDelete: LinearLayout = view.findViewById(R.id.expiry_delete)
         val serialNumber: TextView = view.findViewById(R.id.serialNumber)
+        val overdueText: TextView = view.findViewById(R.id.overdueText)
     }
 }
 

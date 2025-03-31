@@ -106,6 +106,8 @@ class ExpiryFragment_home : Fragment() {
 
         // Observe itemList LiveData and update itemList with the raw data
         addItemViewModel.itemList1.observe(viewLifecycleOwner) { response ->
+            println("itemList1 response == ${response.list}")
+
             ExpiryUtils.mProgress.dismiss()
 
             itemList.clear()
@@ -131,6 +133,7 @@ class ExpiryFragment_home : Fragment() {
                 this["item_type"] = "1"
                 this["is_days"] = "3"
             }
+            println(" itemNameResponse is called =$inputMap")
             addItemViewModel.fetchList1(inputMap)
         }
 
