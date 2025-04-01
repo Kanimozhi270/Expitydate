@@ -53,7 +53,7 @@ class RenewFragment_home : Fragment() {
             ViewModelProvider(this, viewModelFactory).get(ExpiryViewModel::class.java)
 
         if (adapter == null) {
-            adapter = ExpiryItemAdapter_home(itemList, requireContext(), "expiry item") { itemId ->
+            adapter = ExpiryItemAdapter_home(itemList, requireContext(), "renew item") { itemId ->
                 showDeleteConfirmationDialog(itemId)
             }
             recyclerView.adapter = adapter
@@ -92,7 +92,7 @@ class RenewFragment_home : Fragment() {
 
 
         if (ExpiryUtils.isNetworkAvailable(requireContext())) {
-            ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
+            ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும்renew ", true).show()
             val InputMap = HashMap<String, Any>()
             InputMap["action"] = "getlist"
             InputMap["user_id"] = ExpiryUtils.userId

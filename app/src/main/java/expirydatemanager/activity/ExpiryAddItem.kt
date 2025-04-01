@@ -74,6 +74,7 @@ class AddItemActivity : AppCompatActivity() {
     private var selectedHour: String = "HH"
     private var selectedMinute: String = "MM"
     private var selectedAmPm: String = "AM"
+    private var hasPopulatedData = false
     private var itemData: HashMap<String, String>? = null  // Declare globally
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,27 +113,29 @@ class AddItemActivity : AppCompatActivity() {
         })
 
 
-        // Observe categories from ViewModel
-        addItemViewModel.categories.observe(this, androidx.lifecycle.Observer { categories ->
+        addItemViewModel.categories.observe(this, Observer { categories ->
             categoriesList = categories
-            println("catItem == $categoriesList")
+            println("Categories List: $categoriesList")
             dialog_type = "Category name"
-            // If empty, don't show the dialog
-            if (categoriesList.isEmpty()) return@Observer
-            if (categoriesList.isNotEmpty() && itemData != null) {
 
+            if (categoriesList.isNotEmpty()) {
+                if (isEditMode == "edit" && !hasPopulatedData) {
+                    hasPopulatedData = true
+                    populateItemData()
+                }
+            } else {
+                Toast.makeText(this, "No categories available.", Toast.LENGTH_SHORT).show()
             }
         })
-        if (isEditMode == "edit") {
-            populateItemData()
-        } else {
+
+
+        if (isEditMode != "edit") {
             setupReminderButtons(binding.btnSameDay)
             setupTimeSpinners()
+        } else {
+            //  populateItemData()
         }
 
-
-        //  setupReminderButtons(binding.btnSameDay)
-        //  setupTimeSpinners()
 
         db = openOrCreateDatabase("expirydatemanager.db", MODE_PRIVATE, null)
         db.execSQL("PRAGMA foreign_keys=ON;")
@@ -156,11 +159,13 @@ class AddItemActivity : AppCompatActivity() {
         }
         println("selectttttrewmn  ====$selectedItemType")
         binding.btnExpiryItem.setOnClickListener {
+            binding.spCategories.text = "Select Category"
             selectedItemType = "expiry item"
             changeColor(binding.btnExpiryItem, binding.expiryText, true)
             loadCategoriesForSelectedType()
         }
         binding.btnRenewItem.setOnClickListener {
+            binding.spCategories.text = "Select Category"
             selectedItemType = "renew item"
             changeColor(binding.btnRenewItem, binding.renewText, true)
             loadCategoriesForSelectedType()
@@ -505,25 +510,35 @@ class AddItemActivity : AppCompatActivity() {
             binding.JathagamSpinnerMinute.setSelection(minuteIndex)
             binding.JathagamSpinnerAmPM.setSelection(amPmIndex)
 
-            val category = data["category_id"].toString() ?: "0"
-            binding.spCategories.text = getCategoryNameFromId(category).toString()
+//            binding.spCategories.text = data["category_name"].toString() ?: ""
+            val categoryId = data["category_id"].toString() ?: "0"
+            println("saveItemToServer  category id== $categoryId")
+
+            // Call getCategoryNameFromId to fetch the correct category name
+            val categoryName = getCategoryNameFromId(categoryId)
+            binding.spCategories.text = categoryName
         }
     }
 
-    private fun getCategoryNameFromId(name: String): Int {
-        val categories = categoriesList["Category"] as? List<Map<String, Any>> ?: return 0
-        println("saveItemToServer  category == $categoriesList")
 
-        return categories.find { it["category"] == name } // Change "item_name" to "category"
-            ?.get("id")
-            ?.let {
-                when (it) {
-                    is Double -> it.toInt()  // Convert Double to Int
-                    is Int -> it             // Already an Int
-                    is String -> it.toDoubleOrNull()?.toInt() ?: 0  // Handle string numbers
-                    else -> 0
-                }
-            } ?: 0
+    private fun getCategoryNameFromId(id: String): String {
+        val categories =
+            categoriesList["Category"] as? List<Map<String, Any>> ?: return "Unknown Category"
+        println("Categories List: $categories")
+
+        // Find the category with the matching ID
+        val category = categories.find {
+            val categoryId = it["id"] // This can be either Double or Int
+            val categoryIdAsInt = when (categoryId) {
+                is Double -> categoryId.toInt()  // Convert Double to Int
+                is Int -> categoryId            // Already an Int
+                else -> null                    // If it's neither, return null
+            }
+            categoryIdAsInt != null && categoryIdAsInt == id.toInt() // Compare with the id as an Int
+        }
+        println("Categories List: $category")
+        // If category is found, return its name
+        return category?.get("category") as? String ?: "Unknown Category"
     }
 
 

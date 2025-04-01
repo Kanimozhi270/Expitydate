@@ -5,20 +5,20 @@
         android:title="Create Item Name"
         android:icon="@drawable/expiry_addicon"/>
 
-    <item
+   <!-- <item
         android:id="@+id/itemlist"
         android:title="Item List"
-        android:icon="@drawable/expity_list"/>
+        android:icon="@drawable/expity_list"/>-->
 
     <item
         android:id="@+id/nav_category"
         android:title="Create Category Name"
         android:icon="@drawable/expiry_addicon"/>
 
-    <item
+ <!--   <item
         android:id="@+id/categorylist"
         android:title="Category List"
-        android:icon="@drawable/expity_list"/>
+        android:icon="@drawable/expity_list"/>-->
 
     <item
         android:id="@+id/last3days"

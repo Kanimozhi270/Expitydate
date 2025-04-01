@@ -9,6 +9,7 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import expirydatemanager.activity.ExpiryHomepage
 import expirydatemanager.activity.Expiry_FullView
 import nithra.tamil.calendar.expirydatemanager.R
 
@@ -34,7 +35,7 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val openIntent = Intent(context, Expiry_FullView::class.java).apply {
+        val openIntent = Intent(context, ExpiryHomepage::class.java).apply {
             putExtra("itemId", itemId)
             println("itemIdddre == $itemId")
 

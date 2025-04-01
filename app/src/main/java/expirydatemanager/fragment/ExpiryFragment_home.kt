@@ -91,7 +91,7 @@ class ExpiryFragment_home : Fragment() {
 
 
         if (ExpiryUtils.isNetworkAvailable(requireContext())) {
-            ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
+            ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும்expiry ", true).show()
             val InputMap = HashMap<String, Any>()
             InputMap["action"] = "getlist"
             InputMap["user_id"] = ExpiryUtils.userId
@@ -135,6 +135,7 @@ class ExpiryFragment_home : Fragment() {
             }
             println(" itemNameResponse is called =$inputMap")
             addItemViewModel.fetchList1(inputMap)
+            //progressDialog!!.dismiss()
         }
 
 

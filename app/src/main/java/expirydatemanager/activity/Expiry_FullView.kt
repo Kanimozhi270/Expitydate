@@ -1,10 +1,8 @@
 package expirydatemanager.activity
 
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
@@ -18,17 +16,21 @@ import expirydatemanager.retrofit.ExpiryRepository
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryFullViewBinding
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class Expiry_FullView : AppCompatActivity() {
 
     private lateinit var binding: ActivityExpiryFullViewBinding
     private lateinit var launcher: ActivityResultLauncher<Intent>
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
+    var categoriesList: Map<String, Any> = hashMapOf()
 
     private val addItemViewModel: ExpiryViewModel by viewModels {
         ExpiryViewModelFactory(repository)
     }
     private var itemListNew: MutableList<ItemList.GetList> = mutableListOf()
+
     private lateinit var itemNamesAdapter: ExpiryFullViewAdapter
 
 
@@ -88,27 +90,55 @@ class Expiry_FullView : AppCompatActivity() {
             if (!response.list.isNullOrEmpty()) {
                 itemListNew.addAll(response.list)
             }
-/*
-            if (itemListNew.isEmpty()) {
-                binding.contentLayout.visibility = View.VISIBLE
-                binding.recyclerViewExpiry.visibility = View.GONE
-            } else {
-                binding.contentLayout.visibility = View.GONE
-                binding.recyclerViewExpiry.visibility = View.VISIBLE
-            }*/
+            /*
+                        if (itemListNew.isEmpty()) {
+                            binding.contentLayout.visibility = View.VISIBLE
+                            binding.recyclerViewExpiry.visibility = View.GONE
+                        } else {
+                            binding.contentLayout.visibility = View.GONE
+                            binding.recyclerViewExpiry.visibility = View.VISIBLE
+                        }*/
             itemNamesAdapter.notifyDataSetChanged()
         }
 
         binding.itemName.text = itemName
-        binding.expiryDate.text = "$expiryDate"
-        binding.reminderBefore.text = "$reminderBefore"+"Days"
+        binding.expiryDate.text = formatDate(expiryDate)
+        binding.reminderBefore.text = "$reminderBefore"+ "Days"
         binding.notifyTime.text = "$notifyTime"
         binding.notes.text = "$note"
-        binding.category.text = "$category"
+        //  binding.category.text = "$category"
+        binding.category.text = getCategoryIdFromName(binding.category.text.toString().trim()).toString()
         binding.itemType.text = "$itemType"
 
 
     }
+
+    private fun getCategoryIdFromName(name: String): Int {
+        val categories = categoriesList["Category"] as? List<Map<String, Any>> ?: return 0
+        println("saveItemToServer  category == $categoriesList")
+
+        return categories.find { it["category"] == name } // Change "item_name" to "category"
+            ?.get("id")?.let {
+                when (it) {
+                    is Double -> it.toInt()  // Convert Double to Int
+                    is Int -> it             // Already an Int
+                    is String -> it.toDoubleOrNull()?.toInt() ?: 0  // Handle string numbers
+                    else -> 0
+                }
+            } ?: 0
+    }
+
+    private fun formatDate(inputDate: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            val date = inputFormat.parse(inputDate)
+            date?.let { outputFormat.format(it) } ?: inputDate
+        } catch (e: Exception) {
+            inputDate
+        }
+    }
+
 
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         if (menuItem.itemId == android.R.id.home) {

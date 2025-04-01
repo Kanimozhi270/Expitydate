@@ -44,6 +44,10 @@ class ExpiryItemList : AppCompatActivity() {
         val categoryName = intent.getStringExtra("category_name") ?: "All Items"
         val itemType = intent.getStringExtra("item_type") ?: "expiry item"
 
+        println("itemTypelist===$itemType")
+        println("categoryNamelist===$categoryName")
+        println("categoryIdlist===$categoryId")
+
         // Set toolbar title
         binding.appBar.title = HtmlCompat.fromHtml(
             "$categoryName", HtmlCompat.FROM_HTML_MODE_LEGACY

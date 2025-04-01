@@ -14,6 +14,8 @@ import expirydatemanager.activity.AddItemActivity
 import expirydatemanager.activity.Expiry_FullView
 import expirydatemanager.pojo.ItemList
 import nithra.tamil.calendar.expirydatemanager.R
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ExpiryListAdapter(
     private val itemList: MutableList<ItemList.GetList>,
@@ -40,11 +42,22 @@ class ExpiryListAdapter(
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        val item = itemList[position]
-        holder.serialNumber.text = (position + 1).toString()
 
+        val item = itemList[position]
+        //date formet
+        val originalDate = item.actionDate
+        val formattedDate = try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            val date = inputFormat.parse(originalDate ?: "")
+            if (date != null) outputFormat.format(date) else "N/A"
+        } catch (e: Exception) {
+            "N/A"
+        }
+
+        holder.serialNumber.text = (position + 1).toString()
         holder.itemNameTextView.text = item.itemName ?: "No Name"
-        holder.expiryOn.text = "${item.actionDate ?: "N/A"}"
+        holder.expiryOn.text = formattedDate
         holder.reminderBefore.text = "${item.reminderType ?: "N/A"}"
 
 
@@ -89,8 +102,10 @@ class ExpiryListAdapter(
             intent.putExtra("notify_time", item.notifyTime)
             intent.putExtra("remark", item.remark)
             intent.putExtra("category_name", item.categoryName)
-            intent.putExtra("item_type", "Expiry Item") // or item.itemType if available
+            intent.putExtra("item_type", "Renew Item") // or item.itemType if available
             context.startActivity(intent)
+
+            println("category_name==${item.categoryName}")
 
         }
     }

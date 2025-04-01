@@ -113,8 +113,25 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
         }
 
+        if (ExpiryUtils.isNetworkAvailable(this)) {
+          //  ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும்home ", true).show()
+            val InputMap = HashMap<String, Any>()
+            InputMap["action"] = "getlist"
+            InputMap["user_id"] = ExpiryUtils.userId
+            InputMap["item_type"] = "1"
+            InputMap["is_days"] = "3"
 
+            expiryDateViewModel.fetchList1(InputMap)
+        } else {
+            // contentLayout.visibility = View.VISIBLE
+        }
 
+        expiryDateViewModel.fetchItemNames(ExpiryUtils.userId)
+        // Don't rely on items.clear() directly here, use a fresh copy
+        expiryDateViewModel.itemNames.observeOnce(this@ExpiryHomepage) { updatedItemsMap ->
+            itemNamesList = updatedItemsMap
+
+        }
         expiryDateViewModel.categoryResponse.observe(this, Observer { message ->
             Toast.makeText(this, message["status"].toString(), Toast.LENGTH_SHORT).show()
         })
@@ -172,7 +189,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                 startActivity(i)
             }
 
-            R.id.categorylist -> {
+           /* R.id.categorylist -> {
                 dialog_type = "categorys"
                 if (ExpiryUtils.isNetworkAvailable(this)) {
                     val GetItems =
@@ -184,21 +201,27 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                 } else {
                     Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
                 }
-            }
+            }*/
 
-            R.id.itemlist -> {
+
+
+            /*R.id.itemlist -> {
                 dialog_type = "Item name"
                 if (ExpiryUtils.isNetworkAvailable(this)) {
                     val GetItems =
                         itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
-                    println("GetItems == $GetItems")
 
+                    println("GetItems == $itemNamesList")
                     showSelectionDialog("Select Item Name", GetItems) { selectedName ->
                     }
                 } else {
                     Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
                 }
-            }
+            }*/
+
+
+
+
             /* R.id.alllist -> {
                  val i = Intent(this@ExpiryHomepage, ExpiryAllList::class.java)
                  startActivity(i)
@@ -243,27 +266,15 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         val etSearch = dialogView.findViewById<EditText>(R.id.etSearch)
         val btnCustomAction = dialogView.findViewById<Button>(R.id.btnCustomAction)
 
+        btnCustomAction.visibility = View.GONE
+
         val dialog = builder.create()
 
 
         fun refreshItemList(itemType: String) {
             println("refreshItemList == $itemType")
             if (itemType == "item_type") {
-                expiryDateViewModel.fetchItemNames(ExpiryUtils.userId)
-                // Don't rely on items.clear() directly here, use a fresh copy
-                expiryDateViewModel.itemNames.observeOnce(this@ExpiryHomepage) { updatedItemsMap ->
-                    itemNamesList = updatedItemsMap
 
-                    val updatedItems =
-                        updatedItemsMap["Items"] as? List<Map<String, Any>> ?: emptyList()
-
-                    // Update the adapter data properly
-                    adapter.updateList(updatedItems.toMutableList()) // <-- use this
-                    recyclerView.adapter =
-                        adapter // <- Force rebind in case observer skipped notify
-                    etSearch.setText("") // Reset search box to show full list
-
-                }
             } else {
                 expiryDateViewModel.fetchCategories(ExpiryUtils.userId, selectedType)
                 expiryDateViewModel.categories.observeOnce(this@ExpiryHomepage) { categories ->
@@ -282,13 +293,8 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         adapter = ExpiryItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
             onItemSelected(selectedItem)
             dialog.dismiss()
-        }, onEdit = { itemName, itemId, itemType ->
+        }, onEdit = { itemName, itemId, itemType -> }, onDelete = { itemId, itemType -> })
 
-
-        }, onDelete = { itemId, itemType ->
-
-
-        })
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -326,6 +332,8 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             spinnerItemType.visibility = View.GONE
             //spinnercard.visibility = View.GONE
         }
+
+
 
         btnCreate.setOnClickListener {
             val name = etItemName.text.toString().trim()
@@ -408,332 +416,4 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         }
         return super.onOptionsItemSelected(item)
     }
-}
-
-// Expiry View model
-class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
-
-    // LiveData for responses
-    private val _itemNameResponse = MutableLiveData<HashMap<String, Any>>()
-    val itemNameResponse: LiveData<HashMap<String, Any>> get() = _itemNameResponse
-
-    private val _itemNameResponse1 = MutableLiveData<HashMap<String, Any>>()
-    val itemNameResponse1: LiveData<HashMap<String, Any>> get() = _itemNameResponse1
-
-
-    private val _deletelistResponse = MutableLiveData<HashMap<String, Any>>()
-    val deletelistResponse: LiveData<HashMap<String, Any>> get() = _deletelistResponse
-
-    private val _deleteitemResponse = MutableLiveData<HashMap<String, Any>>()
-    val deleteitemResponse: LiveData<HashMap<String, Any>> get() = _deleteitemResponse
-
-    private val _deletecatResponse = MutableLiveData<HashMap<String, Any>>()
-    val deletecatResponse: LiveData<HashMap<String, Any>> get() = _deletecatResponse
-
-
-    private val _categoryResponse = MutableLiveData<HashMap<String, Any>>()
-    val categoryResponse: LiveData<HashMap<String, Any>> get() = _categoryResponse
-
-    private val _listResponse = MutableLiveData<String>()
-    val listResponse: LiveData<String> get() = _listResponse
-
-    private val _itemNames = MutableLiveData<Map<String, Any>>()
-    val itemNames: LiveData<Map<String, Any>> get() = _itemNames
-
-    private val _itemlist1 = MutableLiveData<ItemList>()
-    val itemList1: LiveData<ItemList> get() = _itemlist1
-
-    private val _categories = MutableLiveData<Map<String, Any>>()
-    val categories: LiveData<Map<String, Any>> get() = _categories
-
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String> get() = _error
-
-    private val apiService = ExpiryRetrofitInstance.instance
-
-    /* fun addItemToServer(itemName: String, itemId: Int) {
-         val params = HashMap<String, String>().apply {
-             this["action"] = "addItemName"
-             this["user_id"] = "989015"
-             this["itemname"] = itemName
-             this["item_id"] = "$itemId" // if edit only
-         }
-         println("item name send to server==$params")
-
-         apiService.addItem(params).enqueue(object : Callback<HashMap<String, Any>> {
-             override fun onResponse(
-                 call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-             ) {
-                 if (response.isSuccessful) {
-                     println("response body=====vv ${response.body()}")
-
-                     _itemNameResponse.value = response.body()
-                 } else {
-                     println("response body=====${response.body()}")
-                 }
-             }
-
-             override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                 _error.value = t.message
-             }
-         })
-     }*/
-
-    fun addItemToServer(params: HashMap<String, String>) {
-        viewModelScope.launch {
-            try {
-                val response = repository.addItem(params)
-                _itemNameResponse1.value = response
-                println("ExpiryResponse - == ${_itemNameResponse1.value}")
-            } catch (t: SocketTimeoutException) {
-                println("exception == ${t.toString()}")
-                _error.value = t.message
-
-            }
-        }
-    }
-
-
-    fun addCategoryToServer(params: HashMap<String, Any>) {
-        viewModelScope.launch {
-            try {
-                val response = repository.addCategory(params)
-                _categoryResponse.value = response
-                println("ExpiryResponse - == ${_categoryResponse.value}")
-            } catch (t: SocketTimeoutException) {
-                println("exception == ${t.toString()}")
-                _error.value = t.message
-
-            }
-        }
-    }
-
-    fun fetchItemNames(userId: Int) {
-        val action = "getItemName"
-        apiService.getItemNames(action, userId).enqueue(object : Callback<HashMap<String, Any>> {
-            override fun onResponse(
-                call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-            ) {
-                if (response.isSuccessful) {
-                    val itemsList =
-                        (response.body()?.get("Items") as? List<Map<String, Any>>)?.map {
-                            it["item_name"] as? String ?: ""
-                        } ?: emptyList()
-
-                    _itemNames.value = response.body()
-                    println("_itemNames  ===== ${_itemNames.value}")
-                }
-            }
-
-            override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                println("_itemNames  ===== ${t.message}")
-            }
-        })
-    }
-
-    fun fetchCategories(userId: Int, itemType: String) {
-        var item_type = if (itemType == "expiry item") "1" else "2"
-
-        apiService.getCategories("getCategory", userId, item_type)
-            .enqueue(object : Callback<HashMap<String, Any>> {
-                override fun onResponse(
-                    call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-                ) {
-                    if (response.isSuccessful) {
-                        val categoryMap = response.body() ?: mapOf()
-                        _categories.value = categoryMap as HashMap<String, Any>
-
-                    }
-                }
-
-                override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                    println("_categories  ===== ${t.message}")
-                }
-            })
-    }
-
-    fun addListToServer(
-        categoryId: Int,
-        itemType: Int,
-        itemId: Int,
-        reminderType: Int,
-        notifyTime: String,
-        remark: String,
-        actionDate: String,
-        listId: Int,//if edit only
-        customDate: String? = null,
-        id: String
-    ) {
-
-        val params = HashMap<String, Any>().apply {
-            this["action"] = "addList"
-            this["user_id"] = ExpiryUtils.userId
-            this["category_id"] = categoryId.toString()
-            this["item_type"] = itemType
-            this["item_id"] = itemId.toString()
-            this["reminder_type"] = reminderType.toString()
-            this["notify_time"] = notifyTime
-            this["remark"] = remark
-            this["action_date"] = actionDate
-            this["list_id"] = id ?: ""
-            customDate?.let { this["custom_date"] = it }
-        }
-
-        println("list send to server==$params")
-
-        viewModelScope.launch {
-            try {
-                val response = repository.addList(params)
-                _itemNameResponse.value = response
-                println("ExpiryResponse - == ${_deleteitemResponse.value}")
-            } catch (t: SocketTimeoutException) {
-                println("exception == ${t.toString()}")
-                _error.value = t.message
-            }
-        }
-
-        /*  apiService.addList(params).enqueue(object : Callback<HashMap<String, Any>> {
-              override fun onResponse(
-                  call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-              ) {
-                  if (response.isSuccessful) {
-                      var data = response.body()
-                      println("item added successfully == $data")
-                      if (data != null && data.containsKey("status") && data["status"] == "success") {
-                          println("item added successfully == $data")
-                      } else {
-                          println("item not added")
-
-                      }
-
-                  } else {
-                      _listResponse.value = "Failed to add list!"
-                      println("Failed to add List!")
-                  }
-              }
-
-              override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                  _listResponse.value = "Error: ${t.message}"
-                  println("Error on add list  ==${t.message}")
-              }
-          })*/
-    }
-
-    /*fun fetchList1(userId: Int, item_id: Int, is_days: Int) {
-        val action = "getlist"
-
-        apiService.getItemlist(action, userId, item_id, is_days)
-            .enqueue(object : Callback<ItemList> {
-                override fun onResponse(call: Call<ItemList>, response: Response<ItemList>) {
-                    if (response.isSuccessful) {
-                        val responseBody = response.body()
-                        _itemlist1.postValue(responseBody!!)
-
-                    }
-                }
-
-                override fun onFailure(call: Call<ItemList>, t: Throwable) {
-                    println("_itemNames  ===== ${t.message}")
-                }
-            })
-    }*/
-
-    fun fetchList1(InputMap: HashMap<String, Any>) {
-        viewModelScope.launch {
-            try {
-                val response = repository.getItemlist(InputMap)
-                _itemlist1.value = response
-                println("ExpiryResponse - == ${_itemlist1.value}")
-            } catch (e: SocketTimeoutException) {
-                // Handle errors
-                println("exception == ${e.toString()}")
-                _error.value = e.message
-            } catch (e: IOException) {
-                // Handle errors
-                println("exception == ${e.toString()}")
-                _error.value = e.message
-            } catch (e: Exception) {
-                // Handle errors
-                println("exception == ${e.toString()}")
-                _error.value = e.message
-            }
-        }
-    }
-
-    fun deletelist(userId: Int, list_id: Int, params: HashMap<String, Any>) {
-
-        println("item name send to server==$params")
-
-        viewModelScope.launch {
-            try {
-                val response = repository.addList(params)
-                _deletelistResponse.value = response
-                println("ExpiryResponse - == ${_deleteitemResponse.value}")
-            } catch (t: SocketTimeoutException) {
-                println("exception == ${t.toString()}")
-                _error.value = t.message
-            }
-        }
-    }
-
-
-    fun deleteCategory(userId: Int, cat_id: Int) {
-        val params = HashMap<String, Any>().apply {
-            this["action"] = "deleteCategory"
-            this["user_id"] = ExpiryUtils.userId
-            this["cat_id"] = "1"
-
-        }
-        println("item name send to server==$params")
-
-        viewModelScope.launch {
-            try {
-                val response = repository.deleteCategory(params)
-                _deletecatResponse.value = response
-                println("ExpiryResponse - == ${_deleteitemResponse.value}")
-            } catch (t: SocketTimeoutException) {
-                println("exception == ${t.toString()}")
-                _error.value = t.message
-            }
-        }
-        /*
-           apiService.deletecat(params).enqueue(object : Callback<HashMap<String, Any>> {
-               override fun onResponse(
-                   call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
-               ) {
-                   if (response.isSuccessful) {
-                       println("response body=====vv ${response.body()}")
-
-                       //_itemNameResponse.value = response.body()?.get("message") ?: "Item added successfully!"
-                       _deletecatResponse.value = response.body()
-                   } else {
-                       println("response body=====${response.body()}")
-                       //_itemNameResponse.value = "Failed to add item!"
-                   }
-               }
-
-               override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
-                   _error.value = t.message
-               }
-           })*/
-    }
-
-    fun deleteitem(userId: Int, item_id: Int, params: HashMap<String, Any>) {
-
-
-        println("item name send to server==$params")
-
-        viewModelScope.launch {
-            try {
-                val response = repository.deleteItem(params)
-                _deleteitemResponse.value = response  // ✅ use correct LiveData
-                println("ExpiryResponse - == ${_deleteitemResponse.value}")
-            } catch (t: SocketTimeoutException) {
-                println("exception == ${t.toString()}")
-                _error.value = t.message
-            }
-        }
-    }
-
-
 }

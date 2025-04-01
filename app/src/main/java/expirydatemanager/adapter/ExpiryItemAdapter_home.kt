@@ -12,15 +12,18 @@ import expirydatemanager.activity.AddItemActivity
 import expirydatemanager.activity.Expiry_FullView
 import expirydatemanager.pojo.ItemList
 import nithra.tamil.calendar.expirydatemanager.R
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class ExpiryItemAdapter_home(
     private val itemList: MutableList<ItemList.GetList>,
     private val contextFromFrag: Context, // Add 'private val' here
     private val item_type: String,
     private val onDeleteClick: (itemId: Int) -> Unit
-) : RecyclerView.Adapter<ExpiryItemAdapter_home.ItemViewHolder>() {
+) : RecyclerView.Adapter<ExpiryItemAdapter_home.ItemViewHolder>()
+{
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view =
@@ -31,10 +34,21 @@ class ExpiryItemAdapter_home(
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = itemList[position]
 
+        //formet date
+        val originalDate = item.actionDate
+        val formattedDate = try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            val date = inputFormat.parse(originalDate ?: "")
+            if (date != null) outputFormat.format(date) else "N/A"
+        } catch (e: Exception) {
+            "N/A"
+        }
+
         // Safely get the 'item_name' and 'reminder_type' from the Map
         val itemName = item.itemName
         val reminderType = item.reminderType?.toString() ?: "No Reminder"
-        val expiry_on = item.actionDate?.toString() ?: "No Expiry Date"
+        val expiry_on = formattedDate
 
         val id = item.id
         println("ID after conversion: $id")
