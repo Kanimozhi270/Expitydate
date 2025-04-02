@@ -1,6 +1,5 @@
 package expirydatemanager.activity
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
@@ -21,11 +20,7 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.GravityCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -36,19 +31,12 @@ import expirydatemanager.fragment.ExpiryViewModelFactory
 import expirydatemanager.fragment.RenewFragment_home
 import expirydatemanager.others.ExpirySharedPreference
 import expirydatemanager.others.ExpiryUtils
-import expirydatemanager.pojo.ItemList
 import expirydatemanager.retrofit.ExpiryRepository
-import kotlinx.coroutines.launch
 import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryDateHomepageBinding
 import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryFragment_home
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.io.IOException
-import java.net.SocketTimeoutException
 
 class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -70,20 +58,28 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
     val addItemLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK && result.data?.getBooleanExtra(
+
+            println("registerForActivityResult ==$result")
+            println("registerForActivityResult == ${result.data?.extras}")
+
+            if (result.resultCode == RESULT_OK && result.data?.getBooleanExtra(
                     "item_added",
                     false
                 ) == true
             ) {
                 val selectedTabIndex = binding.tabLayout.selectedTabPosition
-                val fragmentTag = "f$selectedTabIndex"
-                val fragment = supportFragmentManager.findFragmentByTag(fragmentTag)
-
+                val fragment = supportFragmentManager.fragments[selectedTabIndex]
+                println("selectedTabIndex ==$selectedTabIndex")
                 if (fragment is ExpiryFragment_home) {
                     fragment.refreshList()
                 } else if (fragment is RenewFragment_home) {
                     fragment.refreshList()
                 }
+
+                println("Fragment found: $fragment")  // Log to check if the fragment is found
+
+            } else {
+                println("It calls for delete")
             }
         }
 
@@ -114,12 +110,11 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         }
 
         if (ExpiryUtils.isNetworkAvailable(this)) {
-          //  ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும்home ", true).show()
+           // ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
             val InputMap = HashMap<String, Any>()
             InputMap["action"] = "getlist"
             InputMap["user_id"] = ExpiryUtils.userId
             InputMap["item_type"] = "1"
-            InputMap["is_days"] = "3"
 
             expiryDateViewModel.fetchList1(InputMap)
         } else {
@@ -131,17 +126,20 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         expiryDateViewModel.itemNames.observeOnce(this@ExpiryHomepage) { updatedItemsMap ->
             itemNamesList = updatedItemsMap
 
+
         }
+
+
         expiryDateViewModel.categoryResponse.observe(this, Observer { message ->
             Toast.makeText(this, message["status"].toString(), Toast.LENGTH_SHORT).show()
         })
 
         binding.btnAddItem.setOnClickListener {
             val selectedTab = binding.tabLayout.selectedTabPosition
-            val itemType = if (selectedTab == 0) "expiry item" else "renew item"
-
+            val itemType = if (selectedTab == 0) "1" else "2"
+            println("itemType for add item ==$itemType")
             val intent = Intent(this, AddItemActivity::class.java)
-            intent.putExtra("itemType", itemType) // pass the itemType
+            intent.putExtra("itemType", itemType)
             addItemLauncher.launch(intent)
         }
 
@@ -170,13 +168,13 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_item -> {
-                showCreateDialog("itemnames")
-            }
+            /* R.id.nav_item -> {
+                 showCreateDialog("itemnames")
+             }
 
-            R.id.nav_category -> {
-                showCreateDialog("categorys")
-            }
+             R.id.nav_category -> {
+                 showCreateDialog("categorys")
+             }*/
 
             R.id.last3days -> {
                 /* val i = Intent(this@ExpiryHomepage, ExpiryHomepage::class.java)
@@ -189,39 +187,33 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                 startActivity(i)
             }
 
-           /* R.id.categorylist -> {
-                dialog_type = "categorys"
-                if (ExpiryUtils.isNetworkAvailable(this)) {
-                    val GetItems =
-                        itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
-                    println("GetItems == $GetItems")
+            /*  R.id.categorylist -> {
+                  dialog_type = "categorys"
+                  if (ExpiryUtils.isNetworkAvailable(this)) {
+                      val GetItems =
+                          itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+                      println("GetItems == $GetItems")
 
-                    showSelectionDialog("Select Category Name", GetItems) { selectedName ->
-                    }
-                } else {
-                    Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
-                }
-            }*/
+                      showSelectionDialog("Select Category Name", GetItems) { selectedName ->
+                      }
+                  } else {
+                      Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
+                  }
+              }
 
+              R.id.itemlist -> {
+                  dialog_type = "Item name"
+                  if (ExpiryUtils.isNetworkAvailable(this)) {
+                      val GetItems =
+                          itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
 
-
-            /*R.id.itemlist -> {
-                dialog_type = "Item name"
-                if (ExpiryUtils.isNetworkAvailable(this)) {
-                    val GetItems =
-                        itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
-
-                    println("GetItems == $itemNamesList")
-                    showSelectionDialog("Select Item Name", GetItems) { selectedName ->
-                    }
-                } else {
-                    Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
-                }
-            }*/
-
-
-
-
+                      println("GetItems == $itemNamesList")
+                      showSelectionDialog("Select Item Name", GetItems) { selectedName ->
+                      }
+                  } else {
+                      Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
+                  }
+              }*/
             /* R.id.alllist -> {
                  val i = Intent(this@ExpiryHomepage, ExpiryAllList::class.java)
                  startActivity(i)
@@ -230,10 +222,10 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             R.id.appshare -> {
                 val shareText =
                     """நித்ரா காலண்டர் வழியாக பகிரப்பட்டது. ஆண்ட்ராய்டு மொபைலில் தரவிறக்கம் செய்ய https://goo.gl/XOqGPp
-ஆப்பிள் மொபைலில் தரவிறக்கம் செய்ய : http://bit.ly/iostamilcal
-
-தமிழில் மிகச்சிறந்த காலண்டரான நித்ரா காலண்டரை  இலவசமாக  உங்கள் ஆண்ட்ராய்டு மொபைலில் தரவிறக்கம் செய்ய : https://goo.gl/XOqGPp 
-ஆப்பிள் மொபைலில் தரவிறக்கம் செய்ய : http://bit.ly/iostamilcal"""
+    ஆப்பிள் மொபைலில் தரவிறக்கம் செய்ய : http://bit.ly/iostamilcal
+    
+    தமிழில் மிகச்சிறந்த காலண்டரான நித்ரா காலண்டரை  இலவசமாக  உங்கள் ஆண்ட்ராய்டு மொபைலில் தரவிறக்கம் செய்ய : https://goo.gl/XOqGPp 
+    ஆப்பிள் மொபைலில் தரவிறக்கம் செய்ய : http://bit.ly/iostamilcal"""
                 val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(Intent.EXTRA_TEXT, shareText)
@@ -265,8 +257,6 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.recyclerView)
         val etSearch = dialogView.findViewById<EditText>(R.id.etSearch)
         val btnCustomAction = dialogView.findViewById<Button>(R.id.btnCustomAction)
-
-        btnCustomAction.visibility = View.GONE
 
         val dialog = builder.create()
 

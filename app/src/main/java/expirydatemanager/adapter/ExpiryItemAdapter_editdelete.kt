@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import nithra.tamil.calendar.expirydatemanager.R
 
-
 class ExpiryItemAdapter_editdelete(
     private val context: Context,
     var items: MutableList<Map<String, Any>>,
@@ -110,5 +109,6 @@ class ExpiryItemAdapter_editdelete(
         builder.create().show()
     }
 }
+
 
 

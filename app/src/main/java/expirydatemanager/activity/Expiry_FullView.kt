@@ -25,6 +25,7 @@ class Expiry_FullView : AppCompatActivity() {
     private lateinit var launcher: ActivityResultLauncher<Intent>
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
     var categoriesList: Map<String, Any> = hashMapOf()
+    private val apiService = ExpiryRetrofitInstance.instance
 
     private val addItemViewModel: ExpiryViewModel by viewModels {
         ExpiryViewModelFactory(repository)
@@ -32,7 +33,7 @@ class Expiry_FullView : AppCompatActivity() {
     private var itemListNew: MutableList<ItemList.GetList> = mutableListOf()
 
     private lateinit var itemNamesAdapter: ExpiryFullViewAdapter
-
+    var category = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,15 +49,27 @@ class Expiry_FullView : AppCompatActivity() {
         )
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
+            val intent = intent
         val itemName = intent.getStringExtra("item_name") ?: "N/A"
         val expiryDate = intent.getStringExtra("action_date") ?: "N/A"
         val reminderBefore = intent.getStringExtra("reminder_type") ?: "N/A"
         val notifyTime = intent.getStringExtra("notify_time") ?: "N/A"
         val note = intent.getStringExtra("remark") ?: "N/A"
-        val category = intent.getStringExtra("category_name") ?: "N/A"
+       // val category = intent.getStringExtra("category_name") ?: "N/A"
         val itemType = intent.getStringExtra("item_type") ?: "N/A"
         val itemId = intent.getStringExtra("item_id") ?: "N/A"
 
+        addItemViewModel.fetchCategories(ExpiryUtils.userId, "2")
+        addItemViewModel.categories.observe(this@Expiry_FullView) { categories ->
+            println("obsserve categories=="+categories)
+            categoriesList = categories
+            category = ""+getCategoryNameFromId(intent.getIntExtra("category_id",0).toString())
+            println("category new id==$category")
+            binding.category.text=category
+        }
+
+
+        println("itemidddd====$itemId")
 
         binding.okButton.setOnClickListener {
             finish()
@@ -67,16 +80,16 @@ class Expiry_FullView : AppCompatActivity() {
         // Fetch data from server
         if (ExpiryUtils.isNetworkAvailable(this)) {
             ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
-
+            var cate_id = ""+intent.getStringExtra("category_id")
             val inputMap = HashMap<String, Any>().apply {
                 put("action", "getlist")
                 put("user_id", ExpiryUtils.userId)
-                put("category_id", "0")
+                put("category_id", cate_id)
                 put("item_type", itemType)
                 put("item_id", itemId)
                 put("is_days", "0")
             }
-
+            println("inputMap ==$inputMap")
             addItemViewModel.fetchList1(inputMap)
         } else {
             Toast.makeText(this, "இணையதள இணைப்பு இல்லை", Toast.LENGTH_SHORT).show()
@@ -106,27 +119,32 @@ class Expiry_FullView : AppCompatActivity() {
         binding.reminderBefore.text = "$reminderBefore"+ "Days"
         binding.notifyTime.text = "$notifyTime"
         binding.notes.text = "$note"
-        //  binding.category.text = "$category"
-        binding.category.text = getCategoryIdFromName(binding.category.text.toString().trim()).toString()
+         binding.category.text = ""+category
+       // binding.category.text = getCategoryIdFromName(binding.category.text.toString().trim()).toString()
         binding.itemType.text = "$itemType"
-
-
     }
 
-    private fun getCategoryIdFromName(name: String): Int {
-        val categories = categoriesList["Category"] as? List<Map<String, Any>> ?: return 0
-        println("saveItemToServer  category == $categoriesList")
 
-        return categories.find { it["category"] == name } // Change "item_name" to "category"
-            ?.get("id")?.let {
-                when (it) {
-                    is Double -> it.toInt()  // Convert Double to Int
-                    is Int -> it             // Already an Int
-                    is String -> it.toDoubleOrNull()?.toInt() ?: 0  // Handle string numbers
-                    else -> 0
-                }
-            } ?: 0
+    private fun getCategoryNameFromId(id: String): String {
+        val categories =
+            categoriesList["Category"] as? List<Map<String, Any>> ?: return "Unknown Category"
+        println("getCategoryNameFromId -> categoryId: $id")
+        println("Categories List: $categories")
+
+        val category = categories.find {
+            val categoryId = it["id"]
+            val categoryIdAsInt = when (categoryId) {
+                is Double -> categoryId.toInt()
+                is Int -> categoryId
+                is String -> categoryId.toIntOrNull()
+                else -> null
+            }
+            categoryIdAsInt != null && categoryIdAsInt == id.toIntOrNull()
+        }
+
+        return category?.get("category") as? String ?: "Unknown Category"
     }
+
 
     private fun formatDate(inputDate: String): String {
         return try {

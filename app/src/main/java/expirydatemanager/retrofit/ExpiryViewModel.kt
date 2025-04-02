@@ -135,9 +135,10 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
     }
 
     fun fetchCategories(userId: Int, itemType: String) {
-        var item_type = if (itemType == "expiry item") "1" else "2"
 
-        apiService.getCategories("getCategory", userId, item_type)
+        println("fetchCategories ==$itemType")
+
+        apiService.getCategories("getCategory", userId, itemType)
             .enqueue(object : Callback<HashMap<String, Any>> {
                 override fun onResponse(
                     call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
@@ -165,7 +166,8 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
         actionDate: String,
         listId: Int,//if edit only
         customDate: String? = null,
-        id: String
+        id: String,
+        editMode: String,
     ) {
 
         val params = HashMap<String, Any>().apply {
@@ -178,11 +180,14 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             this["notify_time"] = notifyTime
             this["remark"] = remark
             this["action_date"] = actionDate
-            this["list_id"] = ""
+            this["list_id"] =
+                if (editMode == "edit") this["list_id"] ?: listId else listId
             customDate?.let { this["custom_date"] = it }
         }
 
+
         println("list send to server==$params")
+        println("list send to server==$id")
 
         viewModelScope.launch {
             try {

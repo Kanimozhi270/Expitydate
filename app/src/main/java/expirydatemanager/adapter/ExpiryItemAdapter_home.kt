@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.recyclerview.widget.RecyclerView
 import expirydatemanager.activity.AddItemActivity
 import expirydatemanager.activity.Expiry_FullView
@@ -21,9 +22,9 @@ class ExpiryItemAdapter_home(
     private val itemList: MutableList<ItemList.GetList>,
     private val contextFromFrag: Context, // Add 'private val' here
     private val item_type: String,
+    private val addItemLauncher: ActivityResultLauncher<Intent>,
     private val onDeleteClick: (itemId: Int) -> Unit
-) : RecyclerView.Adapter<ExpiryItemAdapter_home.ItemViewHolder>()
-{
+) : RecyclerView.Adapter<ExpiryItemAdapter_home.ItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view =
@@ -34,21 +35,10 @@ class ExpiryItemAdapter_home(
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = itemList[position]
 
-        //formet date
-        val originalDate = item.actionDate
-        val formattedDate = try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-            val date = inputFormat.parse(originalDate ?: "")
-            if (date != null) outputFormat.format(date) else "N/A"
-        } catch (e: Exception) {
-            "N/A"
-        }
-
         // Safely get the 'item_name' and 'reminder_type' from the Map
         val itemName = item.itemName
         val reminderType = item.reminderType?.toString() ?: "No Reminder"
-        val expiry_on = formattedDate
+        val expiry_on = item.actionDate?.toString() ?: "No Expiry Date"
 
         val id = item.id
         println("ID after conversion: $id")
@@ -64,7 +54,8 @@ class ExpiryItemAdapter_home(
         val currentDate = LocalDate.now()
 
         // Parse the expiry date (assuming the expiry date is in a format like "dd-MM-yyyy")
-        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy") // Adjust the format based on your date string
+        val formatter =
+            DateTimeFormatter.ofPattern("dd-MM-yyyy") // Adjust the format based on your date string
         val expiryDate = try {
             LocalDate.parse(item.actionDate, formatter)
         } catch (e: Exception) {
@@ -79,12 +70,15 @@ class ExpiryItemAdapter_home(
         }
 
         holder.itemView.setOnClickListener {
+            println("categoryy idd===${item.categoryId}")
+
             val intent = Intent(contextFromFrag, Expiry_FullView::class.java).apply {
 
-              //  putExtra("item_data", item)
+                //  putExtra("item_data", item)
                 putExtra("item_type", item_type)
+                putExtra("itemType", item_type)
                 putExtra("isEditMode", "edit")
-                putExtra("list_id", item.id)
+                putExtra("list_id", item.id.toString())
                 putExtra("category_id", item.categoryId)
                 putExtra("category_name", item.categoryName)
                 putExtra("item_id", item.itemId)
@@ -94,33 +88,35 @@ class ExpiryItemAdapter_home(
                 putExtra("item_name", item.itemName)
                 putExtra("remark", item.remark)
 
+                println("list_iddddd == ${item.id}")
+                println("cat idddd== ${item.categoryName}")
+                println("cat nameee == ${item.categoryId}")
             }
-            contextFromFrag.startActivity(intent)
+            addItemLauncher.launch(intent)
         }
 
 
         holder.expiryEdit.setOnClickListener {
-            var item = itemList[position]
             val itemMap = hashMapOf(
-                "id" to item.id.toString(),
-                "category_id" to item.categoryId.toString(),
-                "category_name" to item.categoryName.toString(),
-                "custom_date" to (item.customDate ?: ""),
-                "item_id" to item.itemId.toString(),
-                "action_date" to item.actionDate,
-                "reminder_type" to item.reminderType,
-                "notify_time" to item.notifyTime,
-                "item_name" to item.itemName,
+                "id" to item.id?.toString().orEmpty(),
+                "category_id" to item.categoryId?.toString().orEmpty(),
+                "category_name" to item.categoryName.orEmpty(),
+                "action_date" to item.actionDate.orEmpty(),
+                "reminder_type" to item.reminderType.orEmpty(),
+                "notify_time" to item.notifyTime.orEmpty(),
+                "item_name" to item.itemName.orEmpty(),
                 "item_type" to item_type,
-                "remark" to item.remark,
+                "remark" to item.remark.orEmpty()
             )
-
+            // Create the Intent
             val intent = Intent(contextFromFrag, AddItemActivity::class.java).apply {
-              //  putExtra("item_data", itemList[position].itemId)
                 putExtra("item_data", itemMap)
                 putExtra("isEditMode", "edit")
+                putExtra("itemType", item_type)
             }
-            contextFromFrag.startActivity(intent)
+
+            // Use the passed ActivityResultLauncher to launch AddItemActivity
+            addItemLauncher.launch(intent)
         }
 
         holder.expiryDelete.setOnClickListener {

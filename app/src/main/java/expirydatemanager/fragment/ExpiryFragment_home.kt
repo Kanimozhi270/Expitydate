@@ -33,10 +33,10 @@ class ExpiryFragment_home : Fragment() {
     var viewModelFactory = ExpiryViewModelFactory(repository)
     lateinit var addItemViewModel: ExpiryViewModel
     private lateinit var launcher: ActivityResultLauncher<Intent>
+    private lateinit var addItemLauncher: ActivityResultLauncher<Intent>
 
     private lateinit var recyclerView: RecyclerView
-    private val itemList =
-        mutableListOf<ItemList.GetList>()  // Store data as a List of Item objects
+    private val itemList = mutableListOf<ItemList.GetList>()  // Store data as a List of Item objects
     var adapter: ExpiryItemAdapter_home? = null
     lateinit var fragmentActivity: AppCompatActivity
     var progressDialog: Dialog? = null
@@ -50,9 +50,24 @@ class ExpiryFragment_home : Fragment() {
 
         addItemViewModel =
             ViewModelProvider(this, viewModelFactory).get(ExpiryViewModel::class.java)
-
+        addItemLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val itemAdded = result.data?.getBooleanExtra("item_added", false) ?: false
+                    println("registerForActivityResult itemAdded ==$itemAdded")
+                    if (itemAdded) {
+                        // Refresh the list in your fragment
+                        refreshList()
+                    }
+                }
+            }
         if (adapter == null) {
-            adapter = ExpiryItemAdapter_home(itemList, requireContext(), "expiry item") { itemId ->
+            adapter = ExpiryItemAdapter_home(
+                itemList,
+                requireContext(),
+                "expiry item",
+                addItemLauncher
+            ) { itemId ->
                 showDeleteConfirmationDialog(itemId)
             }
             recyclerView.adapter = adapter
@@ -63,12 +78,13 @@ class ExpiryFragment_home : Fragment() {
                     val inputMap = hashMapOf<String, Any>(
                         "action" to "getlist",
                         "user_id" to ExpiryUtils.userId,
-                        "item_type" to "1",
-                        "is_days" to "3"
+                        "item_type" to "1"
                     )
                     addItemViewModel.fetchList1(inputMap)
                 }
             }
+
+
 
         addItemViewModel.deleteitemResponse.observe(viewLifecycleOwner) { response ->
             println("addItemViewModel.deleteitemResponse == $response")
@@ -91,12 +107,11 @@ class ExpiryFragment_home : Fragment() {
 
 
         if (ExpiryUtils.isNetworkAvailable(requireContext())) {
-            ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும்expiry ", true).show()
+            ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
             val InputMap = HashMap<String, Any>()
             InputMap["action"] = "getlist"
             InputMap["user_id"] = ExpiryUtils.userId
             InputMap["item_type"] = "1"
-            InputMap["is_days"] = "3"
 
             addItemViewModel.fetchList1(InputMap)
             // addItemViewModel.deletelist(userId = 989015, 2, )
@@ -131,14 +146,11 @@ class ExpiryFragment_home : Fragment() {
                 this["action"] = "getlist"
                 this["user_id"] = ExpiryUtils.userId
                 this["item_type"] = "1"
-                this["is_days"] = "3"
+                // this["is_days"] = "3"
             }
             println(" itemNameResponse is called =$inputMap")
             addItemViewModel.fetchList1(inputMap)
-            //progressDialog!!.dismiss()
         }
-
-
 
 
         addItemViewModel.deletelistResponse.observe(viewLifecycleOwner) { response ->
@@ -152,27 +164,25 @@ class ExpiryFragment_home : Fragment() {
                 val inputMap = hashMapOf<String, Any>(
                     "action" to "getlist",
                     "user_id" to ExpiryUtils.userId,
-                    "item_type" to "1",
-                    "is_days" to "3"
+                    "item_type" to "1"
                 )
                 addItemViewModel.fetchList1(inputMap)
             } else {
                 Toast.makeText(requireContext(), "Failed to delete", Toast.LENGTH_SHORT).show()
             }
         }
-
-
         return view
     }
 
     fun refreshList() {
+        println("refreshList expiry  is called")
         val inputMap = hashMapOf<String, Any>(
             "action" to "getlist",
             "user_id" to ExpiryUtils.userId,
-            "item_type" to "1",
-            "is_days" to "3"
+            "item_type" to "1"
         )
         addItemViewModel.fetchList1(inputMap)
+        adapter?.notifyDataSetChanged()
     }
 
 

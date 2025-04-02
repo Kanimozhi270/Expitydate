@@ -47,6 +47,7 @@ import java.util.Locale
 class AddItemActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAdditemBinding
+    private var hasPopulatedData = false
 
     // private val addItemViewModel: ExpiryViewModel by viewModels()
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
@@ -56,7 +57,7 @@ class AddItemActivity : AppCompatActivity() {
 
     private lateinit var db: SQLiteDatabase
     private lateinit var adapter: ExpiryItemAdapter_editdelete
-    private var selectedItemType = "expiry item"
+    private var selectedItemType = "1"
     private var displayDate = ""
     private var selectedDate = ""
     private var selectedReminder = "same day"
@@ -74,7 +75,6 @@ class AddItemActivity : AppCompatActivity() {
     private var selectedHour: String = "HH"
     private var selectedMinute: String = "MM"
     private var selectedAmPm: String = "AM"
-    private var hasPopulatedData = false
     private var itemData: HashMap<String, String>? = null  // Declare globally
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,13 +92,24 @@ class AddItemActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         // Set default selection to "Expiry Item"
-        selectedItemType =
-            (intent.getStringExtra("itemType") as? String).toString() ?: "expiry item"
+
         changeColor(binding.btnExpiryItem, binding.expiryText, true)
-        loadCategoriesForSelectedType()
+
         addItemViewModel.fetchItemNames(ExpiryUtils.userId)
         itemData = intent.getSerializableExtra("item_data") as? HashMap<String, String>
         isEditMode = (intent.getStringExtra("isEditMode") as? String).toString()
+
+        if (isEditMode == "edit") {
+            selectedItemType = when (itemData?.get("item_type")) {
+                "1", "expiry item" -> "1"
+                "2", "renew item" -> "2"
+                else -> "1"
+            }
+            loadCategoriesForSelectedType(selectedItemType)
+        } else {
+            selectedItemType = intent.getStringExtra("itemType") ?: "1"
+            loadCategoriesForSelectedType("1")
+        }
 
         // Observe item names from ViewModel
         addItemViewModel.itemNames.observe(this, androidx.lifecycle.Observer { itemNames ->
@@ -113,6 +124,7 @@ class AddItemActivity : AppCompatActivity() {
         })
 
 
+        // Observe categories from ViewModel
         addItemViewModel.categories.observe(this, Observer { categories ->
             categoriesList = categories
             println("Categories List: $categoriesList")
@@ -127,6 +139,7 @@ class AddItemActivity : AppCompatActivity() {
                 Toast.makeText(this, "No categories available.", Toast.LENGTH_SHORT).show()
             }
         })
+
 
 
         if (isEditMode != "edit") {
@@ -160,15 +173,17 @@ class AddItemActivity : AppCompatActivity() {
         println("selectttttrewmn  ====$selectedItemType")
         binding.btnExpiryItem.setOnClickListener {
             binding.spCategories.text = "Select Category"
-            selectedItemType = "expiry item"
+            println("selectttttrewmn  ====$selectedItemType")
             changeColor(binding.btnExpiryItem, binding.expiryText, true)
-            loadCategoriesForSelectedType()
+            selectedItemType = "1"
+            loadCategoriesForSelectedType("1")
         }
         binding.btnRenewItem.setOnClickListener {
             binding.spCategories.text = "Select Category"
-            selectedItemType = "renew item"
+            println("selectttttrewmn  ====$selectedItemType")
             changeColor(binding.btnRenewItem, binding.renewText, true)
-            loadCategoriesForSelectedType()
+            selectedItemType = "2"
+            loadCategoriesForSelectedType("2")
         }
 
         binding.etExpiryDate.setOnClickListener {
@@ -202,6 +217,7 @@ class AddItemActivity : AppCompatActivity() {
             setupReminderButtons(binding.customReminder)
 
         }
+
         addItemViewModel.itemNameResponse.observe(this) { response ->
             println("Add/Update Item Response == $response")
 
@@ -258,8 +274,7 @@ class AddItemActivity : AppCompatActivity() {
 
         val notifyTime = getFormattedNotifyTime()
         val remark = binding.etNote.text.toString().trim()
-        val formattedExpiryDate =
-            convertDateToServerFormat(binding.etExpiryDate.text.toString().trim())
+        val formattedExpiryDate = convertDateToServerFormat(binding.etExpiryDate.text.toString().trim())
         val customDate = if (getReminderType(selectedReminder) == 0) formattedExpiryDate else ""
 
         val itemId = getItemIdFromName(binding.etItemName.text.toString().trim())
@@ -271,30 +286,33 @@ class AddItemActivity : AppCompatActivity() {
         println("saveItemToServer == notifyTime $notifyTime")
         println("saveItemToServer == remark $remark")
         println("saveItemToServer == remark $selectedItemType")
-        if (selectedItemType == "expiry item") {
-            println("saveItemToServer == 1 $selectedItemType")
-        } else {
-            println("saveItemToServer == 2 $selectedItemType")
-        }
+
 
         println("saveItemToServer == formattedExpiryDate $formattedExpiryDate")
         println("saveItemToServer == customDate $customDate")
         println("saveItemToServer == id $editId")
 
         // Save the item to the server
+
+        val listId =
+            if (isEditMode == "edit") editId.takeIf { it.isNotEmpty() }?.toInt() ?: 0 else 0
+        val editModeValue = if (isEditMode == "edit") isEditMode else ""
+
         addItemViewModel.addListToServer(
             id = itemId.toString(),
             categoryId = categoryId,
-            itemType = if (selectedItemType == "expiry item") 1 else 2,
+            itemType = selectedItemType.toString().toInt(),
             itemId = itemId,
             reminderType = getReminderType(selectedReminder),
             notifyTime = notifyTime,
             remark = remark,
             actionDate = formattedExpiryDate,
-            listId = 0,
-            customDate = customDate
+            listId = listId,  // ✅ Safe conversion
+            customDate = customDate,
+            editMode = editModeValue
         )
 
+        println("saveItemToServer == id $listId")
         // Schedule the notification based on reminder type
         scheduleNotification(
             itemName = binding.etItemName.text.toString(),
@@ -308,36 +326,115 @@ class AddItemActivity : AppCompatActivity() {
         clearFields()
     }
 
-
     private fun validateInputs(): Boolean {
         val itemName = binding.etItemName.text.toString().trim()
         val category = binding.spCategories.text.toString().trim()
         val expiryDate = binding.etExpiryDate.text.toString().trim()
         val notifyTime = getFormattedNotifyTime()
-        //val note = binding.etNote.text.toString().trim()
+        val note = binding.etNote.text.toString().trim()
 
-        val isNotifyTimeValid = !(notifyTime.contains("HH") || notifyTime.contains("MM"))
+        // Validate Item Type
+        if (selectedItemType.isEmpty()) {
+            showToast("Please select Item Type!")
+            return false
+        }
 
-        return when {
-            itemName.isEmpty() || itemName == "Select Item Name" -> showToast("Please select Item Name!")
-            selectedItemType.isEmpty() -> showToast("Please select Item Type!")
-            category.isEmpty() || category == "Select Catrgory" -> showToast("Please select a Category!")
-            expiryDate.isEmpty() -> showToast("Please select Expiry Date!")
-            selectedReminder.isEmpty() -> showToast("Please select a Reminder Type!")
-            !isNotifyTimeValid -> showToast("Please select Notify Time!")
-            selectedReminder == "custom" && binding.customdatetext.text.toString().trim()
-                .isEmpty() ->
-                showToast("Please select a Custom Reminder Date!")
-            // note.isEmpty() -> showToast("Please enter Note!")
-            else -> true
+        // Validate Category
+        if (category.isEmpty() || category == "Select Category") {
+            showToast("Please select a Category!")
+            return false
+        }
+
+        // Validate Item Name
+        if (itemName.isEmpty() || itemName == "Select Item Name") {
+            showToast("Please select Item Name!")
+            return false
+        }
+
+        // Validate Expiry Date (Should be current date or in the future)
+        if (expiryDate.isEmpty() || !isDateInFutureOrToday(expiryDate)) {
+            showToast("Expiry Date should be today or a future date!")
+            return false
+        }
+
+        // Validate Reminder Before
+        if (selectedReminder.isEmpty()) {
+            showToast("Please select a Reminder Type!")
+            return false
+        }
+
+        // Validate Notify Time (Should be current time or in the future)
+        if (notifyTime.contains("HH") || notifyTime.contains("MM") || !isTimeInFutureOrNow(notifyTime)) {
+            showToast("Notify Time should be current time or a future time!")
+            return false
+        }
+
+        // Validate Notes (optional, if needed)
+        if (note.isEmpty()) {
+            return true // Optional field
+        }
+
+        return true // All validations passed
+    }
+    private fun isTimeInFutureOrNow(notifyTime: String): Boolean {
+        return try {
+            val currentCalendar = Calendar.getInstance()
+            val currentTime = currentCalendar.timeInMillis
+
+            // Parse notify time (e.g., "12:00 AM")
+            val timeParts = notifyTime.split(" ")
+            val hourMinute = timeParts[0].split(":")
+            var hour = hourMinute[0].toIntOrNull() ?: 0
+            val minute = hourMinute.getOrNull(1)?.toIntOrNull() ?: 0
+            val amPm = timeParts.getOrNull(1)?.uppercase(Locale.ENGLISH) ?: "AM"
+
+            // Convert to 24-hour format
+            if (amPm == "PM" && hour < 12) hour += 12
+            if (amPm == "AM" && hour == 12) hour = 0
+
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, hour)
+                set(Calendar.MINUTE, minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            val selectedTime = calendar.timeInMillis
+            selectedTime >= currentTime // Return true if the time is today or in the future
+        } catch (e: Exception) {
+            false
         }
     }
 
 
+    private fun isDateInFutureOrToday(dateStr: String): Boolean {
+        return try {
+            val format = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH) // The format used for input date
+            val selectedDate = format.parse(dateStr)
+            val currentDate = Date() // Current system date
+
+            // Compare only the date part (ignoring time) for today or future
+            val calendarSelected = Calendar.getInstance()
+            calendarSelected.time = selectedDate
+
+            val calendarCurrent = Calendar.getInstance()
+            calendarCurrent.time = currentDate
+
+            // Check if the selected date is today or in the future
+            calendarSelected[Calendar.YEAR] > calendarCurrent[Calendar.YEAR] ||
+                    (calendarSelected[Calendar.YEAR] == calendarCurrent[Calendar.YEAR] &&
+                            calendarSelected[Calendar.DAY_OF_YEAR] >= calendarCurrent[Calendar.DAY_OF_YEAR])
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
+
     private fun getFormattedNotifyTime(): String {
-        val hour = binding.JathagamSpinnerHour.selectedItem.toString()
-        val minute = binding.JathagamSpinnerMinute.selectedItem.toString()
-        val amPm = binding.JathagamSpinnerAmPM.selectedItem.toString()
+        val hour = binding.expirySpinnerHour.selectedItem.toString()
+        val minute = binding.expirySpinnerMinute.selectedItem.toString()
+        val amPm = binding.expirySpinnerAmPM.selectedItem.toString()
         return "$hour:$minute $amPm"
     }
 
@@ -422,9 +519,9 @@ class AddItemActivity : AppCompatActivity() {
         binding.customdatetext.text = ""
 
         // Reset the spinners (notify time and reminder type)
-        binding.JathagamSpinnerHour.setSelection(0)
-        binding.JathagamSpinnerMinute.setSelection(0)
-        binding.JathagamSpinnerAmPM.setSelection(0)
+        binding.expirySpinnerHour.setSelection(0)
+        binding.expirySpinnerMinute.setSelection(0)
+        binding.expirySpinnerAmPM.setSelection(0)
 
         // Reset the reminder buttons
         selectedReminder = "same day"
@@ -472,15 +569,16 @@ class AddItemActivity : AppCompatActivity() {
             editId = data["id"] ?: ""
 
             selectedItemType = when (data["item_type"]) {
-                "expiry item" -> "expiry item"
+                "expiry item" -> "1"
+                "renew item" -> "2"
                 "1" -> "1"
                 "2" -> "2"
-                else -> "renew item"
+                else -> "1"
             }
 
             when (selectedItemType) {
-                "renew item", "2" -> changeColor(binding.btnRenewItem, binding.renewText, true)
-                "expiry item", "1" -> changeColor(binding.btnExpiryItem, binding.expiryText, true)
+                "2" -> changeColor(binding.btnRenewItem, binding.renewText, true)
+                "1" -> changeColor(binding.btnExpiryItem, binding.expiryText, true)
             }
 
 
@@ -506,9 +604,9 @@ class AddItemActivity : AppCompatActivity() {
             val amPmIndex = if (amPm.uppercase() == "PM") 1 else 0
 
             // **Set Spinner Selections**
-            binding.JathagamSpinnerHour.setSelection(hourIndex)
-            binding.JathagamSpinnerMinute.setSelection(minuteIndex)
-            binding.JathagamSpinnerAmPM.setSelection(amPmIndex)
+            binding.expirySpinnerHour.setSelection(hourIndex)
+            binding.expirySpinnerMinute.setSelection(minuteIndex)
+            binding.expirySpinnerAmPM.setSelection(amPmIndex)
 
 //            binding.spCategories.text = data["category_name"].toString() ?: ""
             val categoryId = data["category_id"].toString() ?: "0"
@@ -524,20 +622,20 @@ class AddItemActivity : AppCompatActivity() {
     private fun getCategoryNameFromId(id: String): String {
         val categories =
             categoriesList["Category"] as? List<Map<String, Any>> ?: return "Unknown Category"
+        println("getCategoryNameFromId -> categoryId: $id")
         println("Categories List: $categories")
 
-        // Find the category with the matching ID
         val category = categories.find {
-            val categoryId = it["id"] // This can be either Double or Int
+            val categoryId = it["id"]
             val categoryIdAsInt = when (categoryId) {
-                is Double -> categoryId.toInt()  // Convert Double to Int
-                is Int -> categoryId            // Already an Int
-                else -> null                    // If it's neither, return null
+                is Double -> categoryId.toInt()
+                is Int -> categoryId
+                is String -> categoryId.toIntOrNull()
+                else -> null
             }
-            categoryIdAsInt != null && categoryIdAsInt == id.toInt() // Compare with the id as an Int
+            categoryIdAsInt != null && categoryIdAsInt == id.toIntOrNull()
         }
-        println("Categories List: $category")
-        // If category is found, return its name
+
         return category?.get("category") as? String ?: "Unknown Category"
     }
 
@@ -650,17 +748,17 @@ class AddItemActivity : AppCompatActivity() {
         // Set up Hour Spinner
         val hourAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, hourList)
         hourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.JathagamSpinnerHour.adapter = hourAdapter
+        binding.expirySpinnerHour.adapter = hourAdapter
 
         // Set up Minute Spinner
         val minuteAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, minuteList)
         minuteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.JathagamSpinnerMinute.adapter = minuteAdapter
+        binding.expirySpinnerMinute.adapter = minuteAdapter
 
         // Set up AM/PM Spinner
         val amPmAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, amPmList)
         amPmAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.JathagamSpinnerAmPM.adapter = amPmAdapter
+        binding.expirySpinnerAmPM.adapter = amPmAdapter
 
     }
 
@@ -682,7 +780,8 @@ class AddItemActivity : AppCompatActivity() {
 
     }
 
-    private fun loadCategoriesForSelectedType() {
+    private fun loadCategoriesForSelectedType(selectedItemType: String) {
+
         addItemViewModel.fetchCategories(ExpiryUtils.userId, selectedItemType)
         println("selectedItemTypeee1 == $selectedItemType")
     }
@@ -740,7 +839,7 @@ class AddItemActivity : AppCompatActivity() {
         fun refreshItemList(itemType: String) {
             println("refreshItemList == $itemType")
             if (itemType == "item_type") {
-                addItemViewModel.fetchItemNames(989015)
+                addItemViewModel.fetchItemNames(ExpiryUtils.userId)
                 // Don't rely on items.clear() directly here, use a fresh copy
                 addItemViewModel.itemNames.observeOnce(this@AddItemActivity) { updatedItemsMap ->
                     itemNamesList = updatedItemsMap
@@ -756,12 +855,8 @@ class AddItemActivity : AppCompatActivity() {
 
                 }
             } else {
-                if (selectedType == "Expiry Item") {
-                    selectedType = "expiry item"
-                } else {
-                    selectedType = "renew item"
-                }
-                addItemViewModel.fetchCategories(989015, selectedType)
+
+                addItemViewModel.fetchCategories(ExpiryUtils.userId, selectedItemType)
                 addItemViewModel.categories.observeOnce(this@AddItemActivity) { categories ->
                     categoriesList = categories
                     val updatedCategories =
@@ -836,22 +931,9 @@ class AddItemActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    fun refreshCategoryList(itemType: String) {
-        val type = if (itemType == "expiry item") "1" else "2"
-        addItemViewModel.fetchCategories(ExpiryUtils.userId, itemType)
-
-        addItemViewModel.categories.observe(this) { categoryMap ->
-            categoriesList = categoryMap
-            println("🔥 Categories updated == $categoriesList")
-        }
-    }
-
 
     private fun showEditDialog(
-        itemName: String,
-        itemId: Int,
-        itemType: String,
-        onSuccess: () -> Unit
+        itemName: String, itemId: Int, itemType: String, onSuccess: () -> Unit
     ) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
@@ -891,8 +973,7 @@ class AddItemActivity : AppCompatActivity() {
                         this["action"] = "addCategory"
                         this["user_id"] = ExpiryUtils.userId
                         this["category"] = newItemName
-                        this["item_type"] =
-                            if (selectedType == "expiry item") "1" else "2"
+                        this["item_type"] = if (selectedType == "expiry item") "1" else "2"
                         this["cat_id"] = "$itemId"
                     }
                     println(" Sending data ==$params")
@@ -971,9 +1052,7 @@ class AddItemActivity : AppCompatActivity() {
                             addItemViewModel.itemNameResponse1.removeObservers(this@AddItemActivity)
                         } else {
                             Toast.makeText(
-                                this@AddItemActivity,
-                                "Failed to add item!",
-                                Toast.LENGTH_SHORT
+                                this@AddItemActivity, "Failed to add item!", Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
@@ -1065,8 +1144,7 @@ class AddItemActivity : AppCompatActivity() {
 
     @SuppressLint("ScheduleExactAlarm")
     private fun scheduleNotification(
-        itemName: String,
-        expiryDate: String,      // yyyy-MM-dd from server
+        itemName: String, expiryDate: String,      // yyyy-MM-dd from server
         notifyTime: String,      // HH:mm AM/PM
         reminderType: String,    // same day / 2 days before / 1 week before / custom
         customDate: String? = null
@@ -1151,9 +1229,7 @@ class AddItemActivity : AppCompatActivity() {
 
         // Schedule the alarm
         alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            pendingIntent
+            AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
         )
     }
 
@@ -1168,3 +1244,4 @@ fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observ
         }
     })
 }
+

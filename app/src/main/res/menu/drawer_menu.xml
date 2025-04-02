@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
+    <!--<item
         android:id="@+id/nav_item"
         android:title="Create Item Name"
-        android:icon="@drawable/expiry_addicon"/>
+        android:icon="@drawable/expiry_addicon"/>-->
 
    <!-- <item
         android:id="@+id/itemlist"
         android:title="Item List"
         android:icon="@drawable/expity_list"/>-->
 
-    <item
+  <!--  <item
         android:id="@+id/nav_category"
         android:title="Create Category Name"
-        android:icon="@drawable/expiry_addicon"/>
+        android:icon="@drawable/expiry_addicon"/>-->
 
  <!--   <item
         android:id="@+id/categorylist"

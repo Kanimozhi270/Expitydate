@@ -19,9 +19,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="தேதியை தேர்வு செய்யுங்கள்"
+            android:text="Choose a date"
             android:textColor="@color/black"
-            android:textSize="15sp"
+            android:textSize="15dp"
             android:textStyle="bold" />
 
         <ImageView
