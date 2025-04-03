@@ -28,19 +28,19 @@
             android:visibility="gone">
 
             <ImageView
-                android:layout_width="250dp"
-                android:layout_height="250dp"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
                 android:contentDescription="No items"
                 android:scaleType="fitCenter"
-                android:src="@drawable/expiry_icon" />
+                android:layout_marginTop="-50dp"
+                android:src="@drawable/expity_emptylist" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-50dp"
                 android:gravity="center"
                 android:padding="16dp"
-                android:text="Add Items to remember expiry or renewal"
+                android:text="No Data"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
         </LinearLayout>

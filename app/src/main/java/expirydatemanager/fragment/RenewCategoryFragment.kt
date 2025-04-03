@@ -45,10 +45,11 @@ class RenewCategoryFragment : Fragment() {
 
 
         val adapter = ExpiryItemAdapter_cat(itemList) { clickedItem ->
+            val itemType = clickedItem.itemType.toDoubleOrNull()?.toInt() ?: 0
             val intent = Intent(requireContext(), ExpiryItemList::class.java)
             intent.putExtra("category_id", clickedItem.id)
             intent.putExtra("category_name", clickedItem.itemName)
-            intent.putExtra("item_type", clickedItem.itemType)
+            intent.putExtra("item_type", itemType)
 
             startActivity(intent)
 
@@ -64,7 +65,7 @@ class RenewCategoryFragment : Fragment() {
 
         if (ExpiryUtils.isNetworkAvailable(requireContext())) {
             ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும் ", true)
-            addItemViewModel.fetchCategories(userId = ExpiryUtils.userId, itemType = "renew item")
+            addItemViewModel.fetchCategories(userId = ExpiryUtils.userId, itemType = "2")
 
         } else {
             contentLayout.visibility = View.VISIBLE

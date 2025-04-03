@@ -48,6 +48,7 @@ class AddItemActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAdditemBinding
     private var hasPopulatedData = false
+    var category_id = ""
 
     // private val addItemViewModel: ExpiryViewModel by viewModels()
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
@@ -95,7 +96,13 @@ class AddItemActivity : AppCompatActivity() {
 
         changeColor(binding.btnExpiryItem, binding.expiryText, true)
 
-        addItemViewModel.fetchItemNames(ExpiryUtils.userId)
+        val map = HashMap<String, Any>()
+        map["action"] = "getItemName"
+        map["user_id"] = "" + ExpiryUtils.userId
+
+        addItemViewModel.fetchItemNames(map)
+
+        // addItemViewModel.fetchItemNames(ExpiryUtils.userId)
         itemData = intent.getSerializableExtra("item_data") as? HashMap<String, String>
         isEditMode = (intent.getStringExtra("isEditMode") as? String).toString()
 
@@ -220,6 +227,7 @@ class AddItemActivity : AppCompatActivity() {
 
         addItemViewModel.itemNameResponse.observe(this) { response ->
             println("Add/Update Item Response == $response")
+            println("Add/Update selectedItemType == $selectedItemType")
 
             val status = response["status"]?.toString() ?: ""
             if (status == "success") {
@@ -230,6 +238,7 @@ class AddItemActivity : AppCompatActivity() {
                 }
                 val resultIntent = Intent()
                 resultIntent.putExtra("item_added", true)
+                resultIntent.putExtra("item_type", selectedItemType)
                 setResult(Activity.RESULT_OK, resultIntent)
                 finish()
             } else {
@@ -246,6 +255,8 @@ class AddItemActivity : AppCompatActivity() {
                         categoriesList["Category"] as MutableList<Map<String, Any>>
                     showSelectionDialog("Select Category", GetcategoryList) { selectedCategory ->
                         binding.spCategories.text = selectedCategory["category"] as String
+                        category_id = selectedCategory["id"].toString()
+                        //categoryId = (selectedCategory["id"].toString()).toInt()
                     }
                 }
 
@@ -274,7 +285,8 @@ class AddItemActivity : AppCompatActivity() {
 
         val notifyTime = getFormattedNotifyTime()
         val remark = binding.etNote.text.toString().trim()
-        val formattedExpiryDate = convertDateToServerFormat(binding.etExpiryDate.text.toString().trim())
+        val formattedExpiryDate =
+            convertDateToServerFormat(binding.etExpiryDate.text.toString().trim())
         val customDate = if (getReminderType(selectedReminder) == 0) formattedExpiryDate else ""
 
         val itemId = getItemIdFromName(binding.etItemName.text.toString().trim())
@@ -364,10 +376,11 @@ class AddItemActivity : AppCompatActivity() {
         }
 
         // Validate Notify Time (Should be current time or in the future)
-        if (notifyTime.contains("HH") || notifyTime.contains("MM") || !isTimeInFutureOrNow(notifyTime)) {
-            showToast("Notify Time should be current time or a future time!")
-            return false
-        }
+        /* if (notifyTime.contains("HH") || notifyTime.contains("MM") || !isTimeInFutureOrNow(notifyTime)) {
+             showToast("Notify Time should be current time or a future time!")
+             return false
+         }*/
+
 
         // Validate Notes (optional, if needed)
         if (note.isEmpty()) {
@@ -376,6 +389,7 @@ class AddItemActivity : AppCompatActivity() {
 
         return true // All validations passed
     }
+
     private fun isTimeInFutureOrNow(notifyTime: String): Boolean {
         return try {
             val currentCalendar = Calendar.getInstance()
@@ -409,7 +423,8 @@ class AddItemActivity : AppCompatActivity() {
 
     private fun isDateInFutureOrToday(dateStr: String): Boolean {
         return try {
-            val format = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH) // The format used for input date
+            val format =
+                SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH) // The format used for input date
             val selectedDate = format.parse(dateStr)
             val currentDate = Date() // Current system date
 
@@ -428,7 +443,6 @@ class AddItemActivity : AppCompatActivity() {
             false
         }
     }
-
 
 
     private fun getFormattedNotifyTime(): String {
@@ -528,7 +542,7 @@ class AddItemActivity : AppCompatActivity() {
         setupReminderButtons(binding.btnSameDay)
 
         // Reset the selected item type
-        selectedItemType = ""
+//        selectedItemType = ""
 
         // Optionally reset other selections if needed
     }
@@ -839,7 +853,21 @@ class AddItemActivity : AppCompatActivity() {
         fun refreshItemList(itemType: String) {
             println("refreshItemList == $itemType")
             if (itemType == "item_type") {
-                addItemViewModel.fetchItemNames(ExpiryUtils.userId)
+
+                /*
+                                val params = HashMap<String, String>().apply {
+                                    this["action"] = "getItemName"
+                                }*/
+                val map = HashMap<String, Any>()
+                map["action"] = "getItemName"
+                map["category_id"] = category_id
+                map["item_type"] = itemType
+                map["user_id"] = "" + ExpiryUtils.userId
+
+
+                addItemViewModel.fetchItemNames(map)
+
+                // addItemViewModel.fetchItemNames(ExpiryUtils.userId)
                 // Don't rely on items.clear() directly here, use a fresh copy
                 addItemViewModel.itemNames.observeOnce(this@AddItemActivity) { updatedItemsMap ->
                     itemNamesList = updatedItemsMap
@@ -935,6 +963,7 @@ class AddItemActivity : AppCompatActivity() {
     private fun showEditDialog(
         itemName: String, itemId: Int, itemType: String, onSuccess: () -> Unit
     ) {
+        val categoryId = getCategoryIdFromName(binding.spCategories.text.toString())
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.dialog_edit_item, null)
@@ -952,6 +981,9 @@ class AddItemActivity : AppCompatActivity() {
                         this["user_id"] = "" + ExpiryUtils.userId
                         this["itemname"] = newItemName
                         this["item_id"] = "$itemId"
+                        this["category_id"] = category_id
+                        this["item_type"] = selectedItemType
+
                     }
 
                     addItemViewModel.addItemToServer(params)
@@ -973,7 +1005,7 @@ class AddItemActivity : AppCompatActivity() {
                         this["action"] = "addCategory"
                         this["user_id"] = ExpiryUtils.userId
                         this["category"] = newItemName
-                        this["item_type"] = if (selectedType == "expiry item") "1" else "2"
+                        this["item_type"] = selectedItemType
                         this["cat_id"] = "$itemId"
                     }
                     println(" Sending data ==$params")
@@ -1006,86 +1038,95 @@ class AddItemActivity : AppCompatActivity() {
         val etItemName = dialog.findViewById<EditText>(R.id.etItemName)
         val spinnerItemType = dialog.findViewById<android.widget.Spinner>(R.id.spinnerItemType)
         val btnCreate = dialog.findViewById<Button>(R.id.btnCreate)
+
         println("Show create dialog tableName ==$tableName")
+
         if (tableName == "categorys") {
             etItemName.hint = "Enter Category Name"
-            spinnerItemType.visibility = View.VISIBLE
+            spinnerItemType.visibility = View.GONE
 
-            val itemTypes = arrayOf("Expiry Item", "Renew Item")
-            val adapter =
-                android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, itemTypes)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerItemType.adapter = adapter
         } else {
             etItemName.hint = "Enter Item Name"
-            spinnerItemType.visibility = View.GONE
+            spinnerItemType.visibility = View.VISIBLE
+
+            // ✅ Load category list dynamically
+            val categoryList = categoriesList["Category"] as? List<Map<String, Any>> ?: emptyList()
+            val categoryNames = categoryList.mapNotNull { it["category"]?.toString() }
+
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoryNames)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerItemType.adapter = adapter
+
         }
-
-
 
         btnCreate.setOnClickListener {
             val name = etItemName.text.toString().trim()
-            selectedType =
-                if (tableName == "categorys") spinnerItemType.selectedItem.toString() else ""
-            println("item nameeee===== $name")
-            println("item nameeeett ===== $tableName")
+            selectedType = if (tableName == "categorys") {
+                spinnerItemType.selectedItem?.toString() ?: ""
+            } else {
+                ""
+            }
 
             if (name.isNotEmpty()) {
                 if (tableName == "Item name") {
+
                     val params = HashMap<String, String>().apply {
                         this["action"] = "addItemName"
                         this["user_id"] = "" + ExpiryUtils.userId
-                        this["itemname"] = etItemName.text.toString()
+                        this["itemname"] = name
                         this["item_id"] = ""
+                        this["category_id"] = category_id
+                        this["item_type"] = selectedItemType
                     }
 
                     addItemViewModel.addItemToServer(params)
-
                     addItemViewModel.itemNameResponse1.observe(this@AddItemActivity) { response ->
                         val status = response["status"]?.toString() ?: ""
                         if (status == "success") {
                             Toast.makeText(this@AddItemActivity, "Item added!", Toast.LENGTH_SHORT)
                                 .show()
-
-                            // ✅ Notify dialog and refresh item list
-                            onNewItemCreated(mapOf("item_name" to etItemName.text.toString()))
+                            onNewItemCreated(mapOf("item_name" to name))
                             addItemViewModel.itemNameResponse1.removeObservers(this@AddItemActivity)
                         } else {
                             Toast.makeText(
-                                this@AddItemActivity, "Failed to add item!", Toast.LENGTH_SHORT
+                                this@AddItemActivity,
+                                "Failed to add item!",
+                                Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
                 } else if (tableName == "categorys") {
-                    println("cat nameeee===== $name")
+                    val selectedCategory = spinnerItemType.selectedItem?.toString() ?: ""
+                    val selectedCategoryId = (categoriesList["Category"] as? List<Map<String, Any>>)
+                        ?.find { it["category"] == selectedCategory }?.get("id").toString()
 
                     val params = HashMap<String, Any>().apply {
                         this["action"] = "addCategory"
                         this["user_id"] = ExpiryUtils.userId
-                        this["category"] = etItemName.text.toString().trim()
-                        this["item_type"] =
-                            if (spinnerItemType.selectedItem.toString() == "Expiry Item") "1" else "2"
+                        this["category"] = name
+                        this["item_type"] = selectedItemType
                         this["cat_id"] = ""
                     }
-                    println("cat nameeee===== $params")
+
                     addItemViewModel.addCategoryToServer(params)
                     addItemViewModel.categoryResponse.observe(this@AddItemActivity) { response ->
                         val status = response["status"]?.toString() ?: ""
                         if (status == "success") {
-                            Toast.makeText(this@AddItemActivity, "Item added!", Toast.LENGTH_SHORT)
-                                .show()
-
-
-                            onNewItemCreated(mapOf("item_name" to etItemName.text.toString()))
+                            Toast.makeText(
+                                this@AddItemActivity,
+                                "Category added!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            onNewItemCreated(mapOf("category" to name))
                             addItemViewModel.categoryResponse.removeObservers(this@AddItemActivity)
                         } else {
                             Toast.makeText(
-                                this@AddItemActivity, "Failed to add item!", Toast.LENGTH_SHORT
+                                this@AddItemActivity,
+                                "Failed to add category!",
+                                Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
-
-
                 }
                 dialog.dismiss()
             } else {
@@ -1095,6 +1136,7 @@ class AddItemActivity : AppCompatActivity() {
 
         dialog.show()
     }
+
 
     private fun deleteItem(itemId: Int, itemType: String, onSuccess: () -> Unit) {
 

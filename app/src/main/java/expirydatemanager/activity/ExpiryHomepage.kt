@@ -63,12 +63,21 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             println("registerForActivityResult == ${result.data?.extras}")
 
             if (result.resultCode == RESULT_OK && result.data?.getBooleanExtra(
-                    "item_added",
-                    false
+                    "item_added", false
                 ) == true
             ) {
-                val selectedTabIndex = binding.tabLayout.selectedTabPosition
+                var selectedTabIndex = 0
+                if (result.data?.getStringExtra(
+                        "item_type",
+                    ) == "1"
+                ) {
+                    selectedTabIndex = 0
+                } else {
+                    selectedTabIndex = 1
+                }
+                // selectedTabIndex = binding.tabLayout.selectedTabPosition
                 val fragment = supportFragmentManager.fragments[selectedTabIndex]
+                binding.viewPager.currentItem = selectedTabIndex
                 println("selectedTabIndex ==$selectedTabIndex")
                 if (fragment is ExpiryFragment_home) {
                     fragment.refreshList()
@@ -94,8 +103,11 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
         // Navigation Drawer
         toggle = ActionBarDrawerToggle(
-            this, binding.drawerLayout, binding.appBar,
-            R.string.navigation_drawer_open, R.string.navigation_drawer_close
+            this,
+            binding.drawerLayout,
+            binding.appBar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
         )
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
@@ -110,7 +122,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         }
 
         if (ExpiryUtils.isNetworkAvailable(this)) {
-           // ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
+            // ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
             val InputMap = HashMap<String, Any>()
             InputMap["action"] = "getlist"
             InputMap["user_id"] = ExpiryUtils.userId
@@ -121,7 +133,12 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             // contentLayout.visibility = View.VISIBLE
         }
 
-        expiryDateViewModel.fetchItemNames(ExpiryUtils.userId)
+        val map = HashMap<String,Any>()
+        map["action"] = "getItemName"
+        map["user_id"] = ""+ExpiryUtils.userId
+
+        expiryDateViewModel.fetchItemNames(map)
+       // expiryDateViewModel.fetchItemNames(ExpiryUtils.userId)
         // Don't rely on items.clear() directly here, use a fresh copy
         expiryDateViewModel.itemNames.observeOnce(this@ExpiryHomepage) { updatedItemsMap ->
             itemNamesList = updatedItemsMap
@@ -167,8 +184,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            /* R.id.nav_item -> {
+        when (item.itemId) {/* R.id.nav_item -> {
                  showCreateDialog("itemnames")
              }
 
@@ -176,8 +192,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                  showCreateDialog("categorys")
              }*/
 
-            R.id.last3days -> {
-                /* val i = Intent(this@ExpiryHomepage, ExpiryHomepage::class.java)
+            R.id.last3days -> {/* val i = Intent(this@ExpiryHomepage, ExpiryHomepage::class.java)
                  startActivity(i)*/
             }
 
@@ -213,8 +228,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                   } else {
                       Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
                   }
-              }*/
-            /* R.id.alllist -> {
+              }*//* R.id.alllist -> {
                  val i = Intent(this@ExpiryHomepage, ExpiryAllList::class.java)
                  startActivity(i)
              }*/

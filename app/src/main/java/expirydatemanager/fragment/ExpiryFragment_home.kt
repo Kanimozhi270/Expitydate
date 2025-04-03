@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import expirydatemanager.Adapter.ExpiryItemAdapter_home
 import expirydatemanager.fragment.ExpiryViewModelFactory
 import expirydatemanager.others.ExpiryUtils
@@ -45,6 +46,7 @@ class ExpiryFragment_home : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_expiry_home, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewExpiry)
+        val swipeRefreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
         val contentLayout = view.findViewById<LinearLayout>(R.id.contentLayout)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -137,6 +139,7 @@ class ExpiryFragment_home : Fragment() {
             }
 
             adapter?.notifyDataSetChanged()
+            swipeRefreshLayout.isRefreshing = false
         }
 
         addItemViewModel.itemNameResponse.observe(viewLifecycleOwner) { response ->

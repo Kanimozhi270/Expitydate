@@ -42,7 +42,8 @@ class ExpiryItemList : AppCompatActivity() {
         // Get category ID from intent
         val categoryId = intent.getIntExtra("category_id", -1)
         val categoryName = intent.getStringExtra("category_name") ?: "All Items"
-        val itemType = intent.getStringExtra("item_type") ?: "expiry item"
+        val itemType = intent.getStringExtra("item_type") ?: "1"
+
 
         println("itemTypelist===$itemType")
         println("categoryNamelist===$categoryName")

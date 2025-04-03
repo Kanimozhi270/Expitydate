@@ -111,9 +111,9 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
         }
     }
 
-    fun fetchItemNames(userId: Int) {
-        val action = "getItemName"
-        apiService.getItemNames(action, userId).enqueue(object : Callback<HashMap<String, Any>> {
+    fun fetchItemNames(map : HashMap<String, Any>) {
+       // val action = "getItemName"
+        apiService.getItemNames(map).enqueue(object : Callback<HashMap<String, Any>> {
             override fun onResponse(
                 call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
             ) {

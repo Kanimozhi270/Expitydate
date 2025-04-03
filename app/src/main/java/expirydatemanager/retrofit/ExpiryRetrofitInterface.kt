@@ -1,6 +1,5 @@
 package expirydatemanager.retrofit
 
-import com.google.gson.JsonObject
 import expirydatemanager.pojo.ItemList
 import retrofit2.Call
 import retrofit2.http.*
@@ -39,10 +38,7 @@ interface ExpiryRetrofitInterface {
     // Fetch Item Names
     @FormUrlEncoded
     @POST("expiryData")
-    fun getItemNames(
-        @Field("action") action: String,
-        @Field("user_id") userId: Int
-    ): Call<HashMap<String, Any>>
+    fun getItemNames(@FieldMap map: HashMap<String, Any>): Call<HashMap<String, Any>>
 
     //fetch list
     /*@FormUrlEncoded

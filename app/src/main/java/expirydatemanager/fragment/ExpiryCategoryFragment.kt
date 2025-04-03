@@ -48,16 +48,18 @@ class ExpiryCategoryFragment : Fragment() {
             ViewModelProvider(this, viewModelFactory).get(ExpiryViewModel::class.java)
 
         val adapter = ExpiryItemAdapter_cat(itemList) { clickedItem ->
+            val itemType = clickedItem.itemType.toDoubleOrNull()?.toInt() ?: 0
+
             val intent = Intent(requireContext(), ExpiryItemList::class.java)
             intent.putExtra("category_id", clickedItem.id)
             intent.putExtra("category_name", clickedItem.itemName)
-            intent.putExtra("item_type", clickedItem.itemType)
+            intent.putExtra("item_type", itemType)
 
             startActivity(intent)
 
             println("catid===${clickedItem.id}")
             println("catname===${clickedItem.itemName}")
-            println("itemType===${clickedItem.itemType}")
+            println("itemTypecheck===${itemType}")
 
         }
 
@@ -66,7 +68,7 @@ class ExpiryCategoryFragment : Fragment() {
 
         if (ExpiryUtils.isNetworkAvailable(requireContext())) {
             ExpiryUtils.mProgress(requireActivity(), "ஏற்றுகிறது. காத்திருக்கவும் ", true)
-            addItemViewModel.fetchCategories(userId = ExpiryUtils.userId, itemType = "expiry item")
+            addItemViewModel.fetchCategories(userId = ExpiryUtils.userId, itemType = "1")
 
         } else {
             contentLayout.visibility = View.VISIBLE
