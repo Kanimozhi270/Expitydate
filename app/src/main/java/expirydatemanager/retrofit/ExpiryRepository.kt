@@ -25,4 +25,8 @@ class ExpiryRepository(private val api: ExpiryRetrofitInterface) {
         return api.deletecat(requestInputMap)
     }
 
+    suspend fun getItem(requestInputMap: HashMap<String, String>): HashMap<String, Any> {
+        return api.getItem(requestInputMap)
+    }
+
 }

@@ -37,7 +37,8 @@ class ExpiryFragment_home : Fragment() {
     private lateinit var addItemLauncher: ActivityResultLauncher<Intent>
 
     private lateinit var recyclerView: RecyclerView
-    private val itemList = mutableListOf<ItemList.GetList>()  // Store data as a List of Item objects
+    private val itemList =
+        mutableListOf<ItemList.GetList>()  // Store data as a List of Item objects
     var adapter: ExpiryItemAdapter_home? = null
     lateinit var fragmentActivity: AppCompatActivity
     var progressDialog: Dialog? = null
@@ -80,7 +81,9 @@ class ExpiryFragment_home : Fragment() {
                     val inputMap = hashMapOf<String, Any>(
                         "action" to "getlist",
                         "user_id" to ExpiryUtils.userId,
-                        "item_type" to "1"
+                        "item_type" to "1",
+                        "is_days" to "3"
+
                     )
                     addItemViewModel.fetchList1(inputMap)
                 }
@@ -114,6 +117,7 @@ class ExpiryFragment_home : Fragment() {
             InputMap["action"] = "getlist"
             InputMap["user_id"] = ExpiryUtils.userId
             InputMap["item_type"] = "1"
+            InputMap["is_days"] = "3"
 
             addItemViewModel.fetchList1(InputMap)
             // addItemViewModel.deletelist(userId = 989015, 2, )
@@ -149,7 +153,7 @@ class ExpiryFragment_home : Fragment() {
                 this["action"] = "getlist"
                 this["user_id"] = ExpiryUtils.userId
                 this["item_type"] = "1"
-                // this["is_days"] = "3"
+                this["is_days"] = "3"
             }
             println(" itemNameResponse is called =$inputMap")
             addItemViewModel.fetchList1(inputMap)
@@ -167,7 +171,8 @@ class ExpiryFragment_home : Fragment() {
                 val inputMap = hashMapOf<String, Any>(
                     "action" to "getlist",
                     "user_id" to ExpiryUtils.userId,
-                    "item_type" to "1"
+                    "item_type" to "1",
+                    "is_days" to "3"
                 )
                 addItemViewModel.fetchList1(inputMap)
             } else {
@@ -182,7 +187,8 @@ class ExpiryFragment_home : Fragment() {
         val inputMap = hashMapOf<String, Any>(
             "action" to "getlist",
             "user_id" to ExpiryUtils.userId,
-            "item_type" to "1"
+            "item_type" to "1",
+            "is_days" to "3"
         )
         addItemViewModel.fetchList1(inputMap)
         adapter?.notifyDataSetChanged()
@@ -195,6 +201,7 @@ class ExpiryFragment_home : Fragment() {
         InputMap["action"] = "getlist"
         InputMap["user_id"] = ExpiryUtils.userId
         InputMap["item_type"] = "1"
+        InputMap["is_days"] = "3"
 
         progressDialog = ExpiryUtils.mProgress(requireActivity(), "Deleting item...", true)
 

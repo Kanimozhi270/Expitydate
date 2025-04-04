@@ -111,9 +111,22 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
         }
     }
 
-    fun fetchItemNames(map : HashMap<String, Any>) {
-       // val action = "getItemName"
-        apiService.getItemNames(map).enqueue(object : Callback<HashMap<String, Any>> {
+    fun fetchItemNames(map: HashMap<String, String>) {
+        // val action = "getItemName"
+
+
+        viewModelScope.launch {
+            try {
+                val response = repository.getItem(map)
+                _itemNames.value = response
+                println("ExpiryResponse - == ${_itemNames.value}")
+            } catch (t: SocketTimeoutException) {
+                println("exception == ${t.toString()}")
+                _error.value = t.message
+
+            }
+        }
+        /*apiService.getItemNames(map).enqueue(object : Callback<HashMap<String, Any>> {
             override fun onResponse(
                 call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
             ) {
@@ -131,7 +144,7 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
             override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
                 println("_itemNames  ===== ${t.message}")
             }
-        })
+        })*/
     }
 
     fun fetchCategories(userId: Int, itemType: String) {

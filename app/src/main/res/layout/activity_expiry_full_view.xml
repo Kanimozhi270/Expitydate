@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/white"
+    android:orientation="vertical"
     android:padding="16dp">
 
     <!-- Toolbar -->
@@ -19,7 +19,6 @@
         app:titleTextColor="@color/black" />
 
 
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -29,20 +28,20 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="20dp"
+            android:padding="20dp"
             app:cardBackgroundColor="@color/btncolor"
-            android:padding="20dp">
+            app:cardCornerRadius="20dp">
 
             <!-- Inner CardView (White Card) -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="15dp"
-                app:cardElevation="5dp"
-                android:layout_marginTop="5dp"
                 android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:padding="20dp"
                 app:cardBackgroundColor="@color/white"
-                android:padding="20dp">
+                app:cardCornerRadius="15dp"
+                app:cardElevation="5dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -54,19 +53,19 @@
                         android:id="@+id/item_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
                         android:text="Item Name"
                         android:textColor="@color/black"
-                        android:layout_gravity="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:gravity="center" />
+                        android:textStyle="bold" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@android:color/darker_gray"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="8dp"
+                        android:background="@android:color/darker_gray" />
 
                     <!-- Expiry Date -->
                     <LinearLayout
@@ -79,9 +78,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:textStyle="bold"
                             android:text="Expiry Date"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -110,9 +109,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:textStyle="bold"
                             android:text="Reminder"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -127,7 +126,12 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="1"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
                             android:textColor="@color/black" />
+
                     </LinearLayout>
 
                     <!-- Notify Time -->
@@ -141,9 +145,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:textStyle="bold"
                             android:text="Notify Time"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -172,9 +176,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:textStyle="bold"
                             android:text="Notes"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -204,9 +208,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:textStyle="bold"
                             android:text="Category"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -236,9 +240,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:textStyle="bold"
                             android:text="Item Type"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -261,10 +265,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="OK"
-                        android:textColor="@color/white"
+                        android:layout_marginTop="10dp"
                         android:backgroundTint="@color/btncolor"
-                        android:layout_marginTop="10dp"/>
+                        android:text="OK"
+                        android:textColor="@color/white" />
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>

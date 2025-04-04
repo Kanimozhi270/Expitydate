@@ -83,7 +83,9 @@ class ExpiryItemList : AppCompatActivity() {
                 put("is_days", "0")/*if (categoryId != -1) {
                     put("category_id", categoryId.toString())
                 }*/
+
             }
+
 
             addItemViewModel.fetchList1(inputMap)
         } else {
@@ -92,6 +94,7 @@ class ExpiryItemList : AppCompatActivity() {
 
         // Set up RecyclerView
         itemNamesAdapter = ExpiryListAdapter(
+            itemType,
             itemListNew, launcher, this, onDelete = { itemId, itemType ->
                 if (itemType == "item_type") {
                     deleteItem(itemId, itemType) {

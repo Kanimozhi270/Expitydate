@@ -15,6 +15,7 @@ import expirydatemanager.pojo.ItemList
 import nithra.tamil.calendar.expirydatemanager.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 class ExpiryItemAdapter_home(
@@ -26,7 +27,8 @@ class ExpiryItemAdapter_home(
 ) : RecyclerView.Adapter<ExpiryItemAdapter_home.ItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_layout_home, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_layout_home, parent, false)
         return ItemViewHolder(view)
     }
 
@@ -36,10 +38,31 @@ class ExpiryItemAdapter_home(
         val itemName = item.itemName
         val reminderType = item.reminderType?.toString() ?: "No Reminder"
         val expiry_on = item.actionDate?.toString() ?: "No Expiry Date"
+        val expiryDateStr = item.actionDate ?: ""
+        if (expiryDateStr.isNotEmpty()) {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val expiryDate = LocalDate.parse(expiryDateStr, formatter)
+            val currentDate = LocalDate.now()
+
+            val daysBetween = ChronoUnit.DAYS.between(currentDate, expiryDate)
+
+            val reminderBefore = when {
+                daysBetween > 1 -> "$daysBetween days \n Remaining"
+                daysBetween == 1L -> "1 day \n Remaining"
+                daysBetween == 0L -> "Today last"
+                daysBetween < 0L -> "Expired before ${-daysBetween} days"
+                else -> "No Expiry Date"
+            }
+
+            holder.expiryDate.text = reminderBefore
+        } else {
+            holder.expiryDate.text = "No Expiry Date"
+        }
+
 
         holder.serialNumber.text = (position + 1).toString()
         holder.itemName.text = itemName
-        holder.expiryDate.text = reminderType
+        //  holder.expiryDate.text = reminderType
         holder.expiry_on.text = expiry_on
 
         // Handle expiry status
@@ -51,8 +74,11 @@ class ExpiryItemAdapter_home(
             null
         }
 
+
+
         if (expiryDate != null) {
-            val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(currentDate, expiryDate).toInt()
+            val daysBetween =
+                java.time.temporal.ChronoUnit.DAYS.between(currentDate, expiryDate).toInt()
 
             val statusText = when {
                 daysBetween > 1 -> "$daysBetween days remaining"
@@ -82,7 +108,7 @@ class ExpiryItemAdapter_home(
                 putExtra("itemType", item_type)
                 putExtra("isEditMode", "edit")
                 putExtra("list_id", item.id.toString())
-                putExtra("category_id", item.categoryId)
+                putExtra("category_id", item.categoryId.toString())
                 putExtra("category_name", item.categoryName)
                 putExtra("item_id", item.itemId)
                 putExtra("action_date", item.actionDate)

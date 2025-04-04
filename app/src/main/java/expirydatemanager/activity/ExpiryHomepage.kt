@@ -120,7 +120,9 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
         }
-
+        if (!ExpiryUtils.isNetworkAvailable(this)) {
+            return
+        }
         if (ExpiryUtils.isNetworkAvailable(this)) {
             // ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
             val InputMap = HashMap<String, Any>()
@@ -133,17 +135,15 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             // contentLayout.visibility = View.VISIBLE
         }
 
-        val map = HashMap<String,Any>()
+        val map = HashMap<String, String>()
         map["action"] = "getItemName"
-        map["user_id"] = ""+ExpiryUtils.userId
+        map["user_id"] = "" + ExpiryUtils.userId
 
         expiryDateViewModel.fetchItemNames(map)
-       // expiryDateViewModel.fetchItemNames(ExpiryUtils.userId)
+        // expiryDateViewModel.fetchItemNames(ExpiryUtils.userId)
         // Don't rely on items.clear() directly here, use a fresh copy
         expiryDateViewModel.itemNames.observeOnce(this@ExpiryHomepage) { updatedItemsMap ->
             itemNamesList = updatedItemsMap
-
-
         }
 
 

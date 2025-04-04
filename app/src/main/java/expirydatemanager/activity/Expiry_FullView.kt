@@ -17,6 +17,9 @@ import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryFullVie
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 class Expiry_FullView : AppCompatActivity() {
@@ -49,23 +52,52 @@ class Expiry_FullView : AppCompatActivity() {
         )
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-            val intent = intent
+        val intent = intent
         val itemName = intent.getStringExtra("item_name") ?: "N/A"
         val expiryDate = intent.getStringExtra("action_date") ?: "N/A"
-        val reminderBefore = intent.getStringExtra("reminder_type") ?: "N/A"
+        val actionDateStr = intent.getStringExtra("action_date") ?: ""
+        val reminderBefore = if (actionDateStr.isNotEmpty()) {
+            try {
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                val actionDate = LocalDate.parse(actionDateStr, formatter)
+                val currentDate = LocalDate.now()
+                val daysBetween = ChronoUnit.DAYS.between(currentDate, actionDate)
+
+                when {
+                    daysBetween > 1 -> "$daysBetween days remaining"
+                    daysBetween == 1L -> "1 day remaining"
+                    daysBetween == 0L -> "Today last"
+                    daysBetween < 0L -> "Expired before ${-daysBetween} days"
+                    else -> "N/A"
+                }
+            } catch (e: Exception) {
+                "Invalid Date"
+            }
+        } else {
+            "No Expiry Date"
+        }
+
         val notifyTime = intent.getStringExtra("notify_time") ?: "N/A"
         val note = intent.getStringExtra("remark") ?: "N/A"
-       // val category = intent.getStringExtra("category_name") ?: "N/A"
+        val intentCategory = intent.getStringExtra("category_id") ?: "N/A"
         val itemType = intent.getStringExtra("item_type") ?: "N/A"
         val itemId = intent.getStringExtra("item_id") ?: "N/A"
+        val catItemType = if (itemType == "expiry item") "1" else "2"
 
-        addItemViewModel.fetchCategories(ExpiryUtils.userId, "2")
+        binding.reminderBefore.text = reminderBefore
+
+
+
+        addItemViewModel.fetchCategories(ExpiryUtils.userId, catItemType)
         addItemViewModel.categories.observe(this@Expiry_FullView) { categories ->
-            println("obsserve categories=="+categories)
+            println("obsserve categories==" + categories)
+            println("obsserve intentCategory ==" + intentCategory)
+            println("obsserve itemType1 ==" + catItemType)
+            println("obsserve itemType ==" + itemType)
             categoriesList = categories
-            category = ""+getCategoryNameFromId(intent.getIntExtra("category_id",0).toString())
+            category = "" + getCategoryNameFromId(intentCategory)
             println("category new id==$category")
-            binding.category.text=category
+            binding.category.text = category
         }
 
 
@@ -80,7 +112,7 @@ class Expiry_FullView : AppCompatActivity() {
         // Fetch data from server
         if (ExpiryUtils.isNetworkAvailable(this)) {
             ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
-            var cate_id = ""+intent.getStringExtra("category_id")
+            var cate_id = "" + intent.getStringExtra("category_id")
             val inputMap = HashMap<String, Any>().apply {
                 put("action", "getlist")
                 put("user_id", ExpiryUtils.userId)
@@ -116,11 +148,11 @@ class Expiry_FullView : AppCompatActivity() {
 
         binding.itemName.text = itemName
         binding.expiryDate.text = formatDate(expiryDate)
-        binding.reminderBefore.text = "$reminderBefore"+ "Days"
+      //  binding.reminderBefore.text = "$reminderBefore" + "Days"
         binding.notifyTime.text = "$notifyTime"
         binding.notes.text = "$note"
-         binding.category.text = ""+category
-       // binding.category.text = getCategoryIdFromName(binding.category.text.toString().trim()).toString()
+        binding.category.text = "" + category
+        // binding.category.text = getCategoryIdFromName(binding.category.text.toString().trim()).toString()
         binding.itemType.text = "$itemType"
     }
 

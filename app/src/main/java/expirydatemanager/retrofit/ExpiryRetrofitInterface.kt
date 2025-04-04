@@ -89,6 +89,12 @@ interface ExpiryRetrofitInterface {
         @FieldMap params: HashMap<String, Any>
     ):  HashMap<String, Any>
 
+    @FormUrlEncoded
+    @POST("expiryData")
+    suspend fun getItem(
+        @FieldMap params: HashMap<String, String>
+    ): HashMap<String, Any>
+
 
 }
 

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import expirydatemanager.Adapter.ExpiryItemAdapter_cat
 import expirydatemanager.activity.ExpiryItemList
+import expirydatemanager.activity.Expiry_FullView
 import expirydatemanager.others.ExpiryItem
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.retrofit.ExpiryRepository

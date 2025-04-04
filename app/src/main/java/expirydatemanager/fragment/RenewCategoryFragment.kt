@@ -45,17 +45,19 @@ class RenewCategoryFragment : Fragment() {
 
 
         val adapter = ExpiryItemAdapter_cat(itemList) { clickedItem ->
+            println("click item type====${clickedItem.itemType}")
             val itemType = clickedItem.itemType.toDoubleOrNull()?.toInt() ?: 0
+
             val intent = Intent(requireContext(), ExpiryItemList::class.java)
             intent.putExtra("category_id", clickedItem.id)
             intent.putExtra("category_name", clickedItem.itemName)
-            intent.putExtra("item_type", itemType)
+            intent.putExtra("item_type", itemType.toString())
 
             startActivity(intent)
 
             println("catid===${clickedItem.id}")
             println("catname===${clickedItem.itemName}")
-            println("itemType===${clickedItem.itemType}")
+            println("itemType===${itemType}")
 
         }
 
