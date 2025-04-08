@@ -268,7 +268,7 @@ class ExpiryCustomDatePickerDialog(
 
     private fun getYearList(): Array<String> {
         val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
-        return Array(currentYear + 2 - 1940) { index -> (currentYear + 1 - index).toString() } // Until next year
+        return Array(currentYear + 5 - 2015) { index -> (currentYear + 10 - index).toString() } // Until next year
 
     }
 

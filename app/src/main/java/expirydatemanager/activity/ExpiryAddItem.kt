@@ -389,26 +389,38 @@ class AddItemActivity : AppCompatActivity() {
             return false
         }
 
-        // Validate Reminder Before
+        // Validate Reminder Type
         if (selectedReminder.isEmpty()) {
             showToast("Please select a Reminder Type!")
             return false
         }
 
-        // Validate Notify Time (Should be current time or in the future)
-        /* if (notifyTime.contains("HH") || notifyTime.contains("MM") || !isTimeInFutureOrNow(notifyTime)) {
-             showToast("Notify Time should be current time or a future time!")
-             return false
-         }*/
+        // Validate Notify Time selection
+        if (notifyTime.contains("HH") || notifyTime.contains("MM")) {
+            showToast("Please select a valid Notify Time!")
+            return false
+        }
 
-
-        // Validate Notes (optional, if needed)
-        if (note.isEmpty()) {
-            return true // Optional field
+        // ✅ If expiry date is today, notify time must be in the future
+        if (isToday(expiryDate) && !isTimeInFutureOrNow(notifyTime)) {
+            showToast("Notify Time must be in the future!")
+            return false
         }
 
         return true // All validations passed
     }
+
+    private fun isToday(dateStr: String): Boolean {
+        return try {
+            val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
+            val selectedDate = sdf.parse(dateStr)
+            val today = sdf.parse(sdf.format(Date()))
+            selectedDate == today
+        } catch (e: Exception) {
+            false
+        }
+    }
+
 
     private fun isTimeInFutureOrNow(notifyTime: String): Boolean {
         return try {

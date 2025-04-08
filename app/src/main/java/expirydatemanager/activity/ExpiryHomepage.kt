@@ -17,6 +17,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.text.HtmlCompat
 import androidx.core.view.GravityCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -98,8 +99,15 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
         binding = ActivityExpiryDateHomepageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
+        binding.appBar.title = HtmlCompat.fromHtml(
+            "Expiry Date Manager", HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
         setSupportActionBar(binding.appBar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.title = HtmlCompat.fromHtml(
+            "Expiry Date Manager", HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         // Navigation Drawer
         toggle = ActionBarDrawerToggle(
@@ -199,6 +207,10 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
             R.id.category -> {
                 val i = Intent(this@ExpiryHomepage, ExpiryCategory::class.java)
                 i.putExtra("title", "Category")
+                startActivity(i)
+            }
+            R.id.additem -> {
+                val i = Intent(this@ExpiryHomepage, AddItemActivity::class.java)
                 startActivity(i)
             }
 

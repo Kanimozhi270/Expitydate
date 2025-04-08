@@ -81,7 +81,7 @@ class RenewFragment_home : Fragment() {
                         "action" to "getlist",
                         "user_id" to ExpiryUtils.userId,
                         "item_type" to "2",
-                        "is_days" to "3"
+                        //"is_days" to "3"
                     )
                     addItemViewModel.fetchList1(inputMap)
                 }
@@ -103,7 +103,7 @@ class RenewFragment_home : Fragment() {
             inputMap["action"] = "getlist"
             inputMap["user_id"] = ExpiryUtils.userId
             inputMap["item_type"] = "2"
-            inputMap["is_days"] = "3"
+            //inputMap["is_days"] = "3"
             addItemViewModel.fetchList1(inputMap)
         }
 
@@ -115,7 +115,7 @@ class RenewFragment_home : Fragment() {
             InputMap["action"] = "getlist"
             InputMap["user_id"] = ExpiryUtils.userId
             InputMap["item_type"] = "2"
-            InputMap["is_days"] = "3"
+           // InputMap["is_days"] = "3"
 
             addItemViewModel.fetchList1(InputMap)
             // addItemViewModel.deletelist(userId = 989015, 2, )
@@ -148,7 +148,7 @@ class RenewFragment_home : Fragment() {
                 this["action"] = "getlist"
                 this["user_id"] = ExpiryUtils.userId
                 this["item_type"] = "2"
-                this["is_days"] = "3"
+                //this["is_days"] = "3"
             }
             addItemViewModel.fetchList1(inputMap)
         }
@@ -168,7 +168,7 @@ class RenewFragment_home : Fragment() {
                     "action" to "getlist",
                     "user_id" to ExpiryUtils.userId,
                     "item_type" to "2",
-                    "is_days" to "3"
+                    //"is_days" to "3"
                 )
                 addItemViewModel.fetchList1(inputMap)
             } else {
@@ -186,7 +186,7 @@ class RenewFragment_home : Fragment() {
             "action" to "getlist",
             "user_id" to ExpiryUtils.userId,
             "item_type" to "2",
-            "is_days" to "3"
+            //"is_days" to "3"
         )
         addItemViewModel.fetchList1(inputMap)
         adapter?.notifyDataSetChanged()
@@ -199,7 +199,7 @@ class RenewFragment_home : Fragment() {
         InputMap["action"] = "getlist"
         InputMap["user_id"] = ExpiryUtils.userId
         InputMap["item_type"] = "1"
-        InputMap["is_days"] = "3"
+       // InputMap["is_days"] = "3"
 
         progressDialog = ExpiryUtils.mProgress(requireActivity(), "Deleting item...", true)
 

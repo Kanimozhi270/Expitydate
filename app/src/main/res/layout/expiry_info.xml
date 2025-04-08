@@ -41,7 +41,10 @@
                 android:autoLink="all"
                 android:linksClickable="true"
                 android:padding="2dp"
-                android:text="காலாவதி தேதி மேலாண்மை மென்பொருள், தயாரிப்புகள் மற்றும் பொருட்களுக்கான காலாவதி தேதிகளைக் கண்காணிக்கவும் நிர்வகிக்கவும் உதவுகிறது. இதில் தானியங்கி நினைவூட்டல்கள் மற்றும் எச்சரிக்கைகள் போன்ற அம்சங்கள் அடங்கும். "
+                android:text="        Expiry Date Manager helps you track all your important item expiry dates in one place – whether it's groceries, medicines, cosmetics, documents, or warranties. Get timely reminders before items expire and stay organized effortlessly.\n\n
+        உங்கள் முக்கியமான பொருட்களின் காலாவதி தேதிகளை எளிதாகக் கண்காணிக்க உதவும் பயன்பாடு. மருந்துகள், உணவுப் பொருட்கள், சான்றிதழ்கள் அல்லது உத்தரவாதங்கள் என்றாலும் சரி – எதுவும் மீறாமல் நினைவூட்டல்கள் வழங்கப்படும்.
+
+"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="#000" />
             <LinearLayout

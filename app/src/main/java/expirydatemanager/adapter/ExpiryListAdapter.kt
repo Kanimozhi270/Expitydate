@@ -91,7 +91,7 @@ class ExpiryListAdapter(
                 }
 
                 daysBetween < 0L -> {
-                    reminderBefore = "Expired before ${-daysBetween} days"
+                    reminderBefore = "Expired before \n ${-daysBetween} days"
                     textColor = Color.RED // Red
                 }
 

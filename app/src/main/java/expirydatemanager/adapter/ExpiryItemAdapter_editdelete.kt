@@ -102,7 +102,7 @@ class ExpiryItemAdapter_editdelete(
 
     private fun showDeleteConfirmationDialog(itemId: Int, itemType: String) {
         val builder = AlertDialog.Builder(context)
-        builder.setMessage("Are you sure you want to delete this item?")
+        builder.setMessage("Are you sure you want to delete?")
             .setPositiveButton("Yes") { dialog, id ->
                 onDelete(itemId, itemType)
             }.setNegativeButton("No", null)

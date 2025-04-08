@@ -15,8 +15,7 @@ import expirydatemanager.pojo.ItemList
 import nithra.tamil.calendar.expirydatemanager.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.util.Locale
+import java.time.Period
 
 class ExpiryItemAdapter_home(
     private val itemList: MutableList<ItemList.GetList>,
@@ -36,71 +35,59 @@ class ExpiryItemAdapter_home(
         val item = itemList[position]
 
         val itemName = item.itemName
-        val reminderType = item.reminderType?.toString() ?: "No Reminder"
         val expiry_on = item.actionDate?.toString() ?: "No Expiry Date"
-        val expiryDateStr = item.actionDate ?: ""
-        if (expiryDateStr.isNotEmpty()) {
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            val expiryDate = LocalDate.parse(expiryDateStr, formatter)
-            val currentDate = LocalDate.now()
-
-            val daysBetween = ChronoUnit.DAYS.between(currentDate, expiryDate)
-
-            val reminderBefore = when {
-                daysBetween > 1 -> "$daysBetween days \n Remaining"
-                daysBetween == 1L -> "1 day \n Remaining"
-                daysBetween == 0L -> "Today last"
-                daysBetween < 0L -> "Expired before ${-daysBetween} days"
-                else -> "No Expiry Date"
-            }
-
-            holder.expiryDate.text = reminderBefore
-        } else {
-            holder.expiryDate.text = "No Expiry Date"
-        }
-
-
         holder.serialNumber.text = (position + 1).toString()
         holder.itemName.text = itemName
-        //  holder.expiryDate.text = reminderType
         holder.expiry_on.text = expiry_on
 
-        // Handle expiry status
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val currentDate = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault())
         val expiryDate = try {
             LocalDate.parse(item.actionDate, formatter)
         } catch (e: Exception) {
             null
         }
 
-
-
         if (expiryDate != null) {
-            val daysBetween =
-                java.time.temporal.ChronoUnit.DAYS.between(currentDate, expiryDate).toInt()
+            val isFuture = expiryDate.isAfter(currentDate) || expiryDate.isEqual(currentDate)
+            val period = Period.between(currentDate, expiryDate)
+            val absPeriod = if (isFuture) period else Period.between(expiryDate, currentDate)
 
-            val statusText = when {
-                daysBetween > 1 -> "$daysBetween days remaining"
-                daysBetween == 1 -> "1 day remaining"
-                daysBetween == 0 -> "Today last"
-                daysBetween == -1 -> "Expired before 1 day"
-                else -> "Expired before ${-daysBetween} days"
+            val months = absPeriod.months
+            val days = absPeriod.days
+
+            val statusText = if (isFuture) {
+                when {
+                    months > 0 && days > 0 -> "$months month${if (months > 1) "s" else ""} \n $days day${if (days > 1) "s" else ""} remaining"
+                    months > 0 -> "$months month${if (months > 1) "s" else ""} remaining"
+                    days > 1 -> "$days days \n remaining"
+                    days == 1 -> "1 day remaining"
+                    days == 0 -> "Today last"
+                    else -> ""
+                }
+            } else {
+                when {
+                    months > 0 && days > 0 -> "Expired before \n $months month${if (months > 1) "s" else ""} $days day${if (days > 1) "s" else ""}"
+                    months > 0 -> "Expired before \n $months month${if (months > 1) "s" else ""}"
+                    days == 1 -> "Expired before \n 1 day"
+                    else -> "Expired before \n $days days"
+                }
             }
 
-            holder.overdueText.text = statusText
-            holder.overdueText.visibility = View.VISIBLE
+            holder.expiryDate.text = statusText
 
-            // Optional color code
-            holder.overdueText.setTextColor(
-                if (daysBetween >= 0)
+            val totalDaysRemaining = expiryDate.toEpochDay() - currentDate.toEpochDay()
+            holder.expiryDate.setTextColor(
+                if (totalDaysRemaining > 5)
                     contextFromFrag.getColor(R.color.green)
                 else
                     contextFromFrag.getColor(R.color.red)
             )
         } else {
-            holder.overdueText.visibility = View.GONE
+            holder.expiryDate.text = "No Expiry Date"
+            holder.expiryDate.setTextColor(contextFromFrag.getColor(R.color.black)) // default color
         }
+
 
         holder.itemView.setOnClickListener {
             val intent = Intent(contextFromFrag, Expiry_FullView::class.java).apply {
@@ -154,6 +141,5 @@ class ExpiryItemAdapter_home(
         val expiryEdit: LinearLayout = view.findViewById(R.id.expiry_edit)
         val expiryDelete: LinearLayout = view.findViewById(R.id.expiry_delete)
         val serialNumber: TextView = view.findViewById(R.id.serialNumber)
-        val overdueText: TextView = view.findViewById(R.id.overdueText)
     }
 }

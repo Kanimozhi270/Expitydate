@@ -10,17 +10,28 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import expirydatemanager.activity.ExpiryHomepage
-import expirydatemanager.activity.Expiry_FullView
 import nithra.tamil.calendar.expirydatemanager.R
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ExpiryNotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         val itemName = intent?.getStringExtra("itemName") ?: "Item"
         val notificationId = intent?.getIntExtra("notificationId", 0) ?: 0
-        val expiryDate = intent?.getStringExtra("expiryDate") ?: "N/A"  // now in dd_MM_yyyy
+        val expiryDateRaw = intent?.getStringExtra("expiryDate") ?: "N/A"
         val notifyTime = intent?.getStringExtra("notifyTime") ?: ""
         val itemId = intent?.getStringExtra("itemId") ?: ""
+
+        // Format expiryDate to dd-MM-yyyy
+        val expiryDate = try {
+            val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val outputFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+            val parsedDate = LocalDate.parse(expiryDateRaw, inputFormat)
+            parsedDate.format(outputFormat)
+        } catch (e: Exception) {
+            expiryDateRaw.replace("_", "-")  // Fallback for dd_MM_yyyy formats
+        }
 
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -37,8 +48,6 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
 
         val openIntent = Intent(context, ExpiryHomepage::class.java).apply {
             putExtra("itemId", itemId)
-            println("itemIdddre == $itemId")
-
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -48,8 +57,9 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Highlight expiry date using bold styling
-        val message = "🕒 Your item <b>$itemName</b> is expiring on <b><font color='#FF0000'>$expiryDate</font></b>"
+        // Notification message with styled date
+        val message =
+            "🕒 Your item <b>$itemName</b> is expiring on <b><font color='#FF0000'>$expiryDate</font></b>"
 
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.expity_nodata)
@@ -68,6 +78,4 @@ class ExpiryNotificationReceiver : BroadcastReceiver() {
 
         notificationManager.notify(notificationId, notification)
     }
-
-
 }
