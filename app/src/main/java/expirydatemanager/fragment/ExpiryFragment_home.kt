@@ -90,7 +90,7 @@ class ExpiryFragment_home : Fragment() {
             }
 
 
-
+        swipeRefreshLayout.setOnRefreshListener(this@ExpiryFragment_home::refreshList)
         addItemViewModel.deleteitemResponse.observe(viewLifecycleOwner) { response ->
             println("addItemViewModel.deleteitemResponse == $response")
             progressDialog!!.dismiss()  // Hide progress dialog here
@@ -105,7 +105,7 @@ class ExpiryFragment_home : Fragment() {
             inputMap["action"] = "getlist"
             inputMap["user_id"] = ExpiryUtils.userId
             inputMap["item_type"] = "1"
-           // inputMap["is_days"] = "3"
+            // inputMap["is_days"] = "3"
             addItemViewModel.fetchList1(inputMap)
         }
 
@@ -153,7 +153,7 @@ class ExpiryFragment_home : Fragment() {
                 this["action"] = "getlist"
                 this["user_id"] = ExpiryUtils.userId
                 this["item_type"] = "1"
-               //this["is_days"] = "3"
+                //this["is_days"] = "3"
             }
             println(" itemNameResponse is called =$inputMap")
             addItemViewModel.fetchList1(inputMap)
@@ -231,4 +231,3 @@ class ExpiryFragment_home : Fragment() {
         }
     }
 }
-

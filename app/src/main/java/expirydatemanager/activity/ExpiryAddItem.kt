@@ -50,7 +50,6 @@ class AddItemActivity : AppCompatActivity() {
     private var hasPopulatedData = false
     var category_id = ""
 
-    // private val addItemViewModel: ExpiryViewModel by viewModels()
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
     private val addItemViewModel: ExpiryViewModel by viewModels {
         ExpiryViewModelFactory(repository)
@@ -160,11 +159,16 @@ class AddItemActivity : AppCompatActivity() {
 
         binding.etItemName.setOnClickListener {
             if (ExpiryUtils.isNetworkAvailable(this)) {
-                val GetItems =
-                    itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
-                println("GetItems == $GetItems")
+                if (category_id == "") {
+                    Toast.makeText(this, "Please Select a category", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
 
-                showSelectionDialog("Select Item Name", GetItems) { selectedName ->
+                val getItems =
+                    itemNamesList["Items"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+                println("GetItems == $getItems")
+
+                showSelectionDialog("Select Item Name", getItems) { selectedName ->
                     binding.etItemName.setText(selectedName["item_name"] as String)
                 }
             } else {
@@ -174,19 +178,27 @@ class AddItemActivity : AppCompatActivity() {
         }
         println("selectttttrewmn  ====$selectedItemType")
         binding.btnExpiryItem.setOnClickListener {
-            binding.spCategories.text = "Select Category"
+            clearFields()
+            itemNamesList = hashMapOf()
+            categoriesList = hashMapOf()
             println("selectttttrewmn  ====$selectedItemType")
             changeColor(binding.btnExpiryItem, binding.expiryText, true)
             selectedItemType = "1"
             loadCategoriesForSelectedType("1")
 
+
         }
+
+
         binding.btnRenewItem.setOnClickListener {
-            binding.spCategories.text = "Select Category"
+            clearFields()
+            itemNamesList = hashMapOf()
+            categoriesList = hashMapOf()
             println("selectttttrewmn  ====$selectedItemType")
             changeColor(binding.btnRenewItem, binding.renewText, true)
             selectedItemType = "2"
             loadCategoriesForSelectedType("2")
+
 
         }
 
@@ -355,7 +367,7 @@ class AddItemActivity : AppCompatActivity() {
         )
 
         // Reset fields after saving the item
-        clearFields()
+        // clearFields()
     }
 
     private fun validateInputs(): Boolean {
@@ -558,7 +570,7 @@ class AddItemActivity : AppCompatActivity() {
     private fun clearFields() {
         // Clear the EditTexts
         binding.etItemName.text = "Select Item Name"
-        binding.spCategories.text = "Select Catrgory"
+        binding.spCategories.text = "Select Category"
         binding.etExpiryDate.text.clear()
         binding.etNote.text.clear()
         binding.customdatetext.text = ""
@@ -654,16 +666,16 @@ class AddItemActivity : AppCompatActivity() {
             binding.expirySpinnerAmPM.setSelection(amPmIndex)
 
 //            binding.spCategories.text = data["category_name"].toString() ?: ""
-            val categoryId = data["category_id"].toString() ?: "0"
-            println("saveItemToServer  category id== $categoryId")
+            category_id = data["category_id"].toString() ?: "0"
+            println("saveItemToServer  category id== $category_id")
 
             // Call getCategoryNameFromId to fetch the correct category name
-            val categoryName = getCategoryNameFromId(categoryId)
+            val categoryName = getCategoryNameFromId(category_id)
             binding.spCategories.text = categoryName
             if (ExpiryUtils.isNetworkAvailable(this)) {
                 val map = HashMap<String, String>()
                 map["action"] = "getItemName"
-                map["category_id"] = categoryId
+                map["category_id"] = category_id
                 map["item_type"] = selectedItemType.toString()
                 map["user_id"] = "" + ExpiryUtils.userId.toString()
                 println("GET ITEM NAMES == $map")
@@ -728,41 +740,54 @@ class AddItemActivity : AppCompatActivity() {
             binding.customReminder
         )
         when (reminderType) {
-            "1" -> highlightSelectedButton(
-                binding.btnSameDay,
-                defaultColor,
-                selectedColor,
-                textDefaultColor,
-                textSelectedColor,
-                reminderButtons
-            )
 
-            "2" -> highlightSelectedButton(
-                binding.btn2DaysBefore,
-                defaultColor,
-                selectedColor,
-                textDefaultColor,
-                textSelectedColor,
-                reminderButtons
-            )
+            "1" -> {
+                highlightSelectedButton(
+                    binding.btnSameDay,
+                    defaultColor,
+                    selectedColor,
+                    textDefaultColor,
+                    textSelectedColor,
+                    reminderButtons
+                )
+                selectedReminder = "same day"
+            }
 
-            "3" -> highlightSelectedButton(
-                binding.btn1WeekBefore,
-                defaultColor,
-                selectedColor,
-                textDefaultColor,
-                textSelectedColor,
-                reminderButtons
-            )
+            "2" -> {
+                highlightSelectedButton(
+                    binding.btn2DaysBefore,
+                    defaultColor,
+                    selectedColor,
+                    textDefaultColor,
+                    textSelectedColor,
+                    reminderButtons
+                )
+                selectedReminder = "2 days before"
+            }
 
-            "0" -> highlightSelectedButton(
-                binding.customReminder,
-                defaultColor,
-                selectedColor,
-                textDefaultColor,
-                textSelectedColor,
-                reminderButtons
-            )
+            "3" -> {
+                highlightSelectedButton(
+                    binding.btn1WeekBefore,
+                    defaultColor,
+                    selectedColor,
+                    textDefaultColor,
+                    textSelectedColor,
+                    reminderButtons
+                )
+                selectedReminder = "1 week before"
+            }
+
+            "0" -> {
+                highlightSelectedButton(
+                    binding.customReminder,
+                    defaultColor,
+                    selectedColor,
+                    textDefaultColor,
+                    textSelectedColor,
+                    reminderButtons
+                )
+                selectedReminder = "custom"
+            }
         }
     }
 
@@ -895,10 +920,7 @@ class AddItemActivity : AppCompatActivity() {
             println("refreshItemList == $itemType")
             if (itemType == "item_type") {
 
-                /*
-                                val params = HashMap<String, String>().apply {
-                                    this["action"] = "getItemName"
-                                }*/
+
                 val map = HashMap<String, String>()
                 map["action"] = "getItemName"
                 map["category_id"] = category_id.toString()
@@ -939,8 +961,8 @@ class AddItemActivity : AppCompatActivity() {
                     map["category_id"] = category_id.toString()
                     map["item_type"] = selectedItemType.toString()
                     map["user_id"] = "" + ExpiryUtils.userId
-                    binding.etItemName.setText("Select Item Name")
-                    binding.spCategories.setText("Select Category")
+                    /* binding.etItemName.setText("Select Item Name")
+                     binding.spCategories.setText("Select Category")*/
                     addItemViewModel.fetchItemNames(map)
                     addItemViewModel.itemNames.observe(this) { response ->
                         println("Get Item Response == $response")
@@ -961,7 +983,7 @@ class AddItemActivity : AppCompatActivity() {
                 println("EDIT CALLBACK CALLED FOR == $itemName ")
                 println("EDIT CALLBACK CALLED FOR == $itemId ")
                 refreshItemList(itemType)
-
+                category_id = itemId.toString()
                 dialog.dismiss()
             }
 
@@ -1053,6 +1075,7 @@ class AddItemActivity : AppCompatActivity() {
                         if (status == "success") {
                             binding.etItemName.text = newItemName
                             Toast.makeText(this, "Updated Successfully!", Toast.LENGTH_SHORT).show()
+
                             onSuccess.invoke()
                         } else {
                             Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show()
@@ -1108,15 +1131,8 @@ class AddItemActivity : AppCompatActivity() {
 
         } else {
             etItemName.hint = "Enter Item Name"
-            spinnerItemType.visibility = View.VISIBLE
+            spinnerItemType.visibility = View.GONE
 
-            // ✅ Load category list dynamically
-            val categoryList = categoriesList["Category"] as? List<Map<String, Any>> ?: emptyList()
-            val categoryNames = categoryList.mapNotNull { it["category"]?.toString() }
-
-            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoryNames)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerItemType.adapter = adapter
 
         }
 
@@ -1148,6 +1164,7 @@ class AddItemActivity : AppCompatActivity() {
                                 .show()
                             onNewItemCreated(mapOf("item_name" to name))
                             addItemViewModel.itemNameResponse1.removeObservers(this@AddItemActivity)
+                            binding.etItemName.text = name
                         } else {
                             Toast.makeText(
                                 this@AddItemActivity, "Failed to add item!", Toast.LENGTH_SHORT
@@ -1167,22 +1184,47 @@ class AddItemActivity : AppCompatActivity() {
                         this["item_type"] = selectedItemType
                         this["cat_id"] = ""
                     }
+                    binding.etItemName.text = "Select Item Name"
+                    itemNamesList = hashMapOf()
 
                     addItemViewModel.addCategoryToServer(params)
                     addItemViewModel.categoryResponse.observe(this@AddItemActivity) { response ->
                         val status = response["status"]?.toString() ?: ""
+
+                        println("After category added responses == $response")
+
                         if (status == "success") {
+                            val categoryList = response["Category"] as? List<Map<String, Any>>
+                            val lastCategory = categoryList?.lastOrNull()
+                            val lastCategoryId =
+                                lastCategory?.get("id")?.toString()?.replace(".0", "") ?: ""
+
+
+                            println("Last added category_id = $lastCategoryId")
+                            category_id = lastCategoryId
                             Toast.makeText(
-                                this@AddItemActivity, "Category added!", Toast.LENGTH_SHORT
+                                this@AddItemActivity,
+                                "Category added!",
+                                Toast.LENGTH_SHORT
                             ).show()
-                            onNewItemCreated(mapOf("category" to name))
+                            binding.spCategories.text = name
+                            onNewItemCreated(
+                                mapOf(
+                                    "category" to name,
+                                    "category_id" to lastCategoryId
+                                )
+                            )
+
                             addItemViewModel.categoryResponse.removeObservers(this@AddItemActivity)
                         } else {
                             Toast.makeText(
-                                this@AddItemActivity, "Failed to add category!", Toast.LENGTH_SHORT
+                                this@AddItemActivity,
+                                "Failed to add category!",
+                                Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
+
                 }
                 dialog.dismiss()
             } else {
@@ -1342,4 +1384,3 @@ fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observ
         }
     })
 }
-

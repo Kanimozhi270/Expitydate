@@ -19,6 +19,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import expirydatemanager.Adapter.ExpiryItemAdapter_home
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.pojo.ItemList
@@ -52,6 +53,7 @@ class RenewFragment_home : Fragment() {
 
         addItemViewModel =
             ViewModelProvider(this, viewModelFactory).get(ExpiryViewModel::class.java)
+        val swipeRefreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
         addItemLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
@@ -88,7 +90,7 @@ class RenewFragment_home : Fragment() {
             }
 
 
-
+        swipeRefreshLayout.setOnRefreshListener(this@RenewFragment_home::refreshList)
         addItemViewModel.deleteitemResponse.observe(viewLifecycleOwner) { response ->
             println("addItemViewModel.deleteitemResponse == $response")
             progressDialog!!.dismiss()  // Hide progress dialog here
@@ -115,7 +117,7 @@ class RenewFragment_home : Fragment() {
             InputMap["action"] = "getlist"
             InputMap["user_id"] = ExpiryUtils.userId
             InputMap["item_type"] = "2"
-           // InputMap["is_days"] = "3"
+            // InputMap["is_days"] = "3"
 
             addItemViewModel.fetchList1(InputMap)
             // addItemViewModel.deletelist(userId = 989015, 2, )
@@ -137,7 +139,7 @@ class RenewFragment_home : Fragment() {
                 contentLayout.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
             }
-
+            swipeRefreshLayout.isRefreshing = false
             adapter?.notifyDataSetChanged()
         }
 
@@ -199,7 +201,7 @@ class RenewFragment_home : Fragment() {
         InputMap["action"] = "getlist"
         InputMap["user_id"] = ExpiryUtils.userId
         InputMap["item_type"] = "1"
-       // InputMap["is_days"] = "3"
+        // InputMap["is_days"] = "3"
 
         progressDialog = ExpiryUtils.mProgress(requireActivity(), "Deleting item...", true)
 
