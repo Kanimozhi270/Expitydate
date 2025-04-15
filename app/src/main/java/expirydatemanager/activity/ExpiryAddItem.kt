@@ -64,7 +64,8 @@ class AddItemActivity : AppCompatActivity() {
     private var dialog_type = ""
     private var categories = HashMap<String, Any>()
     var itemNamesList: Map<String, Any> = hashMapOf()
-    var categoriesList: Map<String, Any> = hashMapOf()
+    var categoriesExpiryList: Map<String, Any> = hashMapOf()
+    var categoriesRenewList: Map<String, Any> = hashMapOf()
     var selectedType = ""
 
     //private val expiryDateViewModel: ExpiryViewModel by viewModels()
@@ -126,20 +127,39 @@ class AddItemActivity : AppCompatActivity() {
 
 
         // Observe categories from ViewModel
-        addItemViewModel.categories.observe(this, Observer { categories ->
-            categoriesList = categories
-            println("Categories List: $categoriesList")
-            dialog_type = "Category name"
-            ExpiryUtils.mProgress.dismiss()
-            if (categoriesList.isNotEmpty()) {
-                if (isEditMode == "edit" && !hasPopulatedData) {
-                    hasPopulatedData = true
-                    populateItemData()
+        addItemViewModel.expiryCategories.observe(this) { categories ->
+            if (selectedItemType == "1") {
+                categoriesExpiryList = categories
+                ExpiryUtils.mProgress.dismiss()
+                println("Expiry List: $categoriesExpiryList")
+                if (categoriesExpiryList.isNotEmpty()) {
+                    if (isEditMode == "edit" && !hasPopulatedData) {
+                        hasPopulatedData = true
+                        populateItemData()
+                    }
+                } else {
+                    Toast.makeText(this, "No categories available.", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "No categories available.", Toast.LENGTH_SHORT).show()
             }
-        })
+        }
+
+        addItemViewModel.renewCategories.observe(this) { categories ->
+            if (selectedItemType == "2") {
+                categoriesRenewList = categories
+                ExpiryUtils.mProgress.dismiss()
+                println("Renew List: $categoriesRenewList")
+                if (categoriesRenewList.isNotEmpty()) {
+                    if (isEditMode == "edit" && !hasPopulatedData) {
+                        hasPopulatedData = true
+                        populateItemData()
+                    }
+                } else {
+                    Toast.makeText(this, "No categories available.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+
 
 
 
@@ -169,7 +189,7 @@ class AddItemActivity : AppCompatActivity() {
                 println("GetItems == $getItems")
 
                 showSelectionDialog("Select Item Name", getItems) { selectedName ->
-                    binding.etItemName.setText(selectedName["item_name"] as String)
+                    binding.etItemName.text = selectedName["item_name"] as String
                 }
             } else {
                 Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
@@ -180,20 +200,18 @@ class AddItemActivity : AppCompatActivity() {
         binding.btnExpiryItem.setOnClickListener {
             clearFields()
             itemNamesList = hashMapOf()
-            categoriesList = hashMapOf()
+            categoriesExpiryList = hashMapOf()
             println("selectttttrewmn  ====$selectedItemType")
             changeColor(binding.btnExpiryItem, binding.expiryText, true)
             selectedItemType = "1"
             loadCategoriesForSelectedType("1")
-
-
         }
 
 
         binding.btnRenewItem.setOnClickListener {
             clearFields()
             itemNamesList = hashMapOf()
-            categoriesList = hashMapOf()
+            categoriesExpiryList = hashMapOf()
             println("selectttttrewmn  ====$selectedItemType")
             changeColor(binding.btnRenewItem, binding.renewText, true)
             selectedItemType = "2"
@@ -258,25 +276,37 @@ class AddItemActivity : AppCompatActivity() {
 
         binding.spCategories.setOnClickListener {
             if (ExpiryUtils.isNetworkAvailable(this)) {
-                // loadCategoriesForSelectedType()
-                if (categoriesList["Category"] != null) {
-                    val GetcategoryList =
-                        categoriesList["Category"] as MutableList<Map<String, Any>>
+                val categorySourceList: Map<String, Any> = when (selectedItemType) {
+                    "1" -> categoriesExpiryList
+                    "2" -> categoriesRenewList
+                    else -> emptyMap()
+                }
 
+                println("categoriesExpiryList == $categoriesExpiryList")
+                println("categoriesRenewList == $categoriesRenewList")
 
+                val getCategoryList =
+                    categorySourceList.values.toList().filterIsInstance<Map<String, Any>>()
 
-                    showSelectionDialog("Select Category", GetcategoryList) { selectedCategory ->
-
+                if (getCategoryList.isNotEmpty()) {
+                    showSelectionDialog(
+                        "Select Category",
+                        getCategoryList.toMutableList()
+                    ) { selectedCategory ->
                         println("Return Category Id ==${selectedCategory["id"]}")
+
                         binding.etItemName.setText("Select Item Name")
                         binding.spCategories.text = selectedCategory["category"] as String
                         category_id = selectedCategory["id"].toString()
+
                         val map = HashMap<String, String>()
                         map["action"] = "getItemName"
-                        map["category_id"] = selectedCategory["id"].toString()
+                        map["category_id"] = category_id
                         map["item_type"] = selectedItemType.toString()
-                        map["user_id"] = "" + ExpiryUtils.userId.toString()
+                        map["user_id"] = ExpiryUtils.userId.toString()
+
                         println("GET ITEM NAMES == $map")
+
                         ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
                         addItemViewModel.fetchItemNames(map)
                         addItemViewModel.itemNames.observe(this) { response ->
@@ -284,17 +314,13 @@ class AddItemActivity : AppCompatActivity() {
                             itemNamesList = response
                             ExpiryUtils.mProgress.dismiss()
                         }
-
-
                     }
-
+                } else {
+                    Toast.makeText(this, "No categories available.", Toast.LENGTH_SHORT).show()
                 }
-
-
             } else {
                 Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show()
             }
-
         }
 
 
@@ -344,7 +370,7 @@ class AddItemActivity : AppCompatActivity() {
 
         addItemViewModel.addListToServer(
             id = itemId.toString(),
-            categoryId = categoryId,
+            categoryId = category_id.toString().toDouble().toInt(),
             itemType = selectedItemType.toString().toInt(),
             itemId = itemId,
             reminderType = getReminderType(selectedReminder),
@@ -531,8 +557,8 @@ class AddItemActivity : AppCompatActivity() {
 
 
     private fun getCategoryIdFromName(name: String): Int {
-        val categories = categoriesList["Category"] as? List<Map<String, Any>> ?: return 0
-        println("saveItemToServer  category == $categoriesList")
+        val categories = categoriesExpiryList["Category"] as? List<Map<String, Any>> ?: return 0
+        println("saveItemToServer  category == $categoriesExpiryList")
 
         return categories.find { it["category"] == name } // Change "item_name" to "category"
             ?.get("id")?.let {
@@ -695,23 +721,25 @@ class AddItemActivity : AppCompatActivity() {
 
 
     private fun getCategoryNameFromId(id: String): String {
-        val categories =
-            categoriesList["Category"] as? List<Map<String, Any>> ?: return "Unknown Category"
-        println("getCategoryNameFromId -> categoryId: $id")
-        println("Categories List: $categories")
-
-        val category = categories.find {
-            val categoryId = it["id"]
-            val categoryIdAsInt = when (categoryId) {
-                is Double -> categoryId.toInt()
-                is Int -> categoryId
-                is String -> categoryId.toIntOrNull()
-                else -> null
-            }
-            categoryIdAsInt != null && categoryIdAsInt == id.toIntOrNull()
+        // Select the right list based on selectedItemType
+        val categories: Map<String, Any> = when (selectedItemType) {
+            "1" -> categoriesExpiryList
+            "2" -> categoriesRenewList
+            else -> emptyMap()
         }
 
-        return category?.get("category") as? String ?: "Unknown Category"
+        println("getCategoryNameFromId -> categoryId: $id")
+        println("Selected Categories Map: $categories")
+        println("Selected Categories Map: $selectedItemType")
+
+        // Look for matching entry by comparing string/int/double keys
+        val matchedCategory = categories.entries.find { entry ->
+            val keyId = entry.key.toDoubleOrNull()?.toInt()
+            val targetId = id.toIntOrNull()
+            keyId != null && keyId == targetId
+        }?.value as? Map<String, Any>
+
+        return matchedCategory?.get("category") as? String ?: "Unknown Category"
     }
 
 
@@ -948,33 +976,62 @@ class AddItemActivity : AppCompatActivity() {
             } else {
 
                 addItemViewModel.fetchCategories(ExpiryUtils.userId, selectedItemType)
-                addItemViewModel.categories.observeOnce(this@AddItemActivity) { categories ->
-                    categoriesList = categories
-                    val updatedCategories =
-                        categories["Category"] as? List<Map<String, Any>> ?: emptyList()
-                    adapter.updateList(updatedCategories.toMutableList())
-                    recyclerView.adapter =
-                        adapter // <- Force rebind in case observer skipped notify
-                    etSearch.setText("") // Reset search box to show full list
-                    val map = HashMap<String, String>()
-                    map["action"] = "getItemName"
-                    map["category_id"] = category_id.toString()
-                    map["item_type"] = selectedItemType.toString()
-                    map["user_id"] = "" + ExpiryUtils.userId
-                    /* binding.etItemName.setText("Select Item Name")
-                     binding.spCategories.setText("Select Category")*/
-                    addItemViewModel.fetchItemNames(map)
-                    addItemViewModel.itemNames.observe(this) { response ->
-                        println("Get Item Response == $response")
-                        itemNamesList = response
+                if (selectedItemType == "1") {
+                    addItemViewModel.expiryCategories.observeOnce(this@AddItemActivity) { categories ->
+                        categoriesExpiryList = categories
+
+                        val updatedCategories =
+                            categories.values.toList().filterIsInstance<Map<String, Any>>()
+                                .toMutableList()
+                        adapter.updateList(updatedCategories)
+                        recyclerView.adapter =
+                            adapter // Force rebind in case observer skipped notify
+                        etSearch.setText("") // Reset search box to show full list
+
+                        val map = HashMap<String, String>()
+                        map["action"] = "getItemName"
+                        map["category_id"] = category_id.toString()
+                        map["item_type"] = selectedItemType.toString()
+                        map["user_id"] = "${ExpiryUtils.userId}"
+
+                        addItemViewModel.fetchItemNames(map)
+                        addItemViewModel.itemNames.observe(this) { response ->
+                            println("Get Item Response == $response")
+                            itemNamesList = response
+                        }
+                    }
+                } else if (selectedItemType == "2") {
+                    addItemViewModel.renewCategories.observeOnce(this@AddItemActivity) { categories ->
+                        categoriesRenewList = categories
+
+                        val updatedCategories =
+                            categories.values.toList().filterIsInstance<Map<String, Any>>()
+                                .toMutableList()
+                        adapter.updateList(updatedCategories)
+                        recyclerView.adapter =
+                            adapter // Force rebind in case observer skipped notify
+                        etSearch.setText("") // Reset search box to show full list
+
+                        val map = HashMap<String, String>()
+                        map["action"] = "getItemName"
+                        map["category_id"] = category_id.toString()
+                        map["item_type"] = selectedItemType.toString()
+                        map["user_id"] = "${ExpiryUtils.userId}"
+
+                        addItemViewModel.fetchItemNames(map)
+                        addItemViewModel.itemNames.observe(this) { response ->
+                            println("Get Item Response == $response")
+                            itemNamesList = response
+                        }
                     }
                 }
+
             }
         }
 
         adapter = ExpiryItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
             println("SELECTED ITEM ID ==${selectedItem["id"]}")
-            category_id = selectedItem["id"].toString()
+            //category_id = selectedItem["id"].toString()
             onItemSelected(selectedItem)
             dialog.dismiss()
         }, onEdit = { itemName, itemId, itemType ->
@@ -1007,6 +1064,8 @@ class AddItemActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+        etSearch.visibility = if (items.size >= 10) View.VISIBLE else View.GONE
+
 
         // Search functionality
         etSearch.addTextChangedListener {
@@ -1174,7 +1233,7 @@ class AddItemActivity : AppCompatActivity() {
                 } else if (tableName == "categorys") {
                     val selectedCategory = spinnerItemType.selectedItem?.toString() ?: ""
                     val selectedCategoryId =
-                        (categoriesList["Category"] as? List<Map<String, Any>>)?.find { it["category"] == selectedCategory }
+                        (categoriesExpiryList["Category"] as? List<Map<String, Any>>)?.find { it["category"] == selectedCategory }
                             ?.get("id").toString()
 
                     val params = HashMap<String, Any>().apply {
@@ -1203,24 +1262,19 @@ class AddItemActivity : AppCompatActivity() {
                             println("Last added category_id = $lastCategoryId")
                             category_id = lastCategoryId
                             Toast.makeText(
-                                this@AddItemActivity,
-                                "Category added!",
-                                Toast.LENGTH_SHORT
+                                this@AddItemActivity, "Category added!", Toast.LENGTH_SHORT
                             ).show()
                             binding.spCategories.text = name
                             onNewItemCreated(
                                 mapOf(
-                                    "category" to name,
-                                    "category_id" to lastCategoryId
+                                    "category" to name, "category_id" to lastCategoryId
                                 )
                             )
 
                             addItemViewModel.categoryResponse.removeObservers(this@AddItemActivity)
                         } else {
                             Toast.makeText(
-                                this@AddItemActivity,
-                                "Failed to add category!",
-                                Toast.LENGTH_SHORT
+                                this@AddItemActivity, "Failed to add category!", Toast.LENGTH_SHORT
                             ).show()
                         }
                     }

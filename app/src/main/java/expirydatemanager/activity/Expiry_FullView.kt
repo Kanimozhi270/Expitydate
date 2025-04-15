@@ -89,16 +89,21 @@ class Expiry_FullView : AppCompatActivity() {
 
 
         addItemViewModel.fetchCategories(ExpiryUtils.userId, catItemType)
-        addItemViewModel.categories.observe(this@Expiry_FullView) { categories ->
-            println("obsserve categories==" + categories)
-            println("obsserve intentCategory ==" + intentCategory)
-            println("obsserve itemType1 ==" + catItemType)
-            println("obsserve itemType ==" + itemType)
-            categoriesList = categories
-            category = "" + getCategoryNameFromId(intentCategory)
-            println("category new id==$category")
-            binding.category.text = category
+
+        if (catItemType == "1") {
+            addItemViewModel.expiryCategories.observe(this@Expiry_FullView) { categories ->
+                categoriesList = categories
+                category = getCategoryNameFromId(intentCategory, categories)
+                binding.category.text = category
+            }
+        } else {
+            addItemViewModel.renewCategories.observe(this@Expiry_FullView) { categories ->
+                categoriesList = categories
+                category = getCategoryNameFromId(intentCategory, categories)
+                binding.category.text = category
+            }
         }
+
 
 
         println("itemidddd====$itemId")
@@ -148,7 +153,7 @@ class Expiry_FullView : AppCompatActivity() {
 
         binding.itemName.text = itemName
         binding.expiryDate.text = formatDate(expiryDate)
-      //  binding.reminderBefore.text = "$reminderBefore" + "Days"
+        //  binding.reminderBefore.text = "$reminderBefore" + "Days"
         binding.notifyTime.text = "$notifyTime"
         binding.notes.text = "$note"
         binding.category.text = "" + category
@@ -157,22 +162,15 @@ class Expiry_FullView : AppCompatActivity() {
     }
 
 
-    private fun getCategoryNameFromId(id: String): String {
-        val categories =
-            categoriesList["Category"] as? List<Map<String, Any>> ?: return "Unknown Category"
+    private fun getCategoryNameFromId(id: String, categoriesMap: Map<String, Any>): String {
         println("getCategoryNameFromId -> categoryId: $id")
-        println("Categories List: $categories")
+        println("Categories Map: $categoriesMap")
 
-        val category = categories.find {
-            val categoryId = it["id"]
-            val categoryIdAsInt = when (categoryId) {
-                is Double -> categoryId.toInt()
-                is Int -> categoryId
-                is String -> categoryId.toIntOrNull()
-                else -> null
-            }
-            categoryIdAsInt != null && categoryIdAsInt == id.toIntOrNull()
-        }
+        val category = categoriesMap.entries.find { entry ->
+            val keyId = entry.key.toDoubleOrNull()?.toInt()
+            val targetId = id.toIntOrNull()
+            keyId != null && keyId == targetId
+        }?.value as? Map<String, Any>
 
         return category?.get("category") as? String ?: "Unknown Category"
     }

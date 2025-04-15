@@ -73,23 +73,23 @@ class RenewCategoryFragment : Fragment() {
             contentLayout.visibility = View.VISIBLE
         }
 
-        addItemViewModel.categories.observe(viewLifecycleOwner) { response ->
-            println("addItemViewModel.categories == $response")
+        addItemViewModel.renewCategories.observe(viewLifecycleOwner) { categoriesMap ->
+            println("addItemViewModel.renewCategories == $categoriesMap")
 
-            val categories = (response["Category"] as? List<Map<String, Any>>)?.map {
-                val id = (it["id"] as? Double)?.toInt() ?: 0
-                val category = it["category"]?.toString() ?: ""
-                itemType = it["item_type"]?.toString() ?: ""
+            val categories = categoriesMap.values.toList().mapNotNull {
+                val map = it as? Map<String, Any>
+                val id = (map?.get("id") as? Double)?.toInt() ?: return@mapNotNull null
+                val category = map["category"]?.toString() ?: return@mapNotNull null
+                val itemType = map["item_type"]?.toString() ?: ""
                 ExpiryItem(id, category, "", itemType)
-            } ?: emptyList()
+            }
 
             ExpiryUtils.mProgress.dismiss()
 
             itemList.clear()
             itemList.addAll(categories)
-            adapter.notifyDataSetChanged()
+            recyclerView.adapter?.notifyDataSetChanged()
 
-            // ✅ Show empty view if list is empty
             if (itemList.isEmpty()) {
                 contentLayout.visibility = View.VISIBLE
                 recyclerView.visibility = View.GONE
@@ -98,6 +98,7 @@ class RenewCategoryFragment : Fragment() {
                 recyclerView.visibility = View.VISIBLE
             }
         }
+
 
 
         return view

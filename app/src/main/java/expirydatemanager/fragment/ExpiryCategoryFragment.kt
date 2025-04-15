@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -15,15 +14,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import expirydatemanager.Adapter.ExpiryItemAdapter_cat
 import expirydatemanager.activity.ExpiryItemList
-import expirydatemanager.activity.Expiry_FullView
 import expirydatemanager.others.ExpiryItem
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.retrofit.ExpiryRepository
 import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
-
-
 class ExpiryCategoryFragment : Fragment() {
 
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
@@ -76,23 +72,23 @@ class ExpiryCategoryFragment : Fragment() {
 
         }
 
-        addItemViewModel.categories.observe(viewLifecycleOwner) { response ->
-            println("addItemViewModel.categories == $response")
+        addItemViewModel.expiryCategories.observe(viewLifecycleOwner) { categoriesMap ->
+            println("addItemViewModel.expiryCategories == $categoriesMap")
 
-            val categories = (response["Category"] as? List<Map<String, Any>>)?.map {
-                val id = (it["id"] as? Double)?.toInt() ?: 0
-                val category = it["category"]?.toString() ?: ""
-                itemType = it["item_type"]?.toString() ?: ""
+            val categories = categoriesMap.values.toList().mapNotNull {
+                val map = it as? Map<String, Any>
+                val id = (map?.get("id") as? Double)?.toInt() ?: return@mapNotNull null
+                val category = map["category"]?.toString() ?: return@mapNotNull null
+                val itemType = map["item_type"]?.toString() ?: ""
                 ExpiryItem(id, category, "", itemType)
-            } ?: emptyList()
+            }
 
             ExpiryUtils.mProgress.dismiss()
 
             itemList.clear()
             itemList.addAll(categories)
-            adapter.notifyDataSetChanged()
+            recyclerView.adapter?.notifyDataSetChanged()
 
-            // ✅ Show empty view if list is empty
             if (itemList.isEmpty()) {
                 contentLayout.visibility = View.VISIBLE
                 recyclerView.visibility = View.GONE
@@ -101,6 +97,7 @@ class ExpiryCategoryFragment : Fragment() {
                 recyclerView.visibility = View.VISIBLE
             }
         }
+
 
         return view
     }

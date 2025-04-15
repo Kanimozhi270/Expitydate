@@ -37,6 +37,13 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
     private val _categoryResponse = MutableLiveData<HashMap<String, Any>>()
     val categoryResponse: LiveData<HashMap<String, Any>> get() = _categoryResponse
 
+    private val _expiryCategories = MutableLiveData<Map<String, Any>>()
+    val expiryCategories: LiveData<Map<String, Any>> get() = _expiryCategories
+
+    private val _renewCategories = MutableLiveData<Map<String, Any>>()
+    val renewCategories: LiveData<Map<String, Any>> get() = _renewCategories
+
+
     private val _listResponse = MutableLiveData<String>()
     val listResponse: LiveData<String> get() = _listResponse
 
@@ -157,11 +164,30 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
                     call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
                 ) {
                     if (response.isSuccessful) {
-                        val categoryMap = response.body() ?: mapOf()
-                        _categories.value = categoryMap as HashMap<String, Any>
+                        val fullMap = response.body() ?: mapOf()
 
+                        val categoryList = fullMap["Category"] as? List<Map<String, Any>> ?: emptyList()
+
+                        val expiryMap = mutableMapOf<String, Any>()
+                        val renewMap = mutableMapOf<String, Any>()
+
+                        for (item in categoryList) {
+                            val itemType = (item["item_type"] as? Double)?.toInt() ?: 0
+                            val categoryId = item["id"].toString()
+
+                            if (itemType == 1) {
+                                expiryMap[categoryId] = item
+                            } else if (itemType == 2) {
+                                renewMap[categoryId] = item
+                            }
+                        }
+
+                        // Post to both LiveData or one depending on your use case
+                        _expiryCategories.value = expiryMap
+                        _renewCategories.value = renewMap
                     }
                 }
+
 
                 override fun onFailure(call: Call<HashMap<String, Any>>, t: Throwable) {
                     println("_categories  ===== ${t.message}")
@@ -295,7 +321,8 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
                 println("exception == ${t.toString()}")
                 _error.value = t.message
             }
-        }/* println("item name send to server==$params")
+        }
+        /* println("item name send to server==$params")
         apiService.deletecat(params).enqueue(object : Callback<HashMap<String, Any>> {
         override fun onResponse(
         call: Call<HashMap<String, Any>>, response: Response<HashMap<String, Any>>
@@ -336,5 +363,4 @@ class ExpiryViewModel(val repository: ExpiryRepository) : ViewModel() {
 
 
 }
-
 

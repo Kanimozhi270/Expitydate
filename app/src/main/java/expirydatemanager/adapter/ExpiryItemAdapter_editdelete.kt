@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import nithra.tamil.calendar.expirydatemanager.R
-
 class ExpiryItemAdapter_editdelete(
     private val context: Context,
     var items: MutableList<Map<String, Any>>,
@@ -36,10 +35,9 @@ class ExpiryItemAdapter_editdelete(
     fun updateList(newItems: MutableList<Map<String, Any>>) {
         this.items.clear()
         this.items.addAll(newItems)
-        this.filteredItems = newItems.toMutableList() // 🔥 update this too!
+        this.filteredItems = newItems.toMutableList()
         notifyDataSetChanged()
     }
-
 
     inner class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvItemName: TextView = view.findViewById(R.id.tvItemName)
@@ -63,6 +61,8 @@ class ExpiryItemAdapter_editdelete(
 
         } else if (item.containsKey("category")) {
             holder.tvItemName.text = filteredItems[position]["category"] as String? ?: ""
+            holder.btnEdit.visibility = if (position < 9) View.GONE else View.VISIBLE
+            holder.btnDelete.visibility = if (position < 9) View.GONE else View.VISIBLE
         }
         // Handle edit button click
         holder.btnEdit.setOnClickListener {
@@ -71,7 +71,7 @@ class ExpiryItemAdapter_editdelete(
             var itemId = 0
             if (item.containsKey("item_name")) {
                 itemName = item["item_name"]?.toString() ?: ""
-                itemType = "item_type" // ✅ this is correct
+                itemType = "item_type"
             } else if (item.containsKey("category")) {
                 itemName = item["category"]?.toString() ?: ""
                 itemType = "categorys" // ✅ should match how you check in refresh
