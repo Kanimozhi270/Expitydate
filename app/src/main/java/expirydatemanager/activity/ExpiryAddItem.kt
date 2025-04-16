@@ -433,6 +433,12 @@ class AddItemActivity : AppCompatActivity() {
             return false
         }
 
+        // Validate notes
+        if (note.isEmpty()) {
+            showToast("Please Enter your Notes")
+            return false
+        }
+
         // Validate Notify Time selection
         if (notifyTime.contains("HH") || notifyTime.contains("MM")) {
             showToast("Please select a valid Notify Time!")
@@ -974,7 +980,7 @@ class AddItemActivity : AppCompatActivity() {
 
                 }
             } else {
-
+                  etSearch.setText("Select Your Category Name")
                 addItemViewModel.fetchCategories(ExpiryUtils.userId, selectedItemType)
                 if (selectedItemType == "1") {
                     addItemViewModel.expiryCategories.observeOnce(this@AddItemActivity) { categories ->
@@ -1181,18 +1187,20 @@ class AddItemActivity : AppCompatActivity() {
         val etItemName = dialog.findViewById<EditText>(R.id.etItemName)
         val spinnerItemType = dialog.findViewById<android.widget.Spinner>(R.id.spinnerItemType)
         val btnCreate = dialog.findViewById<Button>(R.id.btnCreate)
+        val selecttext = dialog.findViewById<TextView>(R.id.selecttext)
+
 
         println("Show create dialog tableName ==$tableName")
 
         if (tableName == "categorys") {
             etItemName.hint = "Enter Category Name"
             spinnerItemType.visibility = View.GONE
+            selecttext.text = "Create Your Category Name"
 
         } else {
             etItemName.hint = "Enter Item Name"
             spinnerItemType.visibility = View.GONE
-
-
+            selecttext.text = "Select Your Item Name"
         }
 
         btnCreate.setOnClickListener {

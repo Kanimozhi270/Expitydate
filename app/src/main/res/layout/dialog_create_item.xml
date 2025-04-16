@@ -8,6 +8,14 @@
     android:padding="20dp"
     android:background="@drawable/expiry_rounded_dialog_background">
 
+    <TextView
+        android:id="@+id/selecttext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:text="Select Your Item Name"
+        android:textStyle="bold"/>
+
     <Spinner
         android:id="@+id/spinnerItemType"
         android:layout_width="match_parent"

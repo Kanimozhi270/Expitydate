@@ -76,26 +76,27 @@
                         android:padding="5dp">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
                             android:text="Expiry Date"
                             android:textColor="@color/black"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4.5"
                             android:gravity="center"
+                            android:layout_marginStart="10dp"
                             android:text=":"
                             android:textColor="@color/black" />
 
                         <TextView
                             android:id="@+id/expiry_date"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
                             android:layout_weight="3"
+
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
                             android:textColor="@color/black" />
                     </LinearLayout>
 
@@ -107,18 +108,17 @@
                         android:padding="5dp">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
                             android:text="Reminder"
                             android:textColor="@color/black"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4.5"
                             android:gravity="center"
+                            android:layout_marginStart="10dp"
                             android:text=":"
                             android:textColor="@color/black" />
 
@@ -128,6 +128,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
                             android:ellipsize="end"
+                            android:layout_marginStart="10dp"
                             android:maxLines="1"
                             android:text="1"
                             android:textAppearance="@style/TextAppearance.AppCompat.Small"
@@ -143,19 +144,18 @@
                         android:padding="5dp">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
                             android:text="Notify Time"
                             android:textColor="@color/black"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4.5"
                             android:gravity="center"
                             android:text=":"
+                            android:layout_marginStart="10dp"
                             android:textColor="@color/black" />
 
                         <TextView
@@ -163,6 +163,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:layout_marginStart="10dp"
                             android:textColor="@color/black" />
                     </LinearLayout>
 
@@ -174,18 +175,17 @@
                         android:padding="5dp">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
                             android:text="Notes"
                             android:textColor="@color/black"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4.5"
                             android:gravity="center"
+                            android:layout_marginStart="10dp"
                             android:text=":"
                             android:textColor="@color/black" />
 
@@ -193,6 +193,7 @@
                             android:id="@+id/notes"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
                             android:layout_weight="3"
                             android:text="-----"
                             android:textColor="@color/black" />
@@ -206,19 +207,18 @@
                         android:padding="5dp">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
                             android:text="Category"
                             android:textColor="@color/black"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4.5"
                             android:gravity="center"
                             android:text=":"
+                            android:layout_marginStart="10dp"
                             android:textColor="@color/black" />
 
                         <TextView
@@ -226,6 +226,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:layout_marginStart="10dp"
                             android:text="Category"
                             android:textColor="@color/black" />
                     </LinearLayout>
@@ -238,18 +239,17 @@
                         android:padding="5dp">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
                             android:text="Item Type"
                             android:textColor="@color/black"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4.5"
                             android:gravity="center"
+                            android:layout_marginStart="10dp"
                             android:text=":"
                             android:textColor="@color/black" />
 
@@ -258,6 +258,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
+                            android:layout_marginStart="10dp"
+
                             android:textColor="@color/black" />
                     </LinearLayout>
 

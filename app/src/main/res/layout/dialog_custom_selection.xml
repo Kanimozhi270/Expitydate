@@ -17,6 +17,15 @@
         android:drawableEnd="@drawable/expiry_ic_search_24"
         android:drawablePadding="8dp" />
 
+    <TextView
+        android:id="@+id/selecttext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16dp"
+        android:textColor="@color/black"
+        android:text="Select Your Item Name"
+        android:textStyle="bold"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
