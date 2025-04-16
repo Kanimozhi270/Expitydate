@@ -10,15 +10,15 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import expirydatemanager.fragment.ExpiryCategoryFragment
 import expirydatemanager.fragment.RenewCategoryFragment
-import nithra.tamil.calendar.expirydatemanager.databinding.ActivityCategoryBinding
+import nithra.tamil.calendar.expirydatemanager.databinding.SmExpiryActivityCategoryBinding
 
 class ExpiryCategory : AppCompatActivity() {
 
-    private lateinit var binding: ActivityCategoryBinding
+    private lateinit var binding: SmExpiryActivityCategoryBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCategoryBinding.inflate(layoutInflater)
+        binding = SmExpiryActivityCategoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.appBar.title = HtmlCompat.fromHtml(

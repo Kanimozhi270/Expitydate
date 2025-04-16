@@ -13,7 +13,7 @@ import expirydatemanager.fragment.ExpiryViewModelFactory
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.pojo.ItemList
 import expirydatemanager.retrofit.ExpiryRepository
-import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryFullViewBinding
+import nithra.tamil.calendar.expirydatemanager.databinding.SmExpiryActivityExpiryFullViewBinding
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
 import java.text.SimpleDateFormat
@@ -24,7 +24,7 @@ import java.util.Locale
 
 class Expiry_FullView : AppCompatActivity() {
 
-    private lateinit var binding: ActivityExpiryFullViewBinding
+    private lateinit var binding: SmExpiryActivityExpiryFullViewBinding
     private lateinit var launcher: ActivityResultLauncher<Intent>
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
     var categoriesList: Map<String, Any> = hashMapOf()
@@ -40,7 +40,7 @@ class Expiry_FullView : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityExpiryFullViewBinding.inflate(layoutInflater)
+        binding = SmExpiryActivityExpiryFullViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.appBar.title = HtmlCompat.fromHtml(

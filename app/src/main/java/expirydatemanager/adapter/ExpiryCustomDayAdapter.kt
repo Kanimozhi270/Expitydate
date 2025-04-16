@@ -36,7 +36,7 @@ class ExpiryCustomDayAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.activity_aanmeega_date_item, parent, false)
+            .inflate(R.layout.sm_expiry_activity_expiry_date_item, parent, false)
         return DayViewHolder(view)
     }
 

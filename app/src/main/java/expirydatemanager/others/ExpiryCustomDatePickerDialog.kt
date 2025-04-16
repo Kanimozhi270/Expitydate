@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import expirydatemanager.Adapter.ExpiryCustomDayAdapter
-import nithra.tamil.calendar.expirydatemanager.databinding.ActivityAanmeegaDatePickerDialogBinding
+import nithra.tamil.calendar.expirydatemanager.databinding.SmExpiryActivityExpiryDatePickerDialogBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -24,7 +24,7 @@ class ExpiryCustomDatePickerDialog(
     private var initialDate: String? = null // <-- Added this parameter
 ) : DialogFragment() {
 
-    private lateinit var binding: ActivityAanmeegaDatePickerDialogBinding
+    private lateinit var binding: SmExpiryActivityExpiryDatePickerDialogBinding
     private val calendar = Calendar.getInstance()
     private var selectedDay: String? = null
     private var selectedMonth: Int? = null
@@ -32,7 +32,7 @@ class ExpiryCustomDatePickerDialog(
     var lastvalue = ""
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        binding = ActivityAanmeegaDatePickerDialogBinding.inflate(layoutInflater)
+        binding = SmExpiryActivityExpiryDatePickerDialogBinding.inflate(layoutInflater)
 
         val dialog = AlertDialog.Builder(
             requireContext(),

@@ -46,7 +46,7 @@ class ExpiryItemAdapter_editdelete(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.item_row_editdelete, parent, false)
+        val view = LayoutInflater.from(context).inflate(R.layout.sm_expiry_item_row_editdelete, parent, false)
         return ItemViewHolder(view)
     }
 

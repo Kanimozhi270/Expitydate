@@ -78,7 +78,7 @@
         android:background="@color/white"
         app:itemTextColor="@android:color/black"
         app:itemIconTint="@android:color/black"
-        app:headerLayout="@layout/drawer_header"
+        app:headerLayout="@layout/sm_expiry_drawer_header"
         app:menu="@menu/drawer_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

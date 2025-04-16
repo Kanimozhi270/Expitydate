@@ -15,7 +15,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +23,6 @@ import expirydatemanager.Adapter.ExpiryItemAdapter_home
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.pojo.ItemList
 import expirydatemanager.retrofit.ExpiryRepository
-import expirydatemanager.retrofit.ExpiryRetrofitInterface
 import nithra.tamil.calendar.expirydatemanager.R
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
@@ -46,7 +44,7 @@ class RenewFragment_home : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_expiry_home, container, false)
+        val view = inflater.inflate(R.layout.sm_expiry_fragment_expiry_home, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewExpiry)
         val contentLayout = view.findViewById<LinearLayout>(R.id.contentLayout)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())

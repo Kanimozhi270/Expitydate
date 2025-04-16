@@ -41,7 +41,7 @@ class ExpiryListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_name_layout, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.sm_expiry_item_name_layout, parent, false)
         return ItemViewHolder(view)
     }
 

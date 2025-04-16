@@ -36,7 +36,7 @@ class ExpiryCategoryFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_expiry_cat, container, false)
+        val view = inflater.inflate(R.layout.sm_expiry_fragment_expiry_cat, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewExpiry)
         val contentLayout = view.findViewById<LinearLayout>(R.id.contentLayout)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())

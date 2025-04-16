@@ -34,14 +34,14 @@ import expirydatemanager.others.ExpirySharedPreference
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.retrofit.ExpiryRepository
 import nithra.tamil.calendar.expirydatemanager.R
-import nithra.tamil.calendar.expirydatemanager.databinding.ActivityExpiryDateHomepageBinding
+import nithra.tamil.calendar.expirydatemanager.databinding.SmExpiryDateHomepageBinding
 import nithra.tamil.calendar.expirydatemanager.fragment.ExpiryFragment_home
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
 
 class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var binding: ActivityExpiryDateHomepageBinding
+    private lateinit var binding: SmExpiryDateHomepageBinding
     private lateinit var toggle: ActionBarDrawerToggle
     val sharedPreference = ExpirySharedPreference()
 
@@ -96,7 +96,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityExpiryDateHomepageBinding.inflate(layoutInflater)
+        binding = SmExpiryDateHomepageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
 
@@ -277,7 +277,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
     ) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_custom_selection, null)
+        val dialogView = inflater.inflate(R.layout.sm_expiry_dialog_custom_selection, null)
         builder.setView(dialogView)
 
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.recyclerView)
@@ -326,7 +326,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
 
     private fun showCreateDialog(tableName: String) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_create_item)
+        dialog.setContentView(R.layout.sm_expity_dialog_create_item)
         dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
 
         val etItemName = dialog.findViewById<EditText>(R.id.etItemName)
@@ -415,7 +415,7 @@ class ExpiryHomepage : AppCompatActivity(), NavigationView.OnNavigationItemSelec
                     this@ExpiryHomepage,
                     android.R.style.Theme_Material_Light_Dialog_NoActionBar_MinWidth
                 )
-                infoDialog.setContentView(R.layout.expiry_info)
+                infoDialog.setContentView(R.layout.sm_expiry_info)
                 infoDialog.window!!.setBackgroundDrawable(ColorDrawable(0))
                 val btnSend: AppCompatButton = infoDialog.findViewById(R.id.btnSend)
                 btnSend.setOnClickListener { infoDialog.dismiss() }

@@ -27,7 +27,7 @@ class ExpiryItemAdapter_home(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_layout_home, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.sm_expiry_item_layout_home, parent, false)
         return ItemViewHolder(view)
     }
 

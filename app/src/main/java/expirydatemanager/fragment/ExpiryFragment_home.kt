@@ -45,7 +45,7 @@ class ExpiryFragment_home : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_expiry_home, container, false)
+        val view = inflater.inflate(R.layout.sm_expiry_fragment_expiry_home, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewExpiry)
         val swipeRefreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout)
         val contentLayout = view.findViewById<LinearLayout>(R.id.contentLayout)

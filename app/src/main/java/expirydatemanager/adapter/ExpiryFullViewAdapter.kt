@@ -1,17 +1,13 @@
 package expirydatemanager.adapter
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.recyclerview.widget.RecyclerView
-import expirydatemanager.activity.AddItemActivity
-import expirydatemanager.activity.Expiry_FullView
 import expirydatemanager.pojo.ItemList
 import nithra.tamil.calendar.expirydatemanager.R
 
@@ -37,7 +33,7 @@ class ExpiryFullViewAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.activity_expiry_full_view, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.sm_expiry_activity_expiry_full_view, parent, false)
         return ItemViewHolder(view)
     }
 

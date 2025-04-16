@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:textSize="16dp"
         android:textColor="@color/black"
-        android:text="Select Your Item Name"
+        android:text="Select Your Category Name"
         android:textStyle="bold"/>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -32,6 +32,16 @@
         android:layout_height="match_parent"
         android:layout_marginTop="8dp"
         android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/nodata"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="gone"
+        android:textSize="20dp"
+        android:text="No Data \n click Add New "/>
 
     <Button
         android:id="@+id/btnCustomAction"

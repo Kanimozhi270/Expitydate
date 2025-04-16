@@ -10,7 +10,6 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import nithra.tamil.calendar.expirydatemanager.R
 
 object ExpiryUtils {
@@ -28,7 +27,7 @@ object ExpiryUtils {
         mProgress = Dialog(
             context!!, android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar_MinWidth
         )
-        mProgress.setContentView(R.layout.layout_dialog_loading)
+        mProgress.setContentView(R.layout.sm_expiry_layout_dialog_loading)
         if (mProgress.window != null) {
             mProgress.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }

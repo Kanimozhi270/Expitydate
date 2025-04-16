@@ -26,6 +26,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import expirydatemanager.Adapter.ExpiryItemAdapter_editdelete
@@ -35,7 +36,7 @@ import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.retrofit.ExpiryRepository
 import nithra.tamil.calendar.expirydatemanager.Notification.ExpiryNotificationReceiver
 import nithra.tamil.calendar.expirydatemanager.R
-import nithra.tamil.calendar.expirydatemanager.databinding.ActivityAdditemBinding
+import nithra.tamil.calendar.expirydatemanager.databinding.SmExpiryActivityAdditemBinding
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
 import java.text.SimpleDateFormat
@@ -46,7 +47,7 @@ import java.util.Locale
 
 class AddItemActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityAdditemBinding
+    private lateinit var binding: SmExpiryActivityAdditemBinding
     private var hasPopulatedData = false
     var category_id = ""
 
@@ -80,7 +81,7 @@ class AddItemActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAdditemBinding.inflate(layoutInflater)
+        binding = SmExpiryActivityAdditemBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.appBar.title = HtmlCompat.fromHtml(
@@ -199,25 +200,16 @@ class AddItemActivity : AppCompatActivity() {
         println("selectttttrewmn  ====$selectedItemType")
         binding.btnExpiryItem.setOnClickListener {
             clearFields()
-            itemNamesList = hashMapOf()
-            categoriesExpiryList = hashMapOf()
-            println("selectttttrewmn  ====$selectedItemType")
             changeColor(binding.btnExpiryItem, binding.expiryText, true)
             selectedItemType = "1"
             loadCategoriesForSelectedType("1")
         }
 
-
         binding.btnRenewItem.setOnClickListener {
             clearFields()
-            itemNamesList = hashMapOf()
-            categoriesExpiryList = hashMapOf()
-            println("selectttttrewmn  ====$selectedItemType")
             changeColor(binding.btnRenewItem, binding.renewText, true)
             selectedItemType = "2"
             loadCategoriesForSelectedType("2")
-
-
         }
 
         binding.etExpiryDate.setOnClickListener {
@@ -231,14 +223,17 @@ class AddItemActivity : AppCompatActivity() {
 
         binding.btnSameDay.setOnClickListener {
             selectedReminder = "same day"
+            binding.customdatetext.visibility = View.GONE
             setupReminderButtons(binding.btnSameDay)
         }
         binding.btn2DaysBefore.setOnClickListener {
             selectedReminder = "2 days before"
+            binding.customdatetext.visibility = View.GONE
             setupReminderButtons(binding.btn2DaysBefore)
         }
         binding.btn1WeekBefore.setOnClickListener {
             selectedReminder = "1 week before"
+            binding.customdatetext.visibility = View.GONE
             setupReminderButtons(binding.btn1WeekBefore)
         }
 
@@ -596,6 +591,7 @@ class AddItemActivity : AppCompatActivity() {
         val selectedDate = date?.let { outputFormatServer.format(it) } ?: ""
 
         binding.customdatetext.text = displayDate // Display formatted date
+        binding.customdatetext.visibility = View.VISIBLE
         selectedReminder = displayDate
     }
 
@@ -894,12 +890,29 @@ class AddItemActivity : AppCompatActivity() {
     }
 
     private fun loadCategoriesForSelectedType(selectedItemType: String) {
+        if (selectedItemType == "1" && categoriesExpiryList.isNotEmpty()) {
+            println("Using cached Expiry Categories")
+            if (isEditMode == "edit" && !hasPopulatedData) {
+                hasPopulatedData = true
+                populateItemData()
+            }
+            return
+        }
+
+        if (selectedItemType == "2" && categoriesRenewList.isNotEmpty()) {
+            println("Using cached Renew Categories")
+            if (isEditMode == "edit" && !hasPopulatedData) {
+                hasPopulatedData = true
+                populateItemData()
+            }
+            return
+        }
+
+        // Only fetch if not cached
         ExpiryUtils.mProgress(this, "ஏற்றுகிறது. காத்திருக்கவும் ", true).show()
-
         addItemViewModel.fetchCategories(ExpiryUtils.userId, selectedItemType)
-        println("selectedItemTypeee1 == $selectedItemType")
+        println("Fetching categories for itemType == $selectedItemType")
     }
-
 
     private fun changeColor(card: CardView, text: TextView, show: Boolean) {
         with(binding) {
@@ -940,11 +953,12 @@ class AddItemActivity : AppCompatActivity() {
     ) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_custom_selection, null)
+        val dialogView = inflater.inflate(R.layout.sm_expiry_dialog_custom_selection, null)
         builder.setView(dialogView)
 
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.recyclerView)
         val etSearch = dialogView.findViewById<EditText>(R.id.etSearch)
+        val selecttext = dialogView.findViewById<TextView>(R.id.selecttext)
         val btnCustomAction = dialogView.findViewById<Button>(R.id.btnCustomAction)
 
         val dialog = builder.create()
@@ -953,46 +967,35 @@ class AddItemActivity : AppCompatActivity() {
         fun refreshItemList(itemType: String) {
             println("refreshItemList == $itemType")
             if (itemType == "item_type") {
-
-
                 val map = HashMap<String, String>()
                 map["action"] = "getItemName"
                 map["category_id"] = category_id.toString()
                 map["item_type"] = selectedItemType.toString()
-                map["user_id"] = "" + ExpiryUtils.userId
-
+                map["user_id"] = "${ExpiryUtils.userId}"
+                println("GET ITEM NAMES == $map")
 
                 addItemViewModel.fetchItemNames(map)
 
-                // addItemViewModel.fetchItemNames(ExpiryUtils.userId)
-                // Don't rely on items.clear() directly here, use a fresh copy
+
                 addItemViewModel.itemNames.observeOnce(this@AddItemActivity) { updatedItemsMap ->
                     itemNamesList = updatedItemsMap
-
-                    val updatedItems =
-                        updatedItemsMap["Items"] as? List<Map<String, Any>> ?: emptyList()
-
-                    // Update the adapter data properly
-                    adapter.updateList(updatedItems.toMutableList()) // <-- use this
-                    recyclerView.adapter =
-                        adapter // <- Force rebind in case observer skipped notify
-                    etSearch.setText("") // Reset search box to show full list
-
+                    val updatedItems = updatedItemsMap["Items"] as? List<Map<String, Any>> ?: emptyList()
+                    adapter.updateList(updatedItems.toMutableList())
+                    recyclerView.adapter = adapter
+                    etSearch.setText("")
                 }
             } else {
-                  etSearch.setText("Select Your Category Name")
+
                 addItemViewModel.fetchCategories(ExpiryUtils.userId, selectedItemType)
                 if (selectedItemType == "1") {
+                    println("selectedItemTypeee == $selectedItemType")
                     addItemViewModel.expiryCategories.observeOnce(this@AddItemActivity) { categories ->
                         categoriesExpiryList = categories
-
-                        val updatedCategories =
-                            categories.values.toList().filterIsInstance<Map<String, Any>>()
-                                .toMutableList()
+                        val updatedCategories = categories.values.toList()
+                            .filterIsInstance<Map<String, Any>>().toMutableList()
                         adapter.updateList(updatedCategories)
-                        recyclerView.adapter =
-                            adapter // Force rebind in case observer skipped notify
-                        etSearch.setText("") // Reset search box to show full list
+                        recyclerView.adapter = adapter
+                        etSearch.setText("")
 
                         val map = HashMap<String, String>()
                         map["action"] = "getItemName"
@@ -1009,14 +1012,11 @@ class AddItemActivity : AppCompatActivity() {
                 } else if (selectedItemType == "2") {
                     addItemViewModel.renewCategories.observeOnce(this@AddItemActivity) { categories ->
                         categoriesRenewList = categories
-
-                        val updatedCategories =
-                            categories.values.toList().filterIsInstance<Map<String, Any>>()
-                                .toMutableList()
+                        val updatedCategories = categories.values.toList()
+                            .filterIsInstance<Map<String, Any>>().toMutableList()
                         adapter.updateList(updatedCategories)
-                        recyclerView.adapter =
-                            adapter // Force rebind in case observer skipped notify
-                        etSearch.setText("") // Reset search box to show full list
+                        recyclerView.adapter = adapter
+                        etSearch.setText("")
 
                         val map = HashMap<String, String>()
                         map["action"] = "getItemName"
@@ -1031,26 +1031,20 @@ class AddItemActivity : AppCompatActivity() {
                         }
                     }
                 }
-
             }
         }
 
         adapter = ExpiryItemAdapter_editdelete(this, items, onItemClick = { selectedItem ->
             println("SELECTED ITEM ID ==${selectedItem["id"]}")
-            //category_id = selectedItem["id"].toString()
             onItemSelected(selectedItem)
             dialog.dismiss()
         }, onEdit = { itemName, itemId, itemType ->
             showEditDialog(itemName, itemId, itemType) {
                 println("EDIT CALLBACK CALLED FOR == $itemType ")
-                println("EDIT CALLBACK CALLED FOR == $itemName ")
-                println("EDIT CALLBACK CALLED FOR == $itemId ")
                 refreshItemList(itemType)
                 category_id = itemId.toString()
                 dialog.dismiss()
             }
-
-
         }, onDelete = { itemId, itemType ->
             println(" Called for delete ==$itemType")
             if (itemType == "item_type") {
@@ -1064,42 +1058,42 @@ class AddItemActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
             }
-
         })
 
-
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // ✅ Add default divider between items
+        val dividerItemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        recyclerView.addItemDecoration(dividerItemDecoration)
+
+        // 🔽 OPTIONAL: If you want to use a custom divider drawable instead of the default one:
+        /*
+        val customDivider = ContextCompat.getDrawable(this, R.drawable.custom_divider)
+        customDivider?.let {
+            val customDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+            customDecoration.setDrawable(it)
+            recyclerView.addItemDecoration(customDecoration)
+        }
+        */
+
         recyclerView.adapter = adapter
         etSearch.visibility = if (items.size >= 10) View.VISIBLE else View.GONE
 
-
-        // Search functionality
         etSearch.addTextChangedListener {
-            adapter.filter(it.toString()) // Filter list based on search input
+            adapter.filter(it.toString())
         }
 
-        // Button for adding new item
         btnCustomAction.setOnClickListener {
-            if (title == "Select Category") {
-                dialog_type = "categorys"
-            } else {
-                dialog_type = "Item name"
-            }
-
+            dialog_type = if (title == "Select Category") "categorys" else "Item name"
             showCreateDialog(dialog_type) { newItem ->
-                println("CALLBACK CALLED FOR == $newItem ")
-                println("CALLBACK CALLED FOR == $dialog_type ")
                 if (dialog_type == "categorys") {
                     refreshItemList("category")
                 } else {
                     refreshItemList("item_type")
                 }
-
-
             }
             dialog.dismiss()
         }
-
 
         dialog.show()
     }
@@ -1111,7 +1105,7 @@ class AddItemActivity : AppCompatActivity() {
         val categoryId = getCategoryIdFromName(binding.spCategories.text.toString())
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_edit_item, null)
+        val dialogView = inflater.inflate(R.layout.sm_expiry_dialog_edit_item, null)
         builder.setView(dialogView)
 
         val etItemName = dialogView.findViewById<EditText>(R.id.etItemName)
@@ -1181,7 +1175,7 @@ class AddItemActivity : AppCompatActivity() {
 
     private fun showCreateDialog(tableName: String, onNewItemCreated: (Map<String, Any>) -> Unit) {
         val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_create_item)
+        dialog.setContentView(R.layout.sm_expity_dialog_create_item)
         dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
 
         val etItemName = dialog.findViewById<EditText>(R.id.etItemName)
@@ -1309,6 +1303,7 @@ class AddItemActivity : AppCompatActivity() {
         addItemViewModel.deleteitemResponse.observe(this) { response ->
             val status = response["status"]?.toString()
             if (status == "success") {
+                binding.etItemName.text = "Select Item Name"
                 Toast.makeText(this, "Deleted Successfully!", Toast.LENGTH_SHORT).show()
                 onSuccess.invoke()
             } else {
@@ -1319,6 +1314,7 @@ class AddItemActivity : AppCompatActivity() {
             addItemViewModel.deleteitemResponse.removeObservers(this)
         }
     }
+
 
     private fun deleteCategory(itemId: Int, itemType: String, onSuccess: () -> Unit) {
 
@@ -1331,6 +1327,7 @@ class AddItemActivity : AppCompatActivity() {
         addItemViewModel.deletecatResponse.observe(this) { response ->
             val status = response["status"]?.toString()
             if (status == "success") {
+                binding.spCategories.text = "Select Category"
                 Toast.makeText(this, "Deleted Successfully!", Toast.LENGTH_SHORT).show()
                 onSuccess.invoke()
             } else {

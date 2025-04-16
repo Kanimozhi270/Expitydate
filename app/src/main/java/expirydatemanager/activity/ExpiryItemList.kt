@@ -17,13 +17,13 @@ import expirydatemanager.fragment.ExpiryViewModelFactory
 import expirydatemanager.others.ExpiryUtils
 import expirydatemanager.pojo.ItemList
 import expirydatemanager.retrofit.ExpiryRepository
-import nithra.tamil.calendar.expirydatemanager.databinding.ActivityItemNamesListBinding
+import nithra.tamil.calendar.expirydatemanager.databinding.SmExpiryActivityItemNamesListBinding
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryRetrofitInstance
 import nithra.tamil.calendar.expirydatemanager.retrofit.ExpiryViewModel
 
 class ExpiryItemList : AppCompatActivity() {
 
-    private lateinit var binding: ActivityItemNamesListBinding
+    private lateinit var binding: SmExpiryActivityItemNamesListBinding
     private lateinit var itemNamesAdapter: ExpiryListAdapter
     private lateinit var launcher: ActivityResultLauncher<Intent>
     private val repository by lazy { ExpiryRepository(ExpiryRetrofitInstance.instance) }
@@ -36,7 +36,7 @@ class ExpiryItemList : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityItemNamesListBinding.inflate(layoutInflater)
+        binding = SmExpiryActivityItemNamesListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Get category ID from intent
