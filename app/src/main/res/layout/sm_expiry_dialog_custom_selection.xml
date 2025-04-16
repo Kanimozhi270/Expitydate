@@ -18,7 +18,7 @@
         android:drawablePadding="8dp" />
 
     <TextView
-        android:id="@+id/selecttext"
+        android:id="@+id/expiryselecttext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="16dp"
